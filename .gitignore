@@ -24,4 +24,5 @@ runs/
 data/
 *.mov
 *.mp4
+!static/videos/*_example.mp4
 portal/static/videos/old/
