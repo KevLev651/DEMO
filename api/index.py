@@ -443,8 +443,8 @@ TOOL_REGISTRY = {
             "template for Excel-driven one-line work."
         ),
         "url_slug": "one-line-from-excel",
-        "image": "img/mcc_motor_bus_preview.svg",
-        "image_aspect": "1140 / 779",
+        "image": "img/one_line_example_backdrop.png",
+        "image_aspect": "4536 / 3240",
         "image_surface": "bg-white",
         "image_padding": "p-0",
         "portal_use": "You need the one-line placement Dynamo script and motor data Excel template.",

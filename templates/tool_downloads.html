@@ -30,6 +30,20 @@
       </div>
     </div>
 
+    {% if tool.image %}
+    <section class="ui-panel overflow-hidden rounded-lg">
+      <div class="border-b border-[var(--line)] px-4 py-3">
+        <h2 class="font-display text-lg font-semibold">Example Backdrop</h2>
+        <p class="mt-1 text-sm ui-muted">Real project example used as the opening visual reference for this workflow.</p>
+      </div>
+      <div class="bg-white p-3">
+        <div class="overflow-hidden rounded-md border border-[var(--line)] {{ tool.image_surface }} {{ tool.image_padding }}" style="aspect-ratio: {{ tool.image_aspect }};">
+          <img src="{{ url_for('static', filename=tool.image) }}" alt="{{ tool.title }} example backdrop" class="h-full w-full object-contain">
+        </div>
+      </div>
+    </section>
+    {% endif %}
+
     <section id="downloadsSection" class="ui-panel rounded-lg" style="opacity:0.35;pointer-events:none;">
       <div class="border-b border-[var(--line)] px-4 py-3">
         <h2 class="font-display text-lg font-semibold">Downloads</h2>
