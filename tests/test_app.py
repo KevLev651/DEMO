@@ -9,8 +9,12 @@ from pathlib import Path
 from unittest.mock import patch
 
 os.environ.setdefault("PIDTOOL_FEEDBACK_DB_PATH", str(Path(tempfile.gettempdir()) / "stellar_test_feedback.sqlite3"))
+os.environ.setdefault("PIDTOOL_ENV", "development")
+os.environ.setdefault("PIDTOOL_REQUIRE_LOGIN", "1")
+os.environ.setdefault("PIDTOOL_ENABLE_ADMIN", "1")
+os.environ.setdefault("PIDTOOL_DEMO_MODE", "0")
 
-from portal.app import app, FEEDBACK_DB_PATH, IFB_GMP_RUNS, IFB_GMP_RUNS_LOCK, load_feedback
+from api.index import app, FEEDBACK_DB_PATH, IFB_GMP_RUNS, IFB_GMP_RUNS_LOCK, load_feedback
 from tools.scanner.pid_common import known_sheet_fallbacks
 
 
@@ -166,7 +170,7 @@ class PortalAppTests(unittest.TestCase):
                 "unique_sheets": 1,
             }
 
-        with patch("portal.app.run_scan", side_effect=fake_scan):
+        with patch("api.index.run_scan", side_effect=fake_scan):
             response = self.client.post(
                 "/scan",
                 data={
@@ -201,7 +205,7 @@ class PortalAppTests(unittest.TestCase):
                 "matched": 1,
             }
 
-        with patch("portal.app.run_comparison", side_effect=fake_compare):
+        with patch("api.index.run_comparison", side_effect=fake_compare):
             response = self.client.post(
                 "/compare",
                 data={
@@ -237,7 +241,7 @@ class PortalAppTests(unittest.TestCase):
                 "no_page": 0,
             }
 
-        with patch("portal.app.run_comparison", side_effect=fake_compare):
+        with patch("api.index.run_comparison", side_effect=fake_compare):
             response = self.client.post(
                 "/compare",
                 data={
@@ -274,7 +278,7 @@ class PortalAppTests(unittest.TestCase):
             (output_dir / "logs").mkdir()
             return {"output_dir": str(output_dir)}
 
-        with patch("portal.app.run_ifb_gmp_compare_job", side_effect=fake_compare_job):
+        with patch("api.index.run_ifb_gmp_compare_job", side_effect=fake_compare_job):
             response = self.client.post(
                 "/ifb-gmp/start",
                 data={
@@ -334,7 +338,7 @@ class PortalAppTests(unittest.TestCase):
             (output_dir / "changed_pairs.zip").write_bytes(b"mock zip")
             return {"output_dir": str(output_dir)}
 
-        with patch("portal.app.run_ifb_gmp_compare_job", side_effect=fake_compare_job):
+        with patch("api.index.run_ifb_gmp_compare_job", side_effect=fake_compare_job):
             response = self.client.post(
                 "/ifb-gmp/start",
                 data={

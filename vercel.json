@@ -1,5 +1,10 @@
 {
   "version": 2,
+  "functions": {
+    "api/**/*.py": {
+      "excludeFiles": "{tests/**,SamplesForTests/**,devFiles/**,scratch/**,runs/**,data/**,tools/pdf_revision_compare_backup_20260429_001030/**,.claude/**}"
+    }
+  },
   "rewrites": [
     {
       "source": "/(.*)",
@@ -7,6 +12,9 @@
     }
   ],
   "env": {
-    "PIDTOOL_ENV": "production"
+    "PIDTOOL_ENV": "production",
+    "PIDTOOL_DEMO_MODE": "1",
+    "PIDTOOL_REQUIRE_LOGIN": "0",
+    "PIDTOOL_ENABLE_ADMIN": "0"
   }
 }

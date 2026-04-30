@@ -5,6 +5,7 @@ import secrets
 import shutil
 import sys
 import sqlite3
+import tempfile
 import uuid
 import zipfile
 from concurrent.futures import Future, ThreadPoolExecutor
@@ -46,20 +47,40 @@ if str(BASE_DIR) not in sys.path:
 from tools.comparator.comparator import run_comparison
 from tools.scanner.scanner import run_scan
 
+IS_VERCEL = bool(os.environ.get("VERCEL") or os.environ.get("VERCEL_URL"))
+IS_PRODUCTION = os.environ.get("PIDTOOL_ENV", "development").strip().lower() == "production"
+
+
+def env_bool(name, default=False):
+    raw_value = os.environ.get(name)
+    if raw_value is None:
+        return default
+    return raw_value.strip().lower() in {"1", "true", "yes", "on"}
+
+
+_runtime_root_raw = os.environ.get("PIDTOOL_RUNTIME_ROOT")
+if _runtime_root_raw:
+    RUNTIME_ROOT = Path(_runtime_root_raw).expanduser()
+elif IS_VERCEL:
+    RUNTIME_ROOT = Path(tempfile.gettempdir()) / "stellar-process-toolbox"
+else:
+    RUNTIME_ROOT = BASE_DIR
+
 STATIC_DIR = BASE_DIR / "static"
+TEMPLATES_DIR = BASE_DIR / "templates"
 VIDEO_DIR = STATIC_DIR / "videos"
 FEEDBACK_PATH = BASE_DIR / "data" / "feedback.json"
 _feedback_db_raw_path = os.environ.get("PIDTOOL_FEEDBACK_DB_PATH")
 FEEDBACK_DB_PATH = (
     Path(_feedback_db_raw_path).expanduser()
     if _feedback_db_raw_path
-    else BASE_DIR / "data" / "feedback.sqlite3"
+    else RUNTIME_ROOT / "data" / "feedback.sqlite3"
 )
 if not FEEDBACK_DB_PATH.is_absolute():
     FEEDBACK_DB_PATH = BASE_DIR / FEEDBACK_DB_PATH
-FEEDBACK_UPLOAD_DIR = BASE_DIR / "data" / "feedback_uploads"
+FEEDBACK_UPLOAD_DIR = RUNTIME_ROOT / "data" / "feedback_uploads"
 MAX_FEEDBACK_ATTACHMENTS = 8
-JOBS_DIR = BASE_DIR / "runs"
+JOBS_DIR = RUNTIME_ROOT / "runs"
 PDF_COMPARE_ROOT = Path(
     os.environ.get("IFB_GMP_COMPARE_ROOT", r"C:\Users\snows\Desktop\PDFCompare")
 ).expanduser().resolve()
@@ -76,7 +97,6 @@ IFB_GMP_EXECUTOR = ThreadPoolExecutor(
 )
 IFB_GMP_RUNS = {}
 IFB_GMP_RUNS_LOCK = threading.Lock()
-IS_PRODUCTION = os.environ.get("PIDTOOL_ENV", "development").strip().lower() == "production"
 
 REVISION_COMPARE_DIR = BASE_DIR / "tools" / "pdf_revision_compare"
 if REVISION_COMPARE_DIR.parent.exists() and str(REVISION_COMPARE_DIR.parent) not in sys.path:
@@ -104,6 +124,9 @@ def env_int(name, default, minimum=None):
 
 
 JOB_RETENTION_HOURS = env_int("PIDTOOL_JOB_RETENTION_HOURS", 24, minimum=1)
+DEMO_MODE = env_bool("PIDTOOL_DEMO_MODE", IS_VERCEL and IS_PRODUCTION)
+REQUIRE_LOGIN = env_bool("PIDTOOL_REQUIRE_LOGIN", not DEMO_MODE)
+ENABLE_ADMIN = env_bool("PIDTOOL_ENABLE_ADMIN", not DEMO_MODE)
 TEAM_USERNAME = os.environ.get("PIDTOOL_TEAM_USERNAME", "StellarProcess")
 TEAM_HASH = os.environ.get("PIDTOOL_TEAM_HASH")
 ADMIN_USERNAME = os.environ.get("PIDTOOL_ADMIN_USERNAME", "Kev123")
@@ -509,20 +532,17 @@ DOWNLOAD_TOOLS_BY_URL_SLUG = {
 
 app = Flask(
     __name__,
-    template_folder="templates",
+    template_folder=str(TEMPLATES_DIR),
     static_folder=str(STATIC_DIR),
     static_url_path="/static",
 )
 if IS_PRODUCTION:
-    missing_config = [
-        name
-        for name, value in {
-            "PIDTOOL_SECRET_KEY": os.environ.get("PIDTOOL_SECRET_KEY"),
-            "PIDTOOL_TEAM_HASH": TEAM_HASH,
-            "PIDTOOL_ADMIN_HASH": ADMIN_HASH,
-        }.items()
-        if not value
-    ]
+    required_config = {"PIDTOOL_SECRET_KEY": os.environ.get("PIDTOOL_SECRET_KEY")}
+    if REQUIRE_LOGIN:
+        required_config["PIDTOOL_TEAM_HASH"] = TEAM_HASH
+    if ENABLE_ADMIN:
+        required_config["PIDTOOL_ADMIN_HASH"] = ADMIN_HASH
+    missing_config = [name for name, value in required_config.items() if not value]
     if missing_config:
         raise RuntimeError(
             "Missing required production configuration: "
@@ -539,11 +559,11 @@ JOBS_DIR.mkdir(parents=True, exist_ok=True)
 VIDEO_DIR.mkdir(parents=True, exist_ok=True)
 STATIC_DIR.mkdir(parents=True, exist_ok=True)
 
-if TEAM_HASH is None:
+if TEAM_HASH is None and REQUIRE_LOGIN:
     TEAM_HASH = generate_password_hash("Jax2026")
     os.environ["PIDTOOL_TEAM_HASH"] = TEAM_HASH
 
-if ADMIN_HASH is None:
+if ADMIN_HASH is None and ENABLE_ADMIN:
     ADMIN_HASH = generate_password_hash("Jax2026")
     os.environ["PIDTOOL_ADMIN_HASH"] = ADMIN_HASH
 
@@ -574,6 +594,8 @@ def load_user(user_id):
 
 @app.before_request
 def require_private_access():
+    if not REQUIRE_LOGIN:
+        return None
     if request.endpoint in PUBLIC_ENDPOINTS or current_user.is_authenticated:
         return None
     next_path = request.full_path if request.query_string else request.path
@@ -619,6 +641,8 @@ def request_too_large(_error):
 def admin_required(view_func):
     @wraps(view_func)
     def wrapped(*args, **kwargs):
+        if not ENABLE_ADMIN:
+            abort(404)
         if not current_user.is_authenticated or not current_user.is_admin:
             next_path = request.full_path if request.query_string else request.path
             return redirect(url_for("admin_login", next=next_path))
@@ -639,6 +663,29 @@ def admin_access_redirect():
     if next_url and next_url.startswith("/"):
         return redirect(next_url)
     return redirect(url_for("admin_dashboard"))
+
+
+def demo_blocked_message(tool_label):
+    return (
+        f"{tool_label} is disabled in the public demo deployment. "
+        "Use a private Python host for live processing or turn off PIDTOOL_DEMO_MODE."
+    )
+
+
+def demo_processing_response(tool_label, *, json_response=False):
+    message = demo_blocked_message(tool_label)
+    if json_response:
+        return jsonify({"error": message}), 503
+    return (
+        render_template(
+            "result.html",
+            title="Demo Mode",
+            error=message,
+            back_tool_label=tool_label,
+            back_tool_url=request.referrer or url_for("index"),
+        ),
+        503,
+    )
 
 
 def load_legacy_feedback_seed():
@@ -1323,6 +1370,9 @@ def inject_portal_metadata():
         "feedback_source_labels": FEEDBACK_SOURCE_LABELS,
         "portal_tools": build_tool_navigation(),
         "csrf_token": csrf_token,
+        "require_login": REQUIRE_LOGIN,
+        "enable_admin": ENABLE_ADMIN,
+        "demo_mode": DEMO_MODE,
     }
 
 
@@ -1482,6 +1532,8 @@ def feedback():
 
 @app.route("/login", methods=["GET", "POST"])
 def team_login():
+    if not REQUIRE_LOGIN:
+        return private_access_redirect()
     if current_user.is_authenticated:
         return private_access_redirect()
 
@@ -1506,6 +1558,8 @@ def team_login():
 
 @app.route("/admin/login", methods=["GET", "POST"])
 def admin_login():
+    if not ENABLE_ADMIN:
+        abort(404)
     if current_user.is_authenticated and current_user.is_admin:
         return admin_access_redirect()
 
@@ -1593,6 +1647,8 @@ def session_jobs_cleanup():
 
 @app.post("/ifb-gmp/start")
 def ifb_gmp_start():
+    if DEMO_MODE:
+        return demo_processing_response("PDF Revision Compare", json_response=True)
     job_dir = None
     try:
         job_id, job_dir = make_job_dir()
@@ -1697,6 +1753,8 @@ def logout():
 
 @app.post("/scan")
 def scan():
+    if DEMO_MODE:
+        return demo_processing_response("Scanner")
     try:
         job_id, job_dir = make_job_dir()
         remember_session_job(job_id)
@@ -1754,6 +1812,8 @@ def scan():
 
 @app.post("/compare")
 def compare():
+    if DEMO_MODE:
+        return demo_processing_response("Comparator")
     try:
         job_id, job_dir = make_job_dir()
         remember_session_job(job_id)
