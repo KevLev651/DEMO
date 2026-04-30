@@ -555,9 +555,8 @@ app.config["MAX_CONTENT_LENGTH"] = env_int(
 ) * 1024 * 1024
 app.logger.setLevel(logging.INFO)
 
+RUNTIME_ROOT.mkdir(parents=True, exist_ok=True)
 JOBS_DIR.mkdir(parents=True, exist_ok=True)
-VIDEO_DIR.mkdir(parents=True, exist_ok=True)
-STATIC_DIR.mkdir(parents=True, exist_ok=True)
 
 if TEAM_HASH is None and REQUIRE_LOGIN:
     TEAM_HASH = generate_password_hash("Jax2026")
