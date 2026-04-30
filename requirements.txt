@@ -1,0 +1,6 @@
+Flask
+Flask-Login
+Werkzeug
+PyMuPDF
+openpyxl
+gunicorn

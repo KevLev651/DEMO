@@ -39,14 +39,14 @@ from werkzeug.security import check_password_hash, generate_password_hash
 from werkzeug.exceptions import RequestEntityTooLarge
 from werkzeug.utils import secure_filename
 
-BASE_DIR = Path(__file__).resolve().parent.parent
+BASE_DIR = Path(__file__).resolve().parent
 if str(BASE_DIR) not in sys.path:
     sys.path.insert(0, str(BASE_DIR))
 
 from tools.comparator.comparator import run_comparison
 from tools.scanner.scanner import run_scan
 
-STATIC_DIR = BASE_DIR / "portal" / "static"
+STATIC_DIR = BASE_DIR / "static"
 VIDEO_DIR = STATIC_DIR / "videos"
 FEEDBACK_PATH = BASE_DIR / "data" / "feedback.json"
 _feedback_db_raw_path = os.environ.get("PIDTOOL_FEEDBACK_DB_PATH")
