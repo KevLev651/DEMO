@@ -1,0 +1,2125 @@
+{
+  "Uuid": "1b7d7680-303b-444b-acf3-95a88ec8739b",
+  "IsCustomNode": false,
+  "Description": "Graph 1 - v11: two-transaction insert then regenerate then param write. Fixes element freshness on first run.",
+  "Name": "Script1",
+  "ElementResolver": {
+    "ResolutionMap": {
+      "DesignScript.Builtin.Dictionary": {
+        "Key": "DesignScript.Builtin.Dictionary",
+        "Value": "DesignScriptBuiltin.dll"
+      }
+    }
+  },
+  "Inputs": [
+    {
+      "Id": "44570633d4b64c3083f9d68ae48105b3",
+      "Name": "Relocate Connectors",
+      "Type": "boolean",
+      "Type2": "boolean",
+      "Value": "true",
+      "Description": "Selection between a true and false.",
+      "SelectedIndex": 0
+    },
+    {
+      "Id": "414c0af441af4e21b68d5028f2181bb8",
+      "Name": "Relocate Connectors",
+      "Type": "boolean",
+      "Type2": "boolean",
+      "Value": "true",
+      "Description": "Selection between a true and false.",
+      "SelectedIndex": 0
+    }
+  ],
+  "Outputs": [],
+  "Nodes": [
+    {
+      "ConcreteType": "Dynamo.Graph.Nodes.CodeBlockNodeModel, DynamoCore",
+      "NodeType": "CodeBlockNode",
+      "Code": "// Graph 1 - Insert & Locate Connectors\n// Extractor Configuration\n\n\"Main\";\n // OUT[0] -> Extractor.IN[1];\n\n// Full 9-field mapping — feeds BOTH Extractor (validation) and ConMan inline writes\n[\n    [\"Equipment ID\",           \"Equipment ID\"],\n    [\"Equipment Description\",  \"Equipment Description\"],\n    [\"Connection ID\",          \"Connection ID\"],\n    [\"Equipment Condition\",    \"Condition\"],\n    [\"Voltage & Phase\",        \"System Voltage\"],\n    [\"Connection Size\",        \"Nominal Diameter\"],\n    [\"Functional Area\",        \"Functional Area\"],\n    [\"Line Number\",            \"Line Designator\"],\n    [\"Service\",                \"Service\"]\n];\n // OUT[1] -> Extractor.IN[2];\n\n4;\n // OUT[2] -> Extractor.IN[3];\n\n[\"Connection ID\",\n    [\n        \"CA\", \"DRN\", \"EL\", \"EX\", \"HH\",\n        \"INT\", \"PCW\", \"PHW\", \"TD\"\n    ]\n];\n // OUT[3] -> Extractor.IN[4];\n\n{\n    \"logic\": \"AND\",\n    \"filters\": [[\"Obsolete\", [\"\"]]]\n};\n // OUT[4] -> Extractor.IN[5];",
+      "Id": "7359c054c20c40e8ab450ecb03ab2925",
+      "Inputs": [],
+      "Outputs": [
+        {
+          "Id": "632634c434344666a5f49483c3372161",
+          "Name": "",
+          "Description": "Value of expression at line 4",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Id": "9c1ad1e5ffe344588ce94820c522971a",
+          "Name": "",
+          "Description": "Value of expression at line 8",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Id": "f85abf5fffac465eb5e7d206408ad728",
+          "Name": "",
+          "Description": "Value of expression at line 21",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Id": "541d886851844f11a642bc8aa1c59114",
+          "Name": "",
+          "Description": "Value of expression at line 24",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Id": "45c86226a8c24026b220e7fddd145d05",
+          "Name": "",
+          "Description": "Value of expression at line 32",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Disabled",
+      "Description": "Allows for DesignScript code to be authored directly"
+    },
+    {
+      "ConcreteType": "PythonNodeModels.PythonNode, PythonNodeModels",
+      "NodeType": "PythonScriptNode",
+      "Code": "# Excel Data Extractor ## Revit 2023 / Dynamo 2.16 / CPython3\r\n\r\n# Developed By - Chris Staker\r\n# v2.0.0 - Semantic Versioning. Output structured as a Dictionary for seamless downstream consumption. Fixed column name casing bug.\r\n\r\nimport sys\r\nimport os\r\nimport ctypes\r\n\r\n# Add custom Python support packages path\r\n# v1.0.0 (Kevin branch) - fixed sys.path for multi-machine support\r\n_pkg_paths = [\r\n    r\"C:\\Dynamo\\2.16\\Python Support Pckg\",\r\n    r\"K:\\CAD\\_Revit2023\\Add_Ins\\Python Support Pckg\",\r\n]\r\nfor _p in _pkg_paths:\r\n    import os as _os\r\n    if _os.path.isdir(_p) and _p not in sys.path:\r\n        sys.path.insert(0, _p)\r\n        break\r\n\r\ntry:\r\n    from openpyxl import load_workbook\r\nexcept ImportError:\r\n    raise ImportError(\r\n        \"openpyxl not found. The Python Support Package must be installed at one of:\\n\"\r\n        \"  C:\\\\Dynamo\\\\2.16\\\\Python Support Pckg\\n\"\r\n        \"  K:\\\\CAD\\\\_Revit2023\\\\Add_Ins\\\\Python Support Pckg\\n\"\r\n        \"Ask your BIM manager to set up the Python Support Package on this machine.\"\r\n    )\r\n\r\n# Get inputs from Dynamo\r\nfile_path = IN[0]\r\ntable_name = IN[1]\r\nexcel_to_revit_mapping_list = IN[2]\r\nheader_row_index_input = IN[3] if len(IN) > 3 else None\r\nprimary_filter_input = IN[4] if len(IN) > 4 else None\r\nsupplementary_filter_input = IN[5] if len(IN) > 5 else None\r\n\r\ndef show_popup_message(title, message, icon_type=0, button_type=0):\r\n    try:\r\n        return ctypes.windll.user32.MessageBoxW(0, message, title, icon_type | button_type)\r\n    except:\r\n        return 1\r\n\r\ndef matches_filter_value(cell_value, filter_value):\r\n    if cell_value is None:\r\n        cell_str = \"\"\r\n    else:\r\n        cell_str = str(cell_value).strip().lower()\r\n    filter_str = str(filter_value).strip().lower()\r\n    return filter_str in cell_str\r\n\r\ndef check_supplementary_filters(record, supp_filter_config, column_indices):\r\n    if not supp_filter_config or 'filters' not in supp_filter_config:\r\n        return True \r\n    \r\n    logic = supp_filter_config.get('logic', 'AND').upper()\r\n    filters = supp_filter_config['filters']\r\n    matches = []\r\n    \r\n    for filter_column, filter_values in filters:\r\n        column_lower = filter_column.strip().lower()\r\n        if column_lower not in column_indices:\r\n            matches.append(False)\r\n            continue\r\n        \r\n        cell_value = record.get(column_lower)\r\n        column_match = any(matches_filter_value(cell_value, fv) for fv in filter_values)\r\n        matches.append(column_match)\r\n    \r\n    return all(matches) if logic == 'AND' else any(matches)\r\n\r\ndef group_data_by_filters(data, primary_filter_config, supp_filter_config, column_indices):\r\n    if not primary_filter_config or len(primary_filter_config) != 2:\r\n        return {'All': data}\r\n    \r\n    primary_column, primary_values = primary_filter_config\r\n    primary_column_lower = primary_column.strip().lower()\r\n    \r\n    if primary_column_lower not in column_indices:\r\n        return {'All': data}\r\n    \r\n    grouped = {filter_val: [] for filter_val in primary_values}\r\n    grouped['Other'] = []\r\n    \r\n    for record in data:\r\n        cell_value = record.get(primary_column_lower)\r\n        matched_group = None\r\n        \r\n        for filter_val in primary_values:\r\n            if matches_filter_value(cell_value, filter_val):\r\n                matched_group = filter_val\r\n                break\r\n        \r\n        if matched_group is None:\r\n            grouped['Other'].append(record)\r\n            continue\r\n        \r\n        if check_supplementary_filters(record, supp_filter_config, column_indices):\r\n            grouped[matched_group].append(record)\r\n        else:\r\n            grouped['Other'].append(record)\r\n            \r\n    return grouped\r\n\r\ndef build_output_structure(grouped_data, formatted_mapping):\r\n    flat_data = []\r\n    log_entries = []\r\n    \r\n    sorted_groups = sorted([k for k in grouped_data.keys() if k != 'Other'])\r\n    if 'Other' in grouped_data:\r\n        sorted_groups.append('Other')\r\n    \r\n    for idx, group_name in enumerate(sorted_groups):\r\n        group_data = grouped_data[group_name]\r\n        if group_data:\r\n            flat_data.extend(group_data)\r\n            log_entries.append({\r\n                'Group': group_name,\r\n                'Count': len(group_data),\r\n                'Output Index': idx\r\n            })\r\n            \r\n    # Output cleanly as a dictionary for downstream nodes\r\n    return {\r\n        \"GroupedData\": grouped_data,\r\n        \"FlatData\": flat_data,\r\n        \"Mapping\": formatted_mapping,\r\n        \"Log\": log_entries\r\n    }\r\n\r\ndef read_excel_data(file_path, table_name, mapping_list, header_row_input=None, primary_filter=None, supp_filter=None):\r\n    if not os.path.exists(file_path):\r\n        return {\"Error\": f\"File not found at {file_path}\"}\r\n    \r\n    while True:\r\n        workbook = None\r\n        try:\r\n            try:\r\n                workbook = load_workbook(file_path, read_only=True, keep_vba=True, data_only=True)\r\n                if table_name not in workbook.sheetnames:\r\n                    return {\"Error\": f\"'{table_name}' sheet not found.\"}\r\n                            \r\n                worksheet = workbook[table_name]\r\n\r\n                def coerce_header_row_index(val):\r\n                    if val is None: return 1\r\n                    try:\r\n                        idx = int(float(str(val).strip()))\r\n                        return max(idx, 1)\r\n                    except: return 1\r\n\r\n                header_row_index = coerce_header_row_index(header_row_input)\r\n                max_rows = worksheet.max_row if worksheet.max_row is not None else 1\r\n                if header_row_index > max_rows: header_row_index = 1\r\n                            \r\n                headers = [str(cell.value).strip().lower() if cell.value else None for cell in worksheet[header_row_index]]\r\n                excel_columns = [item[0] for item in mapping_list]\r\n                column_indices = {}\r\n                            \r\n                for col in excel_columns:\r\n                    try:\r\n                        column_indices[col] = headers.index(col.strip().lower())\r\n                    except ValueError:\r\n                        return {\"Error\": f\"Column '{col}' not found.\"}\r\n                \r\n                all_column_indices = {header: idx for idx, header in enumerate(headers) if header}\r\n                data = []\r\n                \r\n                for row_num, row in enumerate(worksheet.iter_rows(min_row=header_row_index + 1), start=header_row_index + 1):\r\n                    record = {}\r\n                    for col_name, col_idx in all_column_indices.items():\r\n                        if col_idx < len(row):\r\n                            record[col_name] = row[col_idx].value\r\n                            \r\n                    if any(record.get(headers[column_indices[col]]) is not None for col in excel_columns if col in column_indices):\r\n                        data.append(record)\r\n                                \r\n            finally:\r\n                if workbook: workbook.close()\r\n            \r\n            grouped_data = group_data_by_filters(data, primary_filter, supp_filter, all_column_indices)\r\n            formatted_mapping = [{'Excel Header': pair[0], 'Revit Parameter': pair[1]} for pair in mapping_list]\r\n            return build_output_structure(grouped_data, formatted_mapping)\r\n        \r\n        except (PermissionError, OSError):\r\n            res = show_popup_message(\"File Access Error\", f\"Excel file '{os.path.basename(file_path)}' is open.\", 0, 53)\r\n            if res == 4: continue\r\n            else: return {\"Error\": \"Operation cancelled by user.\"}\r\n        except Exception as e:\r\n            return {\"Error\": str(e)}\r\n\r\nOUT = read_excel_data(file_path, table_name, excel_to_revit_mapping_list, header_row_index_input, primary_filter_input, supplementary_filter_input)",
+      "Engine": "CPython3",
+      "EngineName": "CPython3",
+      "VariableInputPorts": true,
+      "Id": "4db0cfea468a4f1cab4dd4de2ff58c94",
+      "Inputs": [
+        {
+          "Id": "a8243138028b4efd9144e871ec63e5c6",
+          "Name": "IN[0]",
+          "Description": "Input #0",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Id": "9925526e9fd34a68b2cc6c4757c82fa9",
+          "Name": "IN[1]",
+          "Description": "Input #1",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Id": "c7412fb459194ec5b994233d693f1031",
+          "Name": "IN[2]",
+          "Description": "Input #2",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Id": "4a18d57227674f54a227cbb82f8e38af",
+          "Name": "IN[3]",
+          "Description": "Input #3",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Id": "284c697843414d63b7bdf9daaa136f31",
+          "Name": "IN[4]",
+          "Description": "Input #4",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Id": "c6ab3c8c4a224bc5a55a859ccbf869f2",
+          "Name": "IN[5]",
+          "Description": "Input #5",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Outputs": [
+        {
+          "Id": "2486a3621d2946f68564fb93a142a69d",
+          "Name": "OUT",
+          "Description": "Result of the python script",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Disabled",
+      "Description": "Runs an embedded Python script."
+    },
+    {
+      "ConcreteType": "Dynamo.Graph.Nodes.CodeBlockNodeModel, DynamoCore",
+      "NodeType": "CodeBlockNode",
+      "Code": "\"Equipment ID\";\n// Anchor parameter name;\n\n[\n\"Data Devices\",\n\"Electrical Equipment\",\n\"Mechanical Equipment\"\n];\n// Revit categories to search for existing connectors;\n\n// Insertion config: [filter_param, [[prefix, family_name], ...]];\n[\"Connection ID\",\n    [\n        [\"CA\",  \"Process Pipe Connector\"],\n        [\"DRN\", \"Process Pipe Connector\"],\n        [\"EL\",  \"Process Electrical Connector\"],\n        [\"EX\",  \"Process Duct Connector\"],\n        [\"HH\",  \"Process Pipe Connector\"],\n        [\"INT\", \"Process Duct Connector\"],\n        [\"PCW\", \"Process Pipe Connector\"],\n        [\"PHW\", \"Process Pipe Connector\"],\n        [\"TD\",  \"Process Data Connector\"]\n    ]\n];",
+      "Id": "22de31005e2849bbb3e2bab53712def9",
+      "Inputs": [],
+      "Outputs": [
+        {
+          "Id": "226da3ea20d74de38a04151bb71b213b",
+          "Name": "",
+          "Description": "Value of expression at line 1",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Id": "4c01651c9c2f4d4f85a67234abc50da6",
+          "Name": "",
+          "Description": "Value of expression at line 4",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Id": "2403414540484e64a1db4d8b7ceabe88",
+          "Name": "",
+          "Description": "Value of expression at line 12",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Disabled",
+      "Description": "Allows for DesignScript code to be authored directly"
+    },
+    {
+      "ConcreteType": "PythonNodeModels.PythonNode, PythonNodeModels",
+      "NodeType": "PythonScriptNode",
+      "Code": "# ConMan\n# Connector Manager for Process Data Cubes\n# Revit 2023 / Dynamo 2.16 / CPython3\n# Developed By - Chris Staker & Kevin Levasseur\n# v3.0.0 - Replaced static param_mapping with UM-Revit Mapping read from Excel.\n#           Initial param writes on new inserts now use read_um_revit_mapping()\n#           with family applicability checks and unlisted-family fallback,\n#           matching Script 2 v9.9.0 logic.\n\nimport sys\nimport clr\nimport re\n\nfrom System.Collections.Generic import List\n\nclr.AddReference('RevitAPI')\nimport Autodesk.Revit.DB as DB\nfrom Autodesk.Revit.DB import (XYZ, ElementId, FilteredElementCollector,\n    BuiltInParameter, BuiltInCategory, ElementMulticategoryFilter,\n    FamilySymbol, LocationPoint)\nimport Autodesk.Revit.DB.Structure as DBStruct\n\nclr.AddReference('RevitServices')\nimport RevitServices\nfrom RevitServices.Persistence import DocumentManager\nfrom RevitServices.Transactions import TransactionManager\n\n# Inputs\nanchor_param_name = IN[0]\ntarget_categories  = IN[1]\nif isinstance(target_categories, str): target_categories = [target_categories]\n\ninsertion_config = IN[2]\nscript1_output   = IN[3]\nraw = IN[4] if len(IN) > 4 else True\nmove_enabled = bool(raw[0]) if isinstance(raw, list) else bool(raw)\nexcel_file_path  = IN[5] if len(IN) > 5 else None   # was param_mapping\n\ndoc = DocumentManager.Instance.CurrentDBDocument\n\n# ═══════════════════════════════════════════════════════════════════════════════\n# SECTION 1 — HELPER FUNCTIONS\n# ═══════════════════════════════════════════════════════════════════════════════\n\ndef safe_get(obj, key, default=None):\n    try:\n        if hasattr(obj, \"get\"):\n            val = obj.get(key)\n            return val if val is not None else default\n        elif hasattr(obj, \"ContainsKey\"):\n            if obj.ContainsKey(key):\n                val = obj[key]\n                return val if val is not None else default\n        elif hasattr(obj, \"Keys\"):\n            for k in obj.Keys:\n                if str(k) == str(key):\n                    val = obj.GetValueAtKey(k) if hasattr(obj, \"GetValueAtKey\") else obj[k]\n                    return val if val is not None else default\n    except: pass\n    return default\n\ndef get_param_value(elem, name):\n    p = elem.LookupParameter(name)\n    if p:\n        if p.StorageType == DB.StorageType.Double: return p.AsDouble()\n        elif p.StorageType == DB.StorageType.Integer: return p.AsInteger()\n        else: return p.AsString()\n    return None\n\ndef get_family_name(elem):\n    try:\n        fn_p = elem.Symbol.get_Parameter(BuiltInParameter.SYMBOL_FAMILY_NAME_PARAM)\n        return fn_p.AsString() if fn_p else \"\"\n    except:\n        return \"\"\n\ndef build_param_map(elem_or_type):\n    \"\"\"Returns a lowercase-name → parameter dict.\"\"\"\n    pm = {}\n    if not elem_or_type: return pm\n    try:\n        for p in elem_or_type.Parameters:\n            try: pm[p.Definition.Name.strip().lower()] = p\n            except: pass\n    except: pass\n    return pm\n\ndef set_location(elem, new_xyz):\n    try:\n        loc = elem.Location\n        if isinstance(loc, LocationPoint):\n            old_pt = loc.Point\n            old_str = \"X:{:.2f}, Y:{:.2f}, Z:{:.2f}\".format(old_pt.X, old_pt.Y, old_pt.Z)\n            if not old_pt.IsAlmostEqualTo(new_xyz, 0.0026):\n                loc.Point = new_xyz\n                return True, old_str\n            return False, old_str\n        return False, \"N/A\"\n    except: return False, \"Error\"\n\ndef extract_flat_data(data_input):\n    flat_data = safe_get(data_input, \"FlatData\")\n    if flat_data is not None:\n        return flat_data\n    is_list_like = isinstance(data_input, list) or (hasattr(data_input, '__iter__') and not isinstance(data_input, str) and not hasattr(data_input, 'ContainsKey') and not hasattr(data_input, 'keys'))\n    if is_list_like:\n        flat = []\n        for item in data_input:\n            is_item_list = isinstance(item, list) or (hasattr(item, '__iter__') and not isinstance(item, str) and not hasattr(item, 'ContainsKey') and not hasattr(item, 'keys'))\n            if is_item_list:\n                flat.extend(extract_flat_data(item))\n            else:\n                if safe_get(item, \"Excel Header\") is None and safe_get(item, \"Log\") is None:\n                    flat.append(item)\n        return flat\n    return [data_input] if (hasattr(data_input, 'keys') or hasattr(data_input, 'ContainsKey')) else []\n\n# ═══════════════════════════════════════════════════════════════════════════════\n# SECTION 2 — UM-REVIT MAPPING READER  (matches Script 2 v9.9.0)\n# ═══════════════════════════════════════════════════════════════════════════════\n\ndef read_um_revit_mapping(file_path):\n    \"\"\"\n    Reads the UM-Revit Mapping sheet from the Utility Matrix Excel file.\n    Returns dict keyed by lowercase Excel column name:\n      { \"connection size\": {\"params\": [...], \"families\": [...]} }\n    Entries with no \"Yes\" in any family column are excluded.\n    \"\"\"\n    um_map = {}\n    if not file_path:\n        return um_map\n    try:\n        _pkg_paths = [\n            r\"C:\\Dynamo\\2.16\\Python Support Pckg\",\n            r\"K:\\CAD\\_Revit2023\\Add_Ins\\Python Support Pckg\",\n        ]\n        for _p in _pkg_paths:\n            import os as _os\n            if _os.path.isdir(_p) and _p not in sys.path:\n                sys.path.insert(0, _p)\n                break\n        from openpyxl import load_workbook\n        wb = load_workbook(file_path, read_only=True, data_only=True)\n        if 'UM-Revit Mapping' not in wb.sheetnames:\n            wb.close()\n            return um_map\n\n        ws = wb['UM-Revit Mapping']\n        header_row  = [c.value for c in next(ws.iter_rows(min_row=3, max_row=3))]\n        family_cols = [str(h).strip() for h in header_row[2:] if h]\n\n        for row in ws.iter_rows(min_row=4, values_only=True):\n            excel_col   = row[0]\n            revit_param = row[1]\n            if not excel_col or not revit_param:\n                continue\n            key         = str(excel_col).strip().lower()\n            params_list = [p.strip() for p in str(revit_param).strip().split(',') if p.strip()]\n\n            applicable = []\n            for i, fam_name in enumerate(family_cols):\n                col_idx = i + 2\n                if col_idx < len(row):\n                    cell_val = row[col_idx]\n                    if cell_val and str(cell_val).strip().lower() == \"yes\":\n                        applicable.append(fam_name)\n\n            if not applicable:\n                continue   # No \"Yes\" for any family — skip\n\n            if key not in um_map:\n                um_map[key] = {\"params\": [], \"families\": set()}\n            for p in params_list:\n                if p not in um_map[key][\"params\"]:\n                    um_map[key][\"params\"].append(p)\n            for f in applicable:\n                um_map[key][\"families\"].add(f)\n\n        wb.close()\n        for k in um_map:\n            um_map[k][\"families\"] = list(um_map[k][\"families\"])\n\n    except Exception:\n        pass\n\n    return um_map\n\n\ndef family_is_applicable(elem_family_name, applicable_families):\n    \"\"\"\n    Substring match (case-insensitive) of elem_family_name against applicable_families.\n    Returns True if any entry matches, or if applicable_families is empty.\n    \"\"\"\n    if not applicable_families:\n        return True\n    efn = elem_family_name.strip().lower()\n    for fam in applicable_families:\n        fam_lower = fam.strip().lower()\n        if fam_lower in efn or efn in fam_lower:\n            return True\n    return False\n\n\ndef write_params_via_um_mapping(inst, excel_row, um_revit_map):\n    \"\"\"\n    Write parameters to a newly inserted connector element using the UM-Revit\n    Mapping. Applies family applicability checks with the same unlisted-family\n    fallback used in Script 2 v9.9.0: if the family is not in the mapping but\n    the mapped parameter physically exists on the element, allow the write.\n    Called inside an open transaction.\n    \"\"\"\n    if not um_revit_map:\n        return\n    elem_fn  = get_family_name(inst)\n    inst_pm  = build_param_map(inst)\n    el_type  = doc.GetElement(inst.GetTypeId())\n    type_pm  = build_param_map(el_type) if el_type else {}\n\n    for col_lower, mapping_entry in um_revit_map.items():\n        val = safe_get(excel_row, col_lower)\n        if val is None or str(val).strip() in ('', '-', 'None', 'null'):\n            continue\n\n        revit_param_names   = mapping_entry['params']\n        applicable_families = mapping_entry['families']\n\n        # Applicability check — with fallback for families not in the mapping\n        if applicable_families and not family_is_applicable(elem_fn, applicable_families):\n            param_exists = any(\n                inst_pm.get(rpn.strip().lower()) is not None or\n                type_pm.get(rpn.strip().lower()) is not None\n                for rpn in revit_param_names\n            )\n            if not param_exists:\n                continue  # Param genuinely not on this element — skip\n\n        for rpn in revit_param_names:\n            p = inst_pm.get(rpn.strip().lower())\n            if p and not p.IsReadOnly:\n                val_str = str(val).strip()\n                try:\n                    if p.StorageType == DB.StorageType.String:\n                        p.Set(val_str.upper())\n                    elif p.StorageType == DB.StorageType.Double:\n                        if not p.SetValueString(val_str):\n                            try: p.Set(float(val))\n                            except: pass\n                    elif p.StorageType == DB.StorageType.Integer:\n                        try: p.Set(int(float(val)))\n                        except: pass\n                except: pass\n\n\n# ═══════════════════════════════════════════════════════════════════════════════\n# SECTION 3 — METRICS & REPORT SETUP\n# ═══════════════════════════════════════════════════════════════════════════════\n\nmetrics = {\n    \"Total Cubes\": 0, \"Excel Conns\": 0, \"Model Conns\": 0,\n    \"Moved\": 0, \"Inserted\": 0, \"Skipped\": 0,\n    \"Rogues Detected\": [], \"Errors\": []\n}\nreport_data = [[\"Revit Element ID\", \"Action\", \"Equipment ID\",\n                \"Connection ID\", \"Previous Location\", \"New Location\"]]\n\n# ═══════════════════════════════════════════════════════════════════════════════\n# SECTION 4 — DATA PREPARATION\n# ═══════════════════════════════════════════════════════════════════════════════\n\nexcel_data = extract_flat_data(script1_output)\nif not excel_data:\n    OUT = [[\"Error: Invalid data structure from Script 1.\"]], [[\"Metric\", \"Value\"]]\n    sys.exit()\n\nfilter_param_revit = insertion_config[0]\nfilter_param_excel = filter_param_revit.strip().lower()\nfilter_rules       = insertion_config[1]\nanchor_param_excel = anchor_param_name.strip().lower()\n\nreq_map = {}\nfor row in excel_data:\n    val = str(safe_get(row, filter_param_excel, \"\")).strip()\n    if val not in [\"-\", \"None\", \"\", \"null\"]:\n        metrics[\"Excel Conns\"] += 1\n        eid_key = str(safe_get(row, anchor_param_excel, \"\")).strip().upper()\n        if eid_key not in req_map: req_map[eid_key] = []\n        req_map[eid_key].append(row)\n\ncubes_coll = FilteredElementCollector(doc).OfCategory(BuiltInCategory.OST_GenericModel).WhereElementIsNotElementType().ToElements()\ndata_cubes = [c for c in cubes_coll if \"Process Data Cube - Generic\" in c.Symbol.Family.Name]\nmetrics[\"Total Cubes\"] = len(data_cubes)\n\ncat_map = {}\nfor c_name in target_categories:\n    for cat in doc.Settings.Categories:\n        if cat.Name == c_name:\n            cat_map[cat.Id] = c_name\n            break\n\nexisting_connectors = []\nif cat_map:\n    typed_ids = List[ElementId](cat_map.keys())\n    multi_filter = ElementMulticategoryFilter(typed_ids)\n    raw_conns = FilteredElementCollector(doc).WherePasses(multi_filter).WhereElementIsNotElementType().ToElements()\n    existing_connectors = [e for e in raw_conns if \"Connector\" in e.Symbol.Family.Name]\nmetrics[\"Model Conns\"] = len(existing_connectors)\n\nsymbol_cache = {}\nfor ec in existing_connectors:\n    try:\n        symbol = ec.Symbol\n        fn_p = symbol.get_Parameter(BuiltInParameter.SYMBOL_FAMILY_NAME_PARAM)\n        family_name = fn_p.AsString() if fn_p else \"\"\n        if family_name and family_name not in symbol_cache:\n            symbol_cache[family_name] = symbol.Id\n    except: continue\n\ntarget_search_terms = set(str(rule[1]).strip().lower() for rule in filter_rules if len(rule) > 1)\nfor fs in FilteredElementCollector(doc).OfClass(FamilySymbol):\n    try:\n        fn_p = fs.get_Parameter(BuiltInParameter.SYMBOL_FAMILY_NAME_PARAM)\n        fn = fn_p.AsString() if fn_p else \"\"\n        if any(term in fn.lower() for term in target_search_terms):\n            if fn and fn not in symbol_cache:\n                symbol_cache[fn] = fs.Id\n    except: continue\n\ndef get_symbol_id_from_cache(target_name):\n    t_clean = target_name.strip().lower()\n    for fam_name, sym_id in symbol_cache.items():\n        if t_clean == fam_name.lower(): return sym_id\n    for fam_name, sym_id in symbol_cache.items():\n        if t_clean in fam_name.lower(): return sym_id\n    return None\n\nconn_map = {}\nconn_by_connection_id = {}\nfor ec in existing_connectors:\n    eid = get_param_value(ec, anchor_param_name)\n    if eid:\n        key = str(eid).strip().upper()\n        if key not in conn_map: conn_map[key] = []\n        conn_map[key].append(ec)\n        conn_id_val = str(get_param_value(ec, filter_param_revit) or \"\").strip().upper()\n        if conn_id_val and conn_id_val not in [\"-\", \"NONE\", \"\", \"NULL\"]:\n            if key not in conn_by_connection_id: conn_by_connection_id[key] = {}\n            conn_by_connection_id[key][conn_id_val] = ec\n\n# ═══════════════════════════════════════════════════════════════════════════════\n# SECTION 5 — BUILD QUEUE\n# ═══════════════════════════════════════════════════════════════════════════════\n\nfull_queue = []\n\nfor cube in data_cubes:\n    eid_raw = get_param_value(cube, anchor_param_name)\n    if not eid_raw: continue\n    eid_key = str(eid_raw).strip().upper()\n\n    cube_reqs   = req_map.get(eid_key, [])\n    model_conns = conn_map.get(eid_key, [])\n    conn_lookup = conn_by_connection_id.get(eid_key, {})\n    if not cube_reqs and not model_conns: continue\n\n    f,  bk = get_param_value(cube, \"Offset Front\") or 0.0, get_param_value(cube, \"Offset Back\")  or 0.0\n    l,  r  = get_param_value(cube, \"Offset Left\")  or 0.0, get_param_value(cube, \"Offset Right\") or 0.0\n    t      = get_param_value(cube, \"Offset Top\")   or 0.0\n    length_dim, width_dim = abs(f) + abs(bk), abs(l) + abs(r)\n    lx, ly, lz = (r - l) / 2.0, (f - bk) / 2.0, t\n\n    unified_queue      = []\n    consumed_model_ids = set()\n\n    for row in cube_reqs:\n        conn_id       = str(safe_get(row, filter_param_excel, \"\")).strip()\n        conn_id_upper = conn_id.upper()\n        target_fam    = next((f_name for f_text, f_name in filter_rules if f_text.lower() in conn_id.lower()), None)\n        if not target_fam: continue\n        if conn_id_upper in conn_lookup:\n            ec = conn_lookup[conn_id_upper]\n            unified_queue.append([ec, 0, conn_id, row])\n            consumed_model_ids.add(ec.Id)\n        else:\n            symbol_id = get_symbol_id_from_cache(target_fam)\n            if symbol_id:\n                unified_queue.append([symbol_id, 1, conn_id, row])\n            else:\n                metrics[\"Errors\"].append(\"ID {}: Missing family '{}'\".format(eid_key, target_fam))\n\n    for ec in model_conns:\n        if ec.Id not in consumed_model_ids:\n            unified_queue.append([ec, 2, None, None])\n            cat_name = cat_map.get(ec.Category.Id, \"Unknown\")\n            r_type = (\"Data\" if cat_name == \"Data Devices\" else\n                      \"Electrical\" if cat_name == \"Electrical Equipment\" else\n                      \"Duct\" if \"Duct\" in ec.Symbol.Family.Name else \"Pipe\")\n            metrics[\"Rogues Detected\"].append(\"ID {}: Rogue {} (ID: {})\".format(eid_key, r_type, ec.Id))\n\n    total_n = len(unified_queue)\n    if total_n == 0: continue\n\n    is_len       = length_dim >= width_dim\n    axis_dim     = length_dim if is_len else width_dim\n    spacing      = max(0.333, axis_dim / (total_n + 1))\n    start_offset = -((total_n - 1) * spacing) / 2.0\n    trans        = cube.GetTransform()\n\n    for i, (item, type_code, val, excel_row) in enumerate(unified_queue):\n        if type_code == 2: continue\n        step     = start_offset + (i * spacing)\n        local_pt = XYZ(lx, ly + step, lz) if is_len else XYZ(lx + step, ly, lz)\n        world_pt = trans.OfPoint(local_pt)\n        full_queue.append([item, type_code, val, eid_raw, excel_row, world_pt, cube])\n\n# ═══════════════════════════════════════════════════════════════════════════════\n# SECTION 6 — TRANSACTION 1: INSERT & MOVE\n# ═══════════════════════════════════════════════════════════════════════════════\n\nTransactionManager.Instance.EnsureInTransaction(doc)\napp_create = doc.Create\ninserted_items = []  # [(new_inst, excel_row, eid_raw, val, new_loc_str)]\n\nfor item, type_code, val, eid_raw, excel_row, world_pt, cube in full_queue:\n    new_loc_str = \"X:{:.2f}, Y:{:.2f}, Z:{:.2f}\".format(world_pt.X, world_pt.Y, world_pt.Z)\n    if type_code == 1:\n        try:\n            symbol = doc.GetElement(item)\n            if not symbol.IsActive: symbol.Activate()\n            new_inst = app_create.NewFamilyInstance(world_pt, symbol, cube, DBStruct.StructuralType.NonStructural)\n            new_inst.LookupParameter(anchor_param_name).Set(str(eid_raw))\n            new_inst.LookupParameter(filter_param_revit).Set(str(val))\n            inserted_items.append((new_inst, excel_row, eid_raw, val, new_loc_str))\n            metrics[\"Inserted\"] += 1\n        except Exception as ex:\n            metrics[\"Errors\"].append(\"Insert failed {}: {}\".format(str(eid_raw), str(ex)))\n    elif type_code == 0:\n        if move_enabled:\n            moved, old_loc_str = set_location(item, world_pt)\n            if moved:\n                report_data.append([item.Id.ToString(), \"Moved\", str(eid_raw), str(val), old_loc_str, new_loc_str])\n                metrics[\"Moved\"] += 1\n            else:\n                report_data.append([item.Id.ToString(), \"No Change\", str(eid_raw), str(val), old_loc_str, old_loc_str])\n                metrics[\"Skipped\"] += 1\n        else:\n            loc = item.Location\n            old_loc_str = (\"X:{:.2f}, Y:{:.2f}, Z:{:.2f}\".format(loc.Point.X, loc.Point.Y, loc.Point.Z)\n                           if isinstance(loc, LocationPoint) else \"N/A\")\n            report_data.append([item.Id.ToString(), \"No Change (Move Disabled)\", str(eid_raw), str(val), old_loc_str, old_loc_str])\n            metrics[\"Skipped\"] += 1\n\nTransactionManager.Instance.TransactionTaskDone()\n\n# ═══════════════════════════════════════════════════════════════════════════════\n# SECTION 7 — REGENERATE + TRANSACTION 2: WRITE PARAMS TO NEW INSERTS\n#\n#   Reads the UM-Revit Mapping from Excel and writes all applicable parameters\n#   to newly inserted connector elements. Uses family applicability checks with\n#   the same unlisted-family fallback as Script 2 v9.9.0.\n# ═══════════════════════════════════════════════════════════════════════════════\n\ndoc.Regenerate()\n\nif inserted_items:\n    um_revit_map = read_um_revit_mapping(excel_file_path)\n    TransactionManager.Instance.EnsureInTransaction(doc)\n    for new_inst, excel_row, eid_raw, val, new_loc_str in inserted_items:\n        try:\n            write_params_via_um_mapping(new_inst, excel_row, um_revit_map)\n            report_data.append([new_inst.Id.ToString(), \"Inserted New\",\n                                 str(eid_raw), str(val), \"N/A\", new_loc_str])\n        except Exception as ex:\n            metrics[\"Errors\"].append(\"Param write failed {}: {}\".format(str(val), str(ex)))\n    TransactionManager.Instance.TransactionTaskDone()\n\nif len(report_data) == 1:\n    report_data = [[\"No connection items processed.\"]]\n\nmetrics_table = [[\"Metric\", \"Value\"]]\nfor key, value in metrics.items():\n    value_str = (\" | \".join(str(v) for v in value) if isinstance(value, list) and value\n                 else \"None\" if isinstance(value, list) else str(value))\n    metrics_table.append([key, value_str])\n\nOUT = [report_data, metrics_table]\n",
+      "Engine": "CPython3",
+      "EngineName": "CPython3",
+      "VariableInputPorts": true,
+      "Id": "773ef90fef2146ffb7939aa2bdde852e",
+      "Inputs": [
+        {
+          "Id": "22d2191a45284cafb4b209bf6774f6fd",
+          "Name": "IN[0]",
+          "Description": "Input #0",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Id": "86c253f9c6d24edbaeef3833166402df",
+          "Name": "IN[1]",
+          "Description": "Input #1",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Id": "1bffbfd9266141acae1297693b68a0ad",
+          "Name": "IN[2]",
+          "Description": "Input #2",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Id": "eb5888fd2d6b42c4bafdabc5485f3cb5",
+          "Name": "IN[3]",
+          "Description": "Input #3",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Id": "0132343021514ed6b5cb51d618acc52d",
+          "Name": "IN[4]",
+          "Description": "Input #4",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Id": "126b53550c9546c2b779470ccacfa807",
+          "Name": "IN[5]",
+          "Description": "",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Outputs": [
+        {
+          "Id": "3e9b515832684b328be2ee6cabf2bca8",
+          "Name": "OUT",
+          "Description": "Result of the python script",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Disabled",
+      "Description": "Runs an embedded Python script."
+    },
+    {
+      "ConcreteType": "Dynamo.Graph.Nodes.CodeBlockNodeModel, DynamoCore",
+      "NodeType": "CodeBlockNode",
+      "Code": "// Graph 1 - Report Configuration\n\n// Sheet names (one per data package from ConMan)\n[\"Connector Actions\", \"Metrics\"];\n\n\"Insert_Connectors_Report.xlsx\";\n // Saves to Desktop if just filename;\n\n\"Blue\";\n // Theme: Blue / Green / Red / Purple / Orange / Teal / custom hex;",
+      "Id": "1ddf7a72791a4644921c9fd0565bbd74",
+      "Inputs": [],
+      "Outputs": [
+        {
+          "Id": "ca257e1e9de246fc967e95e79d9dcf38",
+          "Name": "",
+          "Description": "Value of expression at line 4",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Id": "55c676672fb64e30b9e9eae5d1be29eb",
+          "Name": "",
+          "Description": "Value of expression at line 6",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Id": "3d62a56e40c84c38b56b76e3945d1956",
+          "Name": "",
+          "Description": "Value of expression at line 9",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Disabled",
+      "Description": "Allows for DesignScript code to be authored directly"
+    },
+    {
+      "ConcreteType": "PythonNodeModels.PythonNode, PythonNodeModels",
+      "NodeType": "PythonScriptNode",
+      "Code": "# ExcelGen\r\n#\r\n# Excel Report Generator\r\n# \r\n# Revit 2023 / Dynamo 2.16 / CPython3\r\n# Developed By - Chris Staker\r\n# Developed On - 06/13/2025\r\n# v1.0.0 - Initial Release\r\n# v1.1.0 - Added Table Color / Theme Input (07/09/2025)\r\n# v1.2.0 - Added support for multiple input formats (07/15/2025)\r\n#        - Simple List of values\r\n#        - Single Dictionary\r\n#        - List of Dictionaries (Rows) or a Dictionary of Lists (Columns)\r\n#        - Implemented logic for Simple/Log and Comparison reports\r\n# v1.3.0 - Added support for List of Lists (table) format (07/17/25)\r\n# v1.4.0 - Added updated counter output (08/10/2025)\r\n# v1.5.0 - Updated highlight logic (08/15/2025)\r\n#        - Fixed bug causing duplicate Excel files with default path\r\n#        - Enhanced column auto-sizing logic\r\n#        - Added configuration, data shape validation, and comments\r\n# v1.6.0 - Ensured Excel report is always created, adding placeholder\r\n#          sheets for invalid data packages (08/15/2025)\r\n# v1.7.0 - Replaced desktop folder logic with local 'C' drive path\r\n#          for Python Support Package location (08/22/2025)\r\n# v1.7.1 - Fixed row striping for Simple reports. (09/10/2025)\r\n# v1.7.2 - Added center alignment for single values or short text\r\n#          (≤35 chars) in Simple report data cells (09/12/2025)\r\n\r\n# --- SCRIPT CONFIGURATION ---\r\n# Central location for settings that might need to be changed.\r\nDEPENDENCY_FOLDER_NAME = \"Python Support Pckg\"\r\nLOCAL_LIBRARY_PATH = r\"C:\\Dynamo\\2.16\\Python Support Pckg\"\r\nNETWORK_LIBRARY_PATH = r\"K:\\CAD\\_Revit2023\\Add_Ins\\Python Support Pckg\"\r\n\r\n# --- Standard Library Imports ---\r\nimport sys\r\nimport os\r\nimport platform\r\nimport time\r\nfrom datetime import datetime\r\nfrom pathlib import Path\r\nimport re\r\nimport traceback\r\nimport colorsys\r\n\r\n# --- Helper Classes ---\r\nclass Logger:\r\n    \"\"\"A simple class to handle logging with timestamps and execution time.\"\"\"\r\n    def __init__(self):\r\n        \"\"\"Initializes the logger and records the start time.\"\"\"\r\n        self.messages = []\r\n        self.start_time = time.time()\r\n\r\n    def log(self, message, level=\"INFO\"):\r\n        \"\"\"Records a log message with a timestamp, elapsed time, and level.\"\"\"\r\n        timestamp = datetime.now().strftime(\"%H:%M:%S\")\r\n        elapsed = round(time.time() - self.start_time, 2)\r\n        try:\r\n            # Safely encode and decode the message to handle potential special characters.\r\n            msg_str = str(message).encode('utf-8', 'replace').decode('utf-8')\r\n            formatted_msg = \"[{}][{}s][{}] {}\".format(timestamp, elapsed, level, msg_str)\r\n            self.messages.append(formatted_msg)\r\n        except Exception:\r\n            self.messages.append(\"[{}][{}s][ERROR] Error formatting log message.\".format(timestamp, elapsed))\r\n    \r\n    def error(self, message): self.log(message, \"ERROR\")\r\n    def warning(self, message): self.log(message, \"WARN\")\r\n    def get_messages(self): return self.messages\r\n\r\n# --- DEPENDENCY PATH HANDLING (WITH LOGGING) ---\r\ndef setup_library_paths(logger):\r\n    \"\"\"\r\n    Checks for the required dependency folder in standard locations (Local C Drive, Network) and adds it to the system path if found.\r\n    Uses constants defined in the SCRIPT CONFIGURATION section.\r\n    Returns:\r\n        tuple: (found_status, found_path, location_name)\r\n    \"\"\"\r\n    logger.log(\"--- Running Dependency Check ---\")\r\n    \r\n    # First, check the local C drive location.\r\n    logger.log(\"Checking local C drive for libraries...\")\r\n    if os.path.isdir(LOCAL_LIBRARY_PATH):\r\n        logger.log(f\"✓ Found library path on Local C Drive: {LOCAL_LIBRARY_PATH}\")\r\n        if LOCAL_LIBRARY_PATH not in sys.path: sys.path.insert(0, LOCAL_LIBRARY_PATH)\r\n        return True, LOCAL_LIBRARY_PATH, \"Local C Drive\"\r\n\r\n    # If not found on local C drive, check the predefined network drive location.\r\n    logger.log(\"Local C drive path not found. Checking network drive...\")\r\n    if os.path.isdir(NETWORK_LIBRARY_PATH):\r\n        logger.log(f\"✓ Found library path on Network Drive: {NETWORK_LIBRARY_PATH}\")\r\n        if NETWORK_LIBRARY_PATH not in sys.path: sys.path.insert(0, NETWORK_LIBRARY_PATH)\r\n        return True, NETWORK_LIBRARY_PATH, \"Network Drive\"\r\n    \r\n    # If the library is not found in any location, log an error.\r\n    logger.error(\"[X] FAILURE: Could not find the required library folder in any predefined location.\")\r\n    return False, None, None\r\n\r\n# --- SCRIPT EXECUTION CONTROL FLOW ---\r\nlogger = Logger()\r\nlogger.log(\"Multi-Sheet Excel Report Script Started\")\r\npath_found, found_path, location_name = setup_library_paths(logger)\r\n\r\n# Main guard clause: exit if the required 'openpyxl' library cannot be imported.\r\nif not path_found:\r\n    error_message = (\"FATAL ERROR: Could not find the required 'openpyxl' library.\")\r\n    OUT = [error_message, logger.get_messages(), \"0\"]\r\nelse:\r\n    try:\r\n        # Attempt to import the library now that the path has been added.\r\n        import openpyxl\r\n        from openpyxl.styles import PatternFill, Font, Alignment\r\n        from openpyxl.utils import get_column_letter\r\n        from openpyxl.worksheet.table import Table, TableStyleInfo\r\n        logger.log(f\"✓ Successfully imported 'openpyxl' from {location_name}.\")\r\n    except ImportError as e:\r\n        error_message = (f\"FATAL ERROR: Import failed from '{found_path}'. Details: {e}\")\r\n        logger.error(error_message)\r\n        OUT = [error_message, logger.get_messages(), \"0\"]\r\n\r\n    else:\r\n        # --- CONSTANTS ---\r\n        # Defines static values used throughout the Excel creation process.\r\n        MAX_SHEET_NAME_LENGTH, MAX_COLUMN_WIDTH = 31, 120\r\n        CHANGED_HIGHLIGHT_COLOR_A = \"FFFFFF99\" # Soft Yellow 1\r\n        CHANGED_HIGHLIGHT_COLOR_B = \"FFFFFFCC\" # Soft Yellow 2\r\n        BASE_TABLE_STYLE = \"TableStyleMedium2\" # A neutral black/white/gray style\r\n\r\n        # --- THEME AND COLOR LOGIC ---\r\n        def create_theme_shades(hex_color):\r\n            \"\"\"Generates lighter shades for a given hex color for UI theming.\"\"\"\r\n            try:\r\n                hex_color = hex_color.lstrip('#')\r\n                r, g, b = (int(hex_color[i:i+2], 16) / 255.0 for i in (0, 2, 4))\r\n                h, l, s = colorsys.rgb_to_hls(r, g, b)\r\n                summary_l = l + (1 - l) * 0.7 \r\n                summary_r, summary_g, summary_b = [int(c * 255) for c in colorsys.hls_to_rgb(h, summary_l, s)]\r\n                stripe_l = l + (1 - l) * 0.9\r\n                stripe_s = s * 0.5\r\n                stripe_r, stripe_g, stripe_b = [int(c * 255) for c in colorsys.hls_to_rgb(h, stripe_l, stripe_s)]\r\n                return { \"summary\": f\"FF{summary_r:02X}{summary_g:02X}{summary_b:02X}\", \"stripe\": f\"FF{stripe_r:02X}{stripe_g:02X}{stripe_b:02X}\" }\r\n            except Exception:\r\n                return {\"summary\": \"FFF0F0F0\", \"stripe\": \"FFF9F9F9\"}\r\n\r\n        def get_theme_config(theme_input, logger):\r\n            \"\"\"\r\n            Resolves a user-provided theme name or hex code into a full color configuration dictionary.\r\n            \"\"\"\r\n            THEMES = { \"blue\": \"4472C4\", \"green\": \"70AD47\", \"red\": \"C5504B\", \"purple\": \"7030A0\", \"orange\": \"ED7D31\", \"teal\": \"264653\" }\r\n            theme_input = str(theme_input).lower().strip() if theme_input else \"blue\"\r\n            hex_color = THEMES.get(theme_input)\r\n            \r\n            if not hex_color:\r\n                hex_color = theme_input.lstrip('#')\r\n                if not (len(hex_color) == 6 and all(c in '0123456789abcdef' for c in hex_color)):\r\n                    logger.warning(f\"Invalid theme or color '{str(theme_input)}'. Using default 'blue' theme.\")\r\n                    hex_color = THEMES[\"blue\"]\r\n                else: \r\n                    logger.log(f\"Using custom hex color: #{hex_color.upper()}\")\r\n            else: \r\n                logger.log(f\"Using predefined theme: '{theme_input.capitalize()}'\")\r\n            \r\n            shades = create_theme_shades(hex_color)\r\n            return { \"header_color\": f\"FF{hex_color.upper()}\", \"summary_background\": shades[\"summary\"], \"stripe_background\": shades[\"stripe\"], \"log_header_color\": f\"FF{hex_color.upper()}\" }\r\n        \r\n        # --- HELPER FUNCTIONS ---\r\n        def safe_cell_value(value):\r\n            \"\"\"Sanitizes a value to be safely written to an Excel cell.\"\"\"\r\n            if value is None: return \"\"\r\n            try: str_value = str(value)\r\n            except: str_value = repr(value)\r\n            str_value = re.sub(r'[\\x00-\\x08\\x0B\\x0C\\x0E-\\x1F\\x7F]', '', str_value)\r\n            return str_value[:32767]\r\n        \r\n        def create_safe_table_name(sheet_name):\r\n            \"\"\"Creates a valid Excel table name from a sheet name.\"\"\"\r\n            safe_name = re.sub(r'[^\\w]', '', sheet_name)\r\n            if not safe_name or not safe_name[0].isalpha(): safe_name = \"Table\" + safe_name\r\n            return safe_name[:250] + \"Data\"\r\n\r\n        def should_center_align_data(value):\r\n            \"\"\"\r\n            Determines if a data value should be center-aligned based on content.\r\n            Returns True for single values or text with ≤30 characters.\r\n            \"\"\"\r\n            if value is None or value == \"\":\r\n                return True\r\n            \r\n            str_value = str(value).strip()\r\n            return len(str_value) <= 35\r\n\r\n        def validate_filepath(filepath, logger):\r\n            \"\"\"\r\n            Validates a user-provided filepath. If invalid, generates a default path on the Desktop.\r\n            Returns:\r\n                tuple: (is_valid, final_filepath, was_path_generated_by_script)\r\n            \"\"\"\r\n            logger.log(f\"Received filepath input: '{filepath}'\")\r\n            is_valid, is_default_path = False, False\r\n            if filepath and isinstance(filepath, str) and filepath.strip():\r\n                filepath = filepath.strip()\r\n                dir_name = os.path.dirname(filepath)\r\n                if dir_name and os.path.isdir(dir_name):\r\n                    is_valid = True; logger.log(f\"✓ Directory exists, using provided filepath: '{filepath}'\")\r\n                elif not dir_name:\r\n                    logger.log(\"Filename only provided, creating default save location...\")\r\n                else: \r\n                    logger.warning(f\"The directory in the provided filepath does not exist: '{dir_name}'\")\r\n            else: \r\n                logger.warning(\"Filepath is empty, None, or invalid type.\")\r\n            \r\n            if not is_valid:\r\n                is_default_path = True\r\n                logger.log(\"Creating default save location on user's Desktop...\")\r\n                try:\r\n                    home_dir = os.path.expanduser(\"~\")\r\n                    desktop_path = os.path.join(home_dir, \"Desktop\")\r\n                    for item in os.listdir(home_dir):\r\n                        if \"onedrive\" in item.lower():\r\n                            onedrive_desktop = os.path.join(home_dir, item, \"Desktop\")\r\n                            if os.path.isdir(onedrive_desktop):\r\n                                desktop_path = onedrive_desktop; break\r\n                    base_name = os.path.basename(filepath.strip()) if filepath and isinstance(filepath, str) and filepath.strip() else \"\"\r\n                    if not base_name:\r\n                        logger.log(\"Creating a default filename with timestamp.\")\r\n                        base_name = f\"Multi_Sheet_Report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.xlsx\"\r\n                    else: \r\n                        logger.log(f\"Preserving original filename: '{base_name}'\")\r\n                    if not base_name.lower().endswith('.xlsx'): base_name = os.path.splitext(base_name)[0] + \".xlsx\"\r\n                    filepath = os.path.join(desktop_path, base_name)\r\n                    logger.log(f\"Generated new valid filepath on Desktop: {filepath}\")\r\n                except Exception as e:\r\n                    logger.error(f\"Could not create a default path on the Desktop. Error: {e}\"); return False, None, False\r\n            \r\n            if not filepath.lower().endswith('.xlsx'): filepath += '.xlsx'\r\n            logger.log(f\"Final validated filepath: {filepath}\")\r\n            return True, filepath, is_default_path\r\n\r\n        def validate_sheet_name(sheet_name, logger):\r\n            \"\"\"Sanitizes a string to be a valid Excel sheet name.\"\"\"\r\n            if not sheet_name: logger.warning(\"Sheet name is empty, using default\"); return \"Report Sheet\"\r\n            sheet_name = str(sheet_name)\r\n            sheet_name = re.sub(r'[\\\\/?*\\[\\]:]', '_', sheet_name)\r\n            sheet_name = sheet_name.strip(\"'\\\"\")\r\n            if len(sheet_name) > MAX_SHEET_NAME_LENGTH:\r\n                sheet_name = sheet_name[:MAX_SHEET_NAME_LENGTH]\r\n                logger.warning(f\"Sheet name truncated to {MAX_SHEET_NAME_LENGTH} characters.\")\r\n            return sheet_name\r\n\r\n        def normalize_data_package(package, logger):\r\n            \"\"\"\r\n            Inspects the input data package and converts it into a standardized format.\r\n            Standard Format: (headers_list, list_of_data_columns, error_message)\r\n            Handles multiple common data structures from Dynamo.\r\n            \"\"\"\r\n            if (isinstance(package, list) and len(package) > 0 and\r\n                all(isinstance(row, list) for row in package)):\r\n                logger.log(\"Detected list of lists (table) format.\")\r\n                headers = package[0]\r\n                data_rows = package[1:]\r\n                num_headers = len(headers)\r\n                \r\n                sanitized_rows = []\r\n                for i, row in enumerate(data_rows):\r\n                    num_items = len(row)\r\n                    if num_items != num_headers:\r\n                        logger.warning(f\"Row {i+1} has {num_items} items, but header has {num_headers}. Row will be adjusted.\")\r\n                        if num_items < num_headers:\r\n                            sanitized_rows.append(row + [''] * (num_headers - num_items))\r\n                        else:\r\n                            sanitized_rows.append(row[:num_headers])\r\n                    else:\r\n                        sanitized_rows.append(row)\r\n                \r\n                if not sanitized_rows: \r\n                    return headers, [[] for _ in headers], None\r\n                data_columns = list(map(list, zip(*sanitized_rows)))\r\n                return headers, data_columns, None\r\n            \r\n            if isinstance(package, list) and len(package) == 2 and isinstance(package[0], list) and isinstance(package[1], dict):\r\n                logger.log(\"Detected legacy data format: [headers_list, data_dict].\")\r\n                headers = package[0]\r\n                data_dict = package[1]\r\n                data_columns = [data_dict.get(h, []) for h in headers]\r\n                return headers, data_columns, None\r\n\r\n            if isinstance(package, dict):\r\n                logger.log(\"Detected column-oriented dictionary format.\")\r\n                if not package: return [], [], None\r\n                headers = list(package.keys())\r\n                data_columns = [v if isinstance(v, list) else [v] for v in package.values()]\r\n                return headers, data_columns, None\r\n\r\n            if isinstance(package, list) and (not package or all(isinstance(i, dict) for i in package)):\r\n                logger.log(\"Detected row-oriented list of dictionaries format.\")\r\n                if not package: return [], [], None\r\n                ordered_headers = []\r\n                header_set = set()\r\n                for row in package:\r\n                    for key in row.keys():\r\n                        if key not in header_set:\r\n                            header_set.add(key); ordered_headers.append(key)\r\n                data_columns = [[row.get(header) for row in package] for header in ordered_headers]\r\n                return ordered_headers, data_columns, None\r\n            \r\n            if isinstance(package, list):\r\n                logger.log(\"Detected simple list format.\"); return [\"Value\"], [package], None\r\n\r\n            err_msg = \"Data package has an unrecognized format or is null.\"\r\n            logger.error(err_msg)\r\n            return None, None, err_msg\r\n            \r\n        def process_element_data(data_inputs, headers, logger):\r\n            \"\"\"\r\n            Processes columnar data for a 'Comparison' report.\r\n            Identifies 'original' and 'updated' columns, compares their values row-by-row, and calculates statistics.\r\n            \"\"\"\r\n            report_data, stats = [], {\"total\": 0, \"changed\": 0, \"no_change\": 0, \"errors\": 0}\r\n            if not data_inputs or not any(data_inputs): return report_data, stats\r\n            \r\n            comparison_pairs, original_cols, updated_cols = [], {}, {}\r\n            for idx, header in enumerate(headers):\r\n                h_lower = str(header).lower()\r\n                if 'original' in h_lower: original_cols[h_lower.replace('original', '').strip()] = idx\r\n                if 'updated' in h_lower: updated_cols[h_lower.replace('updated', '').strip()] = idx\r\n            for key, orig_idx in original_cols.items():\r\n                if key in updated_cols: comparison_pairs.append((orig_idx, updated_cols[key]))\r\n            \r\n            num_rows = len(data_inputs[0]) if data_inputs and data_inputs[0] else 0\r\n            for i in range(num_rows):\r\n                stats[\"total\"] += 1\r\n                try:\r\n                    row_data = [(data_list[i] if i < len(data_list) else \"\") for data_list in data_inputs]\r\n                    has_changed = any(str(row_data[orig_idx]).strip() != str(row_data[upd_idx]).strip() for orig_idx, upd_idx in comparison_pairs)\r\n                    row_data.append(\"Changed\" if has_changed else \"No Change\")\r\n                    if has_changed: stats[\"changed\"] += 1\r\n                    else: stats[\"no_change\"] += 1\r\n                    report_data.append({'data': row_data, 'changed': has_changed})\r\n                except Exception as e:\r\n                    stats[\"errors\"] += 1; logger.error(f\"Error processing data at index {i}: {e}\")\r\n            logger.log(f\"Data processing completed. Stats: {stats}\"); return report_data, stats\r\n\r\n        def process_and_create_sheet(wb, sheet_config, logger, used_table_names, theme_config, total_changed_counter):\r\n            \"\"\"\r\n            Creates and formats a single worksheet based on a configuration dictionary.\r\n            Handles 'Simple', 'Comparison', and 'Error' report types.\r\n            \"\"\"\r\n            validated_sheet_name = \"\"\r\n            try:\r\n                config_name = sheet_config.get('name', 'Report Sheet')\r\n                report_type = sheet_config.get('type')\r\n\r\n                validated_sheet_name = validate_sheet_name(config_name, logger)\r\n                logger.log(f\"--- Processing Sheet: '{validated_sheet_name}' (Type: {report_type or 'Unknown'}) ---\")\r\n                ws = wb.create_sheet(title=validated_sheet_name)\r\n                \r\n                # --- Logic for 'Error' Report Type ---\r\n                if report_type == 'Error':\r\n                    error_message = sheet_config.get('error_message', 'An unspecified error occurred.')\r\n                    ws['A1'] = \"Data Error\"\r\n                    ws['A1'].font = Font(bold=True, size=16, color=\"C00000\") # Red, bold font\r\n                    ws['A2'] = error_message\r\n                    ws.column_dimensions['A'].width = 100\r\n                    ws['A2'].alignment = Alignment(wrap_text=True, vertical='top')\r\n                    logger.log(f\"Created placeholder error sheet for '{validated_sheet_name}'.\")\r\n                    return True\r\n\r\n                # Unpack remaining data and define styles for valid report types.\r\n                data_headers = sheet_config.get('headers', [])\r\n                data_columns = sheet_config.get('columns', [])\r\n                fills = { \r\n                    \"header\": PatternFill(start_color=theme_config['header_color'], fill_type='solid'), \r\n                    \"summary\": PatternFill(start_color=theme_config['summary_background'], fill_type='solid'), \r\n                    \"stripe\": PatternFill(start_color=theme_config['stripe_background'], fill_type='solid'), \r\n                    \"changed_a\": PatternFill(start_color=CHANGED_HIGHLIGHT_COLOR_A, fill_type='solid'),\r\n                    \"changed_b\": PatternFill(start_color=CHANGED_HIGHLIGHT_COLOR_B, fill_type='solid')\r\n                }\r\n                fonts = {\"header\": Font(bold=True, color=\"FFFFFF\"), \"bold\": Font(bold=True), \"italic\": Font(italic=True)}\r\n                center_align, right_align = Alignment(horizontal='center', vertical='center'), Alignment(horizontal='right', vertical='center')\r\n\r\n                # --- Logic for 'Simple' Report Type ---\r\n                if report_type == 'Simple':\r\n                    summary_header_data = sheet_config.get('summary_header')\r\n                    start_col = 2 if summary_header_data else 1\r\n                    data_start_row = 8 if summary_header_data else 1\r\n                    if summary_header_data:\r\n                        title_cell = ws.cell(row=1, column=1, value=\"Execution Summary\"); title_cell.font = fonts['bold']; title_cell.alignment = center_align; ws.merge_cells(start_row=1, start_column=1, end_row=1, end_column=2)\r\n                        for r_idx, (key, value) in enumerate(summary_header_data.items(), 2):\r\n                            ws.cell(row=r_idx, column=1, value=key).font = fonts['bold']; ws.cell(row=r_idx, column=2, value=safe_cell_value(value))\r\n                        for row in ws.iter_rows(min_row=1, max_row=len(summary_header_data) + 1, min_col=1, max_col=2):\r\n                            for cell in row: cell.fill = fills['summary']\r\n                    if data_headers:\r\n                        for i, value in enumerate(data_headers, start_col): ws.cell(row=data_start_row, column=i, value=value).font, ws.cell(row=data_start_row, column=i, value=value).fill, ws.cell(row=data_start_row, column=i, value=value).alignment = fonts['header'], fills['header'], center_align\r\n                        num_rows = len(data_columns[0]) if data_columns and data_columns[0] else 0\r\n                        for i in range(num_rows):\r\n                            for j, col in enumerate(data_columns, start_col): \r\n                                cell_value = safe_cell_value(col[i] if i < len(col) else \"\")\r\n                                cell = ws.cell(row=data_start_row + 1 + i, column=j, value=cell_value)\r\n                                # Apply center alignment for individual parameter-like data\r\n                                if should_center_align_data(cell_value):\r\n                                    cell.alignment = center_align\r\n                        \r\n                        end_col_idx = start_col + len(data_headers) - 1\r\n                        \r\n                        # Manually apply row striping for better file integrity\r\n                        if num_rows > 0:\r\n                            data_rows_for_styling = ws.iter_rows(min_row=data_start_row + 1, max_row=data_start_row + 1 + num_rows -1, min_col=start_col, max_col=end_col_idx)\r\n                            for i, row_obj in enumerate(data_rows_for_styling):\r\n                                if (i + 1) % 2 == 0:\r\n                                    for cell in row_obj:\r\n                                        cell.fill = fills['stripe']\r\n\r\n                        table_range_str = f\"{get_column_letter(start_col)}{data_start_row}:{get_column_letter(end_col_idx)}{data_start_row + num_rows}\"\r\n                        safe_table_name = create_safe_table_name(validated_sheet_name)\r\n                        table = Table(displayName=safe_table_name, ref=table_range_str); table.tableStyleInfo = TableStyleInfo(name=BASE_TABLE_STYLE, showFirstColumn=False, showLastColumn=False, showRowStripes=False, showColumnStripes=False); ws.add_table(table)\r\n                \r\n                # --- Logic for 'Comparison' Report Type ---\r\n                elif report_type == 'Comparison':\r\n                    report_data, stats = process_element_data(data_columns, data_headers, logger)\r\n                    report_headers = data_headers + [\"Update Status\"]\r\n                    total_changed_counter[0] += stats['changed']\r\n                    \r\n                    suppress_highlighting = stats['changed'] > 0 and stats['changed'] == stats['total']\r\n                    if suppress_highlighting: logger.log(\"All rows have changed; suppressing yellow highlight for clarity on first run.\")\r\n                    \r\n                    ws['A1'] = \"Report Summary\"; ws['A1'].font = fonts['bold']; ws.merge_cells('A1:B1'); ws['A1'].alignment = center_align\r\n                    summary_data = {\"Total Rows:\": stats['total'], \"Changed:\": stats['changed'], \"No Change:\": stats['no_change'], \"Errors:\": stats['errors']}\r\n                    for i, (key, value) in enumerate(summary_data.items(), 2): ws.cell(row=i, column=1, value=key).font = fonts['bold']; ws.cell(row=i, column=2, value=value).alignment = right_align\r\n                    timestamp_str = datetime.now().strftime(\"%Y-%m-%d %H:%M:%S\"); ws.merge_cells('A6:B6'); ws['A6'].value = f\"Generated: {timestamp_str}\"; ws['A6'].font = fonts['italic']; ws['A6'].alignment = center_align\r\n                    for row in ws['A1:B6']:\r\n                        for cell in row: cell.fill = fills['summary']\r\n                    \r\n                    data_start_row = 8\r\n                    for i, value in enumerate(report_headers, 1): cell = ws.cell(row=data_start_row, column=i, value=value); cell.font, cell.fill, cell.alignment = fonts['header'], fills['header'], center_align\r\n                    for i, row_info in enumerate(report_data):\r\n                        for j, value in enumerate(row_info['data'], 1): ws.cell(row=data_start_row + 1 + i, column=j, value=safe_cell_value(value)).alignment = center_align\r\n                    \r\n                    if report_data:\r\n                        data_rows = ws.iter_rows(min_row=data_start_row + 1, max_row=ws.max_row, min_col=1, max_col=len(report_headers))\r\n                        changed_row_counter = 0\r\n                        for i, row_obj in enumerate(data_rows):\r\n                            if (i + 1) % 2 == 0:\r\n                                for cell in row_obj: cell.fill = fills['stripe']\r\n                            if not suppress_highlighting and report_data[i]['changed']:\r\n                                highlight_fill = fills['changed_a'] if changed_row_counter % 2 == 0 else fills['changed_b']\r\n                                for cell in row_obj: cell.fill = highlight_fill\r\n                                changed_row_counter += 1\r\n                        \r\n                        table_range_str = f\"A{data_start_row}:{get_column_letter(len(report_headers))}{data_start_row + len(report_data)}\"\r\n                        safe_table_name = create_safe_table_name(validated_sheet_name); counter = 1\r\n                        while safe_table_name in used_table_names: safe_table_name = f\"{safe_table_name}{counter}\"; counter += 1\r\n                        used_table_names.add(safe_table_name)\r\n                        table = Table(displayName=safe_table_name, ref=table_range_str); table.tableStyleInfo = TableStyleInfo(name=BASE_TABLE_STYLE, showFirstColumn=False, showLastColumn=False, showRowStripes=False, showColumnStripes=False); ws.add_table(table)\r\n                        ws.freeze_panes = ws.cell(row=data_start_row + 1, column=1); logger.log(f\"Table '{safe_table_name}' created for Comparison report.\")\r\n                \r\n                # --- Column Auto-Sizing Logic (for valid reports) ---\r\n                column_widths = {}\r\n                for row in ws.rows:\r\n                    for cell in row:\r\n                        if cell.value:\r\n                            adjusted_len = (len(str(cell.value)) * 1.15) + 1\r\n                            column_widths[cell.column] = max(column_widths.get(cell.column, 0), adjusted_len)\r\n                \r\n                for col_idx, max_len in column_widths.items():\r\n                    ws.column_dimensions[get_column_letter(col_idx)].width = min(max_len, MAX_COLUMN_WIDTH)\r\n                \r\n                logger.log(\"Auto-sized columns successfully.\"); return True\r\n            except Exception as e:\r\n                logger.error(f\"Failed to process sheet '{validated_sheet_name or 'Unknown'}': {e}\\n{traceback.format_exc()}\"); return False\r\n\r\n        def create_multi_sheet_excel_report(filepath, sheet_configs, logger, theme_config, total_changed_counter):\r\n            \"\"\"\r\n            Main function to orchestrate the creation of the Excel workbook.\r\n            It validates the filepath, creates sheets, adds a log sheet, and saves the file.\r\n            \"\"\"\r\n            is_path_valid, validated_filepath, is_default_path = validate_filepath(filepath, logger)\r\n            if not is_path_valid: return False, \"Filepath validation failed.\"\r\n            \r\n            try:\r\n                wb = openpyxl.Workbook(); wb.remove(wb.active)\r\n                used_sheet_names, used_table_names, sheet_count = set(), set(), 0\r\n                \r\n                for config in sheet_configs:\r\n                    original_name = config.get('name', 'Report Sheet'); validated_name = validate_sheet_name(original_name, logger); final_name = validated_name; counter = 1\r\n                    while final_name in used_sheet_names: \r\n                        suffix = f\"_{counter}\"; final_name = validated_name[:MAX_SHEET_NAME_LENGTH - len(suffix)] + suffix; counter += 1\r\n                    if final_name != original_name: logger.warning(f\"Sheet '{original_name}' renamed to '{final_name}' for uniqueness.\")\r\n                    config['name'] = final_name; used_sheet_names.add(final_name)\r\n                    if process_and_create_sheet(wb, config, logger, used_table_names, theme_config, total_changed_counter): sheet_count += 1\r\n                \r\n                if sheet_count == 0: logger.warning(\"No data sheets were created. Report will only contain the script log.\")\r\n                \r\n                # --- Create and Format the Log Sheet ---\r\n                log_ws = wb.create_sheet(title=\"Script Log\"); log_ws.append([\"Timestamp\", \"Elapsed (s)\", \"Level\", \"Message\"]); log_pattern = re.compile(r\"\\[(.*?)\\]\\[(.*?)s\\]\\[(.*?)\\] (.*)\", re.DOTALL)\r\n                for msg in logger.get_messages():\r\n                    match = log_pattern.match(msg)\r\n                    if match: log_ws.append([match.group(1), float(match.group(2)), match.group(3), match.group(4)])\r\n                    else: log_ws.append([\"\", \"\", \"\", msg])\r\n                header_fill = PatternFill(start_color=theme_config['log_header_color'], fill_type='solid'); stripe_fill, error_fill, warning_fill = PatternFill(start_color='FFEAEAEA', fill_type='solid'), PatternFill(start_color='FFFFC7CE', fill_type='solid'), PatternFill(start_color='FFFFEB9C', fill_type='solid'); header_font, header_align, data_align, indent_align = Font(bold=True, color=\"FFFFFF\"), Alignment(horizontal='center', vertical='center'), Alignment(horizontal='center', vertical='center'), Alignment(horizontal='left', vertical='top', indent=1, wrap_text=True)\r\n                for cell in log_ws[\"1:1\"]: cell.font, cell.fill, cell.alignment = header_font, header_fill, header_align\r\n                for row_num in range(2, log_ws.max_row + 1):\r\n                    fill = stripe_fill if row_num % 2 == 0 else None\r\n                    level = log_ws.cell(row=row_num, column=3).value\r\n                    if level == \"ERROR\": fill = error_fill\r\n                    elif level == \"WARN\": fill = warning_fill\r\n                    for col_num in range(1, 5): log_ws.cell(row=row_num, column=col_num).alignment = data_align if col_num < 4 else indent_align\r\n                    if fill:\r\n                        for col_num in range(1, 5): log_ws.cell(row=row_num, column=col_num).fill = fill\r\n                log_ws.column_dimensions['A'].width, log_ws.column_dimensions['B'].width, log_ws.column_dimensions['C'].width, log_ws.column_dimensions['D'].width = 12, 12, 10, 100; log_ws.freeze_panes = 'A2'\r\n                \r\n                # --- Save the Workbook ---\r\n                final_filepath = validated_filepath; logger.log(f\"Attempting to save workbook to: {final_filepath}\")\r\n                if is_default_path:\r\n                    wb.save(filename=final_filepath)\r\n                else:\r\n                    try: \r\n                        wb.save(filename=final_filepath)\r\n                    except PermissionError:\r\n                        logger.warning(f\"SAVE FAILED: '{os.path.basename(final_filepath)}' is open or permission is denied.\")\r\n                        p = Path(validated_filepath); final_filepath = p.with_name(f\"{p.stem}_{datetime.now().strftime('%Y%m%d_%H%M%S')}{p.suffix}\"); logger.log(f\"Attempting to save to a new file: {final_filepath}\"); wb.save(filename=final_filepath)\r\n                \r\n                if platform.system() == \"Windows\": os.startfile(final_filepath)\r\n                return True, f\"Excel report with {sheet_count} sheet(s) created: {os.path.basename(final_filepath)}\"\r\n            except Exception as e:\r\n                error_msg = f\"An unexpected error occurred: {e}\"; logger.error(f\"{error_msg}\\n{traceback.format_exc()}\"); return False, error_msg\r\n\r\n        def main():\r\n            \"\"\"\r\n            The main entry point for the script.\r\n            It parses inputs, builds sheet configurations, and calls the report creation function.\r\n            \"\"\"\r\n            try:\r\n                # --- Input Parsing and Validation ---\r\n                if len(IN) < 3: raise ValueError(\"Insufficient inputs. Expected filepath, sheet_names, and theme.\")\r\n                filepath, sheet_names, theme_input, data_packages = IN[0], IN[1], IN[2], IN[3:]\r\n                theme_config = get_theme_config(theme_input, logger)\r\n                sheet_names = [sheet_names] if isinstance(sheet_names, str) else sheet_names\r\n                if not isinstance(sheet_names, list): raise TypeError(f\"Sheet names (IN[1]) must be a list.\")\r\n                num_names, num_packages = len(sheet_names), len(data_packages)\r\n                if num_names != num_packages:\r\n                    sheets_to_process = min(num_names, num_packages); logger.warning(f\"Input Mismatch: Found {num_names} names and {num_packages} data packages. Processing {sheets_to_process} sheets.\")\r\n                else: \r\n                    sheets_to_process = num_names\r\n                \r\n                total_changed_counter = [0]\r\n                sheet_configs = []\r\n                \r\n                # --- Sheet Configuration Assembly ---\r\n                for i in range(sheets_to_process):\r\n                    sheet_name, package = sheet_names[i], data_packages[i]\r\n                    headers, data_columns, error = normalize_data_package(package, logger)\r\n                    \r\n                    if error:\r\n                        logger.error(f\"Data for sheet '{sheet_name}' is invalid. Creating a placeholder sheet. Reason: {error}\")\r\n                        config = {\r\n                            'name': sheet_name,\r\n                            'type': 'Error', \r\n                            'error_message': f\"The data package provided for this sheet was null or in an unrecognized format. See the Script Log tab for details.\"\r\n                        }\r\n                    else:\r\n                        is_sow_log_report = isinstance(package, dict) and 'debug_log' in package\r\n                        config = {'name': sheet_name, 'headers': headers, 'columns': data_columns}\r\n                        header_string = ' '.join(str(h) for h in headers).lower()\r\n                        \r\n                        if is_sow_log_report:\r\n                            logger.log(f\"Classifying '{sheet_name}' as a Simple/Log report.\")\r\n                            config['type'] = 'Simple'\r\n                            summary_data = {k: (v[0] if isinstance(v, list) and len(v)==1 else v) for k, v in package.items() if k != 'debug_log'}\r\n                            log_data = package.get('debug_log', [])\r\n                            config['summary_header'] = summary_data; config['headers'] = ['Log Messages']; config['columns'] = [log_data]\r\n                        elif 'original' in header_string and 'updated' in header_string:\r\n                            logger.log(f\"Classifying '{sheet_name}' as a Comparison report.\"); config['type'] = 'Comparison'\r\n                        else:\r\n                            logger.log(f\"Classifying '{sheet_name}' as a Simple report.\"); config['type'] = 'Simple'; config['summary_header'] = None\r\n                    \r\n                    sheet_configs.append(config)\r\n                    \r\n                logger.log(f\"Successfully assembled {len(sheet_configs)} sheet configurations.\")\r\n                if not sheet_configs:\r\n                    logger.warning(\"No sheet names provided. Report will only contain logs.\")\r\n                \r\n                success, message = create_multi_sheet_excel_report(filepath, sheet_configs, logger, theme_config, total_changed_counter)\r\n                if success: logger.log(\"Script completed successfully.\")\r\n                else: logger.error(\"Script completed with errors.\")\r\n                return [message, logger.get_messages(), str(total_changed_counter[0])]\r\n            except Exception as e:\r\n                error_msg = f\"Fatal error in main execution: {e}\\n{traceback.format_exc()}\"\r\n                logger.error(error_msg); return [error_msg, logger.get_messages(), \"0\"]\r\n\r\n        OUT = main()",
+      "Engine": "CPython3",
+      "EngineName": "CPython3",
+      "VariableInputPorts": true,
+      "Id": "dba33607c39f49948d5059d47ac0e432",
+      "Inputs": [
+        {
+          "Id": "815a7e0e319442918a8d54ff6fc33ed7",
+          "Name": "IN[0]",
+          "Description": "Input #0",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Id": "35d688725f634f75ae9290d2d2812ee6",
+          "Name": "IN[1]",
+          "Description": "Input #1",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Id": "991576c6724f4a0d81cb37fd6566da2b",
+          "Name": "IN[2]",
+          "Description": "Input #2",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Id": "f114fd44d0dd4859bffbf65ed7bd2282",
+          "Name": "IN[3]",
+          "Description": "Input #3",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Id": "16360788c80c44a1a48c8388025f77d9",
+          "Name": "IN[4]",
+          "Description": "Trigger: wait for ConMan to complete",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Outputs": [
+        {
+          "Id": "04a31f1af64a43e9869b06d3dea39c1a",
+          "Name": "OUT",
+          "Description": "Result of the python script",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Disabled",
+      "Description": "Runs an embedded Python script."
+    },
+    {
+      "ConcreteType": "CoreNodeModels.Watch, CoreNodeModels",
+      "NodeType": "ExtensionNode",
+      "Id": "0c4aedebc3c143d1af22b178222386a6",
+      "Inputs": [
+        {
+          "Id": "b287552786634f70ba7bd3076d09a86b",
+          "Name": "",
+          "Description": "Node to show output from",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Outputs": [
+        {
+          "Id": "e72bc32d060843f099d3d9fa3b1d5bf7",
+          "Name": "",
+          "Description": "Node output",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Disabled",
+      "Description": "Visualize the node's output"
+    },
+    {
+      "ConcreteType": "CoreNodeModels.Watch, CoreNodeModels",
+      "NodeType": "ExtensionNode",
+      "Id": "b193083fcba2414cb8605b0cb12bcd61",
+      "Inputs": [
+        {
+          "Id": "35b51e79f84646fd8b9143b90312c5dd",
+          "Name": "",
+          "Description": "Node to show output from",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Outputs": [
+        {
+          "Id": "1d5e169b88e143a6a468b64e8af82c63",
+          "Name": "",
+          "Description": "Node output",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Disabled",
+      "Description": "Visualize the node's output"
+    },
+    {
+      "ConcreteType": "Dynamo.Graph.Nodes.CodeBlockNodeModel, DynamoCore",
+      "NodeType": "CodeBlockNode",
+      "Code": "// Parameter Writer Config\n\n// OUT[0]: Categories\n[\n    \"Electrical Equipment\",\n    \"Data Devices\",\n    \"Mechanical Equipment\",\n    \"Generic Models\"\n];\n\n// OUT[1]: Key parameter\n\"Connection ID\";",
+      "Id": "c63b908678d3433483bf5f432e01e56a",
+      "Inputs": [],
+      "Outputs": [
+        {
+          "Id": "11df6d0f07474350bf86d62fe9c2e748",
+          "Name": "",
+          "Description": "Value of expression at line 4",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Id": "5da12333555945a683c754e3ba95ec19",
+          "Name": "",
+          "Description": "Value of expression at line 12",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Disabled",
+      "Description": "Allows for DesignScript code to be authored directly"
+    },
+    {
+      "ConcreteType": "PythonNodeModels.PythonNode, PythonNodeModels",
+      "NodeType": "PythonScriptNode",
+      "Code": "# Script 1 — Parameter Writer\n# Revit 2023 / Dynamo 2.16 / CPython3\n# Developed By - Chris Staker & Kevin Levasseur\n# v1.0.0 - Full rewrite. Replaces static mapping with UM-Revit Mapping read\n#           directly from the Utility Matrix Excel file. Matches Script 2\n#           v9.9.0 logic: existing_connectors element lookup, family\n#           applicability checks, unlisted-family fallback, idempotent writes,\n#           Original/Updated report columns for ExcelGen.\n#\n# INPUTS:\n#   IN[0] = extractor_output   — structured dict from Excel Data Extractor\n#   IN[1] = unused             — legacy (was raw_mapping_table)\n#   IN[2] = categories_input   — list of Revit category name strings\n#   IN[3] = key_parameter      — Revit parameter name for matching (Connection ID)\n#   IN[4] = conman_dependency  — ConMan output (ordering only, not consumed)\n#   IN[5] = excel_file_path    — path to Utility Matrix .xlsx\n\nimport sys\nimport clr\n\nclr.AddReference('RevitAPI')\nfrom Autodesk.Revit.DB import (\n    FilteredElementCollector, StorageType, BuiltInParameter\n)\n\nclr.AddReference('RevitServices')\nimport RevitServices\nfrom RevitServices.Persistence import DocumentManager\nfrom RevitServices.Transactions import TransactionManager\n\ndoc              = DocumentManager.Instance.CurrentDBDocument\nextractor_output = IN[0]\n# IN[1] intentionally not consumed — legacy raw_mapping_table\ncategories_input = IN[2]\nkey_parameter    = IN[3]\n# IN[4] intentionally not consumed — ConMan ordering dependency\nexcel_file_path  = IN[5] if len(IN) > 5 else None\n\n# ═══════════════════════════════════════════════════════════════════════════════\n# SECTION 1 — HELPER FUNCTIONS  (mirrors Script 2 v9.9.0)\n# ═══════════════════════════════════════════════════════════════════════════════\n\ndef safe_get(obj, key, default=None):\n    try:\n        if hasattr(obj, \"get\"):\n            val = obj.get(key)\n            return val if val is not None else default\n        elif hasattr(obj, \"ContainsKey\"):\n            if obj.ContainsKey(key):\n                val = obj[key]\n                return val if val is not None else default\n        elif hasattr(obj, \"Keys\"):\n            for k in obj.Keys:\n                if str(k) == str(key):\n                    val = obj.GetValueAtKey(k) if hasattr(obj, \"GetValueAtKey\") else obj[k]\n                    return val if val is not None else default\n    except: pass\n    return default\n\ndef get_param_display_value(param):\n    if not param: return \"\"\n    st = param.StorageType\n    if st == StorageType.String:\n        return param.AsString() or \"\"\n    elif st == StorageType.Double:\n        try:\n            v = param.AsValueString()\n            if v: return v\n        except: pass\n        return str(round(param.AsDouble(), 4)) if param.AsDouble() is not None else \"\"\n    elif st == StorageType.Integer:\n        return str(param.AsInteger())\n    elif st == StorageType.ElementId:\n        return str(param.AsElementId().IntegerValue)\n    return \"\"\n\ndef check_param_match(param, target_val):\n    if not param or target_val is None: return False\n    st         = param.StorageType\n    target_str = str(target_val).strip()\n    if st == StorageType.String:\n        return (param.AsString() or \"\").strip().upper() == target_str.upper()\n    elif st == StorageType.Double:\n        revit_str = param.AsValueString()\n        if revit_str:\n            if revit_str == target_str:        return True\n            if revit_str == target_str + '\"':  return True\n            if revit_str == target_str + \"'\":  return True\n        try:\n            if param.AsDouble() is not None and abs(param.AsDouble() - float(target_val)) < 0.0001:\n                return True\n        except: pass\n        return False\n    elif st == StorageType.Integer:\n        try:   return param.AsInteger() == int(float(target_val))\n        except: return False\n    return False\n\ndef compare_and_set_param(param, value):\n    \"\"\"Idempotent setter — writes only when value differs from current.\"\"\"\n    if not param or param.IsReadOnly or value is None:\n        return False, get_param_display_value(param)\n    st        = param.StorageType\n    value_str = str(value).strip()\n    try:\n        if st == StorageType.String:\n            before_norm = (param.AsString() or \"\").strip().upper()\n            target_norm = value_str.upper()\n            if before_norm == target_norm:\n                return False, param.AsString() or \"\"\n            param.Set(target_norm)\n            return True, param.AsString() or \"\"\n        elif st == StorageType.Double:\n            before = param.AsDouble()\n            if param.SetValueString(value_str):\n                after   = param.AsDouble()\n                changed = (before is None) or (abs(before - after) > 0.0001)\n                return changed, get_param_display_value(param)\n            try:\n                target_float = float(value)\n                if before is not None and abs(before - target_float) < 0.0001:\n                    return False, get_param_display_value(param)\n                param.Set(target_float)\n                after   = param.AsDouble()\n                changed = (before is None) or (abs(before - after) > 0.0001)\n                return changed, get_param_display_value(param)\n            except:\n                return False, get_param_display_value(param)\n        elif st == StorageType.Integer:\n            try:\n                target_int = int(float(value))\n                if param.AsInteger() == target_int:\n                    return False, get_param_display_value(param)\n                param.Set(target_int)\n                changed = param.AsInteger() == target_int\n                return changed, get_param_display_value(param)\n            except:\n                return False, get_param_display_value(param)\n        return False, get_param_display_value(param)\n    except:\n        return False, get_param_display_value(param)\n\ndef extract_flat_data(data_input):\n    flat_data = safe_get(data_input, \"FlatData\")\n    if flat_data is not None:\n        return flat_data\n    is_list_like = (isinstance(data_input, list) or\n                    (hasattr(data_input, '__iter__') and\n                     not isinstance(data_input, str) and\n                     not hasattr(data_input, 'ContainsKey') and\n                     not hasattr(data_input, 'keys')))\n    if is_list_like:\n        flat = []\n        for item in data_input:\n            is_item_list = (isinstance(item, list) or\n                            (hasattr(item, '__iter__') and\n                             not isinstance(item, str) and\n                             not hasattr(item, 'ContainsKey') and\n                             not hasattr(item, 'keys')))\n            if is_item_list:\n                flat.extend(extract_flat_data(item))\n            elif safe_get(item, \"Excel Header\") is None and safe_get(item, \"Log\") is None:\n                flat.append(item)\n        return flat\n    return ([data_input]\n            if (hasattr(data_input, 'keys') or hasattr(data_input, 'ContainsKey'))\n            else [])\n\ndef get_family_name(elem):\n    try:\n        fn_p = elem.Symbol.get_Parameter(BuiltInParameter.SYMBOL_FAMILY_NAME_PARAM)\n        return fn_p.AsString() if fn_p else \"\"\n    except:\n        return \"\"\n\ndef build_param_map(elem_or_type):\n    pm = {}\n    try:\n        for p in elem_or_type.Parameters:\n            try: pm[p.Definition.Name.strip().lower()] = p\n            except: pass\n    except: pass\n    return pm\n\ndef get_representative_display(param_names, inst_pm, type_pm, preferred_name=None):\n    ordered = []\n    if preferred_name:\n        ordered.append(preferred_name.strip().lower())\n    ordered.extend(n.strip().lower() for n in param_names\n                   if n and n.strip().lower() not in ordered)\n    first_display = \"\"\n    for name in ordered:\n        param = inst_pm.get(name) or type_pm.get(name)\n        display = get_param_display_value(param) if param is not None else \"\"\n        if first_display == \"\":\n            first_display = display\n        if str(display).strip() != \"\":\n            return display\n    return first_display\n\n# ═══════════════════════════════════════════════════════════════════════════════\n# SECTION 2 — UM-REVIT MAPPING READER  (identical to Script 2 v9.9.0)\n# ═══════════════════════════════════════════════════════════════════════════════\n\ndef read_um_revit_mapping(file_path):\n    um_map = {}\n    if not file_path:\n        return um_map\n    try:\n        _pkg_paths = [\n            r\"C:\\Dynamo\\2.16\\Python Support Pckg\",\n            r\"K:\\CAD\\_Revit2023\\Add_Ins\\Python Support Pckg\",\n        ]\n        for _p in _pkg_paths:\n            import os as _os\n            if _os.path.isdir(_p) and _p not in sys.path:\n                sys.path.insert(0, _p)\n                break\n        from openpyxl import load_workbook\n        wb = load_workbook(file_path, read_only=True, data_only=True)\n        if 'UM-Revit Mapping' not in wb.sheetnames:\n            wb.close()\n            return um_map\n        ws = wb['UM-Revit Mapping']\n        header_row  = [c.value for c in next(ws.iter_rows(min_row=3, max_row=3))]\n        family_cols = [str(h).strip() for h in header_row[2:] if h]\n        for row in ws.iter_rows(min_row=4, values_only=True):\n            excel_col   = row[0]\n            revit_param = row[1]\n            if not excel_col or not revit_param:\n                continue\n            key         = str(excel_col).strip().lower()\n            params_list = [p.strip() for p in str(revit_param).strip().split(',') if p.strip()]\n            applicable  = []\n            for i, fam_name in enumerate(family_cols):\n                col_idx = i + 2\n                if col_idx < len(row):\n                    cell_val = row[col_idx]\n                    if cell_val and str(cell_val).strip().lower() == \"yes\":\n                        applicable.append(fam_name)\n            if not applicable:\n                continue\n            if key not in um_map:\n                um_map[key] = {\"params\": [], \"families\": set()}\n            for p in params_list:\n                if p not in um_map[key][\"params\"]:\n                    um_map[key][\"params\"].append(p)\n            for f in applicable:\n                um_map[key][\"families\"].add(f)\n        wb.close()\n        for k in um_map:\n            um_map[k][\"families\"] = list(um_map[k][\"families\"])\n    except Exception:\n        pass\n    return um_map\n\n\ndef family_is_applicable(elem_family_name, applicable_families):\n    if not applicable_families:\n        return True\n    efn = elem_family_name.strip().lower()\n    for fam in applicable_families:\n        fam_lower = fam.strip().lower()\n        if fam_lower in efn or efn in fam_lower:\n            return True\n    return False\n\n# ═══════════════════════════════════════════════════════════════════════════════\n# SECTION 3 — COLLECT CONNECTOR ELEMENTS\n# ═══════════════════════════════════════════════════════════════════════════════\n\nall_doc_categories    = {c.Name: c for c in doc.Settings.Categories}\ncategories_to_process = categories_input if isinstance(categories_input, list) else [categories_input]\nall_elements = []\nfor item in categories_to_process:\n    cat_obj = None\n    if hasattr(item, 'Id'):\n        cat_obj = item\n    elif isinstance(item, str) and item in all_doc_categories:\n        cat_obj = all_doc_categories[item]\n    if cat_obj:\n        collector = (FilteredElementCollector(doc)\n                     .OfCategoryId(cat_obj.Id)\n                     .WhereElementIsNotElementType()\n                     .ToElements())\n        all_elements.extend(collector)\n\n# Restrict to connector families only — prevents Data Cubes from overwriting\n# connector entries in the lookup when both have Connection ID set.\nexisting_connectors = [\n    e for e in all_elements\n    if e.Symbol and \"Connector\" in (e.Symbol.Family.Name or \"\")\n]\n\n# ═══════════════════════════════════════════════════════════════════════════════\n# SECTION 4 — PARAMETER WRITE FUNCTION  (matches Script 2 v9.9.0 Section 9)\n# ═══════════════════════════════════════════════════════════════════════════════\n\ndef write_parameters_to_revit(data_input, key_param_name, file_path):\n    data = extract_flat_data(data_input)\n    if not data or not key_param_name:\n        return [[\"Error: Inputs are empty.\"]], [], 0, 0\n\n    um_revit_map = read_um_revit_mapping(file_path)\n\n    # Connection ID lowercase → connector element (connectors only)\n    element_lookup = {}\n    for el in existing_connectors:\n        p = el.LookupParameter(key_param_name)\n        if p:\n            val = get_param_display_value(p)\n            if val:\n                element_lookup[val.strip().lower()] = el\n\n    # Recover display-case column names from extractor Mapping metadata\n    col_case_map = {}\n    mapping_entries = safe_get(data_input, \"Mapping\")\n    if mapping_entries:\n        try:\n            for entry in mapping_entries:\n                orig = safe_get(entry, \"Excel Header\") or \"\"\n                if orig:\n                    col_case_map[str(orig).strip().lower()] = str(orig).strip()\n        except: pass\n\n    all_excel_cols = []\n    seen_lower     = set()\n    for mapped_lower, mapped_display in col_case_map.items():\n        if mapped_lower not in seen_lower:\n            seen_lower.add(mapped_lower)\n            all_excel_cols.append(mapped_display)\n\n    key_col_lower  = key_param_name.strip().lower()\n    writable_cols  = [c for c in all_excel_cols if c.strip().lower() != key_col_lower]\n    not_found_keys = set()\n    params_written = 0\n    params_skipped = 0\n\n    header_row = [\"Revit Element ID\", \"Connection ID\", \"Family\",\n                  \"Update Status\", \"Parameters Changed\"]\n    for col in writable_cols:\n        header_row.extend([\"Original: \" + col, \"Updated: \" + col])\n    processed_report = [header_row]\n\n    TransactionManager.Instance.EnsureInTransaction(doc)\n\n    for data_row in data:\n        key_value = safe_get(data_row, key_col_lower)\n        if key_value is None:\n            continue\n\n        element = element_lookup.get(str(key_value).strip().lower())\n        if not element:\n            not_found_keys.add(key_value)\n            continue\n\n        elem_fn        = get_family_name(element)\n        el_type        = doc.GetElement(element.GetTypeId())\n        inst_param_map = build_param_map(element)\n        type_param_map = build_param_map(el_type) if el_type else {}\n\n        element_was_updated = False\n        changed_excel_cols  = []\n        values_row = [element.Id.ToString(), str(key_value), elem_fn, \"Unchanged\", \"\"]\n\n        for col in writable_cols:\n            col_lower = col.strip().lower()\n            new_val   = safe_get(data_row, col_lower)\n\n            mapping_entry = um_revit_map.get(col_lower)\n            if mapping_entry:\n                revit_param_names   = mapping_entry[\"params\"]\n                applicable_families = mapping_entry[\"families\"]\n            else:\n                if col_lower in inst_param_map or col_lower in type_param_map:\n                    revit_param_names   = [col]\n                    applicable_families = []\n                else:\n                    values_row.extend([\"\", \"\"])\n                    continue\n\n            # Applicability check with unlisted-family fallback\n            if applicable_families and not family_is_applicable(elem_fn, applicable_families):\n                param_exists_on_elem = any(\n                    inst_param_map.get(rpn.strip().lower()) is not None or\n                    type_param_map.get(rpn.strip().lower()) is not None\n                    for rpn in revit_param_names\n                )\n                if not param_exists_on_elem:\n                    values_row.extend([\"\", \"\"])\n                    continue\n\n            # Pre-read before values\n            param_records = []\n            for rpn in revit_param_names:\n                rpn_lower = rpn.strip().lower()\n                p  = inst_param_map.get(rpn_lower)\n                tp = type_param_map.get(rpn_lower)\n                before = (get_param_display_value(p)  if p  is not None else\n                          get_param_display_value(tp) if tp is not None else \"\")\n                param_records.append((rpn_lower, p, tp, before))\n\n            primary_before = param_records[0][3] if param_records else \"\"\n\n            if new_val is None or str(new_val).strip() in (\"\", \"-\", \"None\", \"null\"):\n                values_row.extend([primary_before, primary_before])\n                params_skipped += 1\n                continue\n\n            first_changed_before = None\n            first_changed_param  = None\n            col_was_updated      = False\n\n            for rpn_lower, param_to_set, tp_match, before_display in param_records:\n                if param_to_set is not None and not param_to_set.IsReadOnly:\n                    changed, _ = compare_and_set_param(param_to_set, new_val)\n                    if changed:\n                        if first_changed_before is None:\n                            first_changed_before = before_display\n                            first_changed_param  = rpn_lower\n                        element_was_updated = True\n                        col_was_updated     = True\n                        params_written     += 1\n                    else:\n                        params_skipped += 1\n                elif tp_match is not None:\n                    if check_param_match(tp_match, new_val):\n                        params_skipped += 1\n                    else:\n                        family = el_type.Family\n                        for sym_id in family.GetFamilySymbolIds():\n                            sym    = doc.GetElement(sym_id)\n                            sym_pm = build_param_map(sym)\n                            sym_p  = sym_pm.get(rpn_lower)\n                            if sym_p and check_param_match(sym_p, new_val):\n                                if not sym.IsActive: sym.Activate()\n                                element.ChangeTypeId(sym_id)\n                                if first_changed_before is None:\n                                    first_changed_before = before_display\n                                    first_changed_param  = rpn_lower\n                                element_was_updated = True\n                                col_was_updated     = True\n                                el_type        = sym\n                                type_param_map = build_param_map(el_type)\n                                params_written += 1\n                                break\n\n            if element_was_updated:\n                doc.Regenerate()\n\n            current_type   = doc.GetElement(element.GetTypeId())\n            cur_inst_pm    = build_param_map(element)\n            cur_type_pm    = build_param_map(current_type) if current_type else {}\n            current_display = get_representative_display(\n                revit_param_names, cur_inst_pm, cur_type_pm,\n                preferred_name=first_changed_param\n            )\n\n            if first_changed_before is not None:\n                original_val_str = first_changed_before\n                final_val_str    = current_display\n            else:\n                original_val_str = primary_before\n                final_val_str    = (current_display if str(current_display).strip() != \"\"\n                                    else primary_before)\n\n            if col_was_updated:\n                changed_excel_cols.append(col)\n\n            values_row.extend([original_val_str, final_val_str])\n\n        if element_was_updated:\n            values_row[3] = \"Updated\"\n        values_row[4] = \", \".join(changed_excel_cols)\n\n        processed_report.append(values_row)\n\n    TransactionManager.Instance.TransactionTaskDone()\n\n    not_found_report = [[\"Key Value\", \"Status\"]]\n    for key in sorted(not_found_keys):\n        not_found_report.append([key, \"Element Not Found in Revit\"])\n\n    if len(processed_report) <= 1:\n        processed_report = [[\"No matching elements were found to process.\"]]\n\n    return processed_report, not_found_report, params_written, params_skipped\n\n\nparam_results = write_parameters_to_revit(extractor_output, key_parameter, excel_file_path)\nOUT = [param_results[0], param_results[1]]\n",
+      "Engine": "CPython3",
+      "EngineName": "CPython3",
+      "VariableInputPorts": true,
+      "Id": "2c483f59f1ee4faaab4ceba273490d46",
+      "Inputs": [
+        {
+          "Id": "3a50db3658204161925a65b69006f087",
+          "Name": "IN[0]",
+          "Description": "",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Id": "d0f587ab9aed4bdf8fe28f9312ac0a4e",
+          "Name": "IN[1]",
+          "Description": "",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Id": "5215396524a84794b5984e5ee3c0d47b",
+          "Name": "IN[2]",
+          "Description": "",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Id": "82fd0c79cf3b4c6c8d3820b4c18eca06",
+          "Name": "IN[3]",
+          "Description": "",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Id": "6c4244a19a9b42008b389e149b6b3098",
+          "Name": "IN[4]",
+          "Description": "Trigger: wait for ConMan before writing params",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Id": "376418cf4746493b84642584b9c42535",
+          "Name": "IN[5]",
+          "Description": "",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Outputs": [
+        {
+          "Id": "419a253684fd4c2d86abff2a5d02f777",
+          "Name": "OUT",
+          "Description": "",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Disabled",
+      "Description": "Runs an embedded Python script."
+    },
+    {
+      "ConcreteType": "CoreNodeModels.Watch, CoreNodeModels",
+      "NodeType": "ExtensionNode",
+      "Id": "3ddc11c17797421da56fefe03acb8984",
+      "Inputs": [
+        {
+          "Id": "e51f25301f86473893fbda1ac7b6d95a",
+          "Name": "",
+          "Description": "Node to evaluate.",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Outputs": [
+        {
+          "Id": "5ecd27da87bb4f869f7a29b0bcbcfc31",
+          "Name": "",
+          "Description": "Watch contents.",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Disabled",
+      "Description": "Visualize the node's output"
+    },
+    {
+      "ConcreteType": "Dynamo.Graph.Nodes.CodeBlockNodeModel, DynamoCore",
+      "NodeType": "CodeBlockNode",
+      "Code": "x[0];",
+      "Id": "6622c06a2af74c7fb5883ab8342fd0b5",
+      "Inputs": [
+        {
+          "Id": "2225b7e053f44fc4aa4faf92d5f9fe28",
+          "Name": "x",
+          "Description": "x",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Outputs": [
+        {
+          "Id": "ab6613da98194a98998239f2ac1a63fc",
+          "Name": "",
+          "Description": "Value of expression at line 1",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Disabled",
+      "Description": "Allows for DesignScript code to be authored directly"
+    },
+    {
+      "ConcreteType": "Dynamo.Graph.Nodes.CodeBlockNodeModel, DynamoCore",
+      "NodeType": "CodeBlockNode",
+      "Code": "x[1];",
+      "Id": "aac9aaff2b1f45438b524d23dac0438b",
+      "Inputs": [
+        {
+          "Id": "2659412946ae4cdba0f634928d5fbd7e",
+          "Name": "x",
+          "Description": "x",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Outputs": [
+        {
+          "Id": "2a11e4fa03684db8a4145eb2c1d866fe",
+          "Name": "",
+          "Description": "Value of expression at line 1",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Disabled",
+      "Description": "Allows for DesignScript code to be authored directly"
+    },
+    {
+      "ConcreteType": "Dynamo.Graph.Nodes.ZeroTouch.DSFunction, DynamoCore",
+      "NodeType": "FunctionNode",
+      "FunctionSignature": "DSCore.List.FirstItem@var[]..[]",
+      "Id": "da290941254e4597af382618d1794ebe",
+      "Inputs": [
+        {
+          "Id": "c00473e83fe745f1b37e063cd1e4466c",
+          "Name": "list",
+          "Description": "List to get the first item from.\n\nvar[]..[]",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Outputs": [
+        {
+          "Id": "5b4e2abb625d403c995cca6875ca5f78",
+          "Name": "item",
+          "Description": "First item in the list.",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Auto",
+      "Description": "Returns the first item in a list.\n\nList.FirstItem (list: var[]..[]): var[]..[]"
+    },
+    {
+      "ConcreteType": "CoreNodeModels.Input.StringInput, CoreNodeModels",
+      "NodeType": "StringInputNode",
+      "InputValue": "Move ALL connectors?",
+      "Id": "ea4075ff453b4db297b774793d4d9f13",
+      "Inputs": [],
+      "Outputs": [
+        {
+          "Id": "19e8100b9970470385e265f2d7274170",
+          "Name": "",
+          "Description": "String",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Disabled",
+      "Description": "Creates a string."
+    },
+    {
+      "ConcreteType": "Dynamo.Graph.Nodes.CustomNodes.Function, DynamoCore",
+      "FunctionSignature": "9fbd05c0-ec1f-4bd3-bf37-969a1552eab8",
+      "FunctionType": "Graph",
+      "NodeType": "FunctionNode",
+      "Id": "f0a22b8d9c6e47b994b0263b6bf1ae20",
+      "Inputs": [
+        {
+          "Id": "77366711b71f4cd5a70d125690112ba5",
+          "Name": "Description_optional_",
+          "Description": "string\nDefault value : \"\"",
+          "UsingDefaultValue": true,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Id": "2715a20e28e243ab8e56a7151b0df79d",
+          "Name": "Logo_optional_",
+          "Description": "var\nDefault value : \"\"",
+          "UsingDefaultValue": true,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Id": "2428029cf3c6477cba2425ced35cc68e",
+          "Name": "ButtonText_optional_",
+          "Description": "string\nDefault value : \"Set Values\"",
+          "UsingDefaultValue": true,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Id": "64b8bf98c0744e61882aaeb01f9b61c9",
+          "Name": "Inputs_",
+          "Description": "var[]",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Id": "51ff74210ecb4b859c123c17aeafb06c",
+          "Name": "Toggle_",
+          "Description": "bool\nDefault value : false",
+          "UsingDefaultValue": true,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Id": "9007deb8d19946b5af29679c000f036d",
+          "Name": "LinkToHelp_optional_",
+          "Description": "string\nDefault value : null",
+          "UsingDefaultValue": true,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Id": "50cfd37f0667451d8bf021d2525529e2",
+          "Name": "CancelButtonText_optional_",
+          "Description": " Cancel button will only be displayed if a label text is entered here\n\nstring\nDefault value : null",
+          "UsingDefaultValue": true,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Id": "ff66439f901141979c7147fce55abbef",
+          "Name": "MaxHeight_optional_",
+          "Description": "int\nDefault value : 0",
+          "UsingDefaultValue": true,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Id": "1bc99769b6e042989df327f826defd68",
+          "Name": "Width_optional_",
+          "Description": "int\nDefault value : 400",
+          "UsingDefaultValue": true,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Id": "35a8aad77dbf453c98c9e7f7ddac75f2",
+          "Name": "LabelWidth_optional_",
+          "Description": "int\nDefault value : 140",
+          "UsingDefaultValue": true,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Outputs": [
+        {
+          "Id": "0e96b8db18814e11b12437c843eb7b69",
+          "Name": "User Inputs",
+          "Description": "return value",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Id": "ec550ef4a2ef46aebb36a08815f669d4",
+          "Name": "Was Run ",
+          "Description": "return value",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Id": "b768614f758941a4a86ac842e0ee88b1",
+          "Name": "Was Cancelled",
+          "Description": "return value",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Auto",
+      "Description": "Create a form with multiple inputs. \r\nsee www.data-shapes.net for tutorials and infos!"
+    },
+    {
+      "ConcreteType": "CoreNodeModels.Input.BoolSelector, CoreNodeModels",
+      "NodeType": "BooleanInputNode",
+      "InputValue": true,
+      "Id": "44570633d4b64c3083f9d68ae48105b3",
+      "Inputs": [],
+      "Outputs": [
+        {
+          "Id": "272d4ab4671c426083f20e1b0f298856",
+          "Name": "",
+          "Description": "Boolean",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Disabled",
+      "Description": "Selection between a true and false."
+    },
+    {
+      "ConcreteType": "Dynamo.Graph.Nodes.CustomNodes.Function, DynamoCore",
+      "FunctionSignature": "9fbd05c0-ec1f-4bd3-bf37-969a1552eab8",
+      "FunctionType": "Graph",
+      "NodeType": "FunctionNode",
+      "Id": "a4cc49dd4e6a4820bbb6321a4dbd1e9f",
+      "Inputs": [
+        {
+          "Id": "8387f059909548e9b8f1e2c463ed4e95",
+          "Name": "Description_optional_",
+          "Description": "string\nDefault value : \"\"",
+          "UsingDefaultValue": true,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Id": "cba7c1c6992d4cf1bbe469e5d83f122e",
+          "Name": "Logo_optional_",
+          "Description": "var\nDefault value : \"\"",
+          "UsingDefaultValue": true,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Id": "7735a76c2120492fa2a8844d5309ecd1",
+          "Name": "ButtonText_optional_",
+          "Description": "string\nDefault value : \"Set Values\"",
+          "UsingDefaultValue": true,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Id": "0d92d3e21543452bb574fa0f2e5bacbf",
+          "Name": "Inputs_",
+          "Description": "var[]",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Id": "de5617771c3246918a5aad3e4417a811",
+          "Name": "Toggle_",
+          "Description": "bool\nDefault value : false",
+          "UsingDefaultValue": true,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Id": "0f9f6a87294d457bb93b0d8fc62120b3",
+          "Name": "LinkToHelp_optional_",
+          "Description": "string\nDefault value : null",
+          "UsingDefaultValue": true,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Id": "7c4abadb7b0441de828249a699982fd3",
+          "Name": "CancelButtonText_optional_",
+          "Description": " Cancel button will only be displayed if a label text is entered here\n\nstring\nDefault value : null",
+          "UsingDefaultValue": true,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Id": "6e5b553cde56475fa221d3f7d3780343",
+          "Name": "MaxHeight_optional_",
+          "Description": "int\nDefault value : 0",
+          "UsingDefaultValue": true,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Id": "a2dfc5f34b47435aa24ab1d50d161f95",
+          "Name": "Width_optional_",
+          "Description": "int\nDefault value : 400",
+          "UsingDefaultValue": true,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Id": "7a9ab0e6c93c4c74b56aa7732170d439",
+          "Name": "LabelWidth_optional_",
+          "Description": "int\nDefault value : 140",
+          "UsingDefaultValue": true,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Outputs": [
+        {
+          "Id": "ae5f352e02bd4e62b9ef91a02b56d1a4",
+          "Name": "User Inputs",
+          "Description": "return value",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Id": "83c86162d4c64e8fa3d036acafb65320",
+          "Name": "Was Run ",
+          "Description": "return value",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Id": "4a942e20a8014249a794594076fb0128",
+          "Name": "Was Cancelled",
+          "Description": "return value",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Auto",
+      "Description": "Create a form with multiple inputs. \r\nsee www.data-shapes.net for tutorials and infos!"
+    },
+    {
+      "ConcreteType": "CoreNodeModels.Input.BoolSelector, CoreNodeModels",
+      "NodeType": "BooleanInputNode",
+      "InputValue": true,
+      "Id": "414c0af441af4e21b68d5028f2181bb8",
+      "Inputs": [],
+      "Outputs": [
+        {
+          "Id": "71f706489e954a0bbaacf3a184e1bf9b",
+          "Name": "",
+          "Description": "Boolean",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Disabled",
+      "Description": "Selection between a true and false."
+    },
+    {
+      "ConcreteType": "Dynamo.Graph.Nodes.CustomNodes.Function, DynamoCore",
+      "FunctionSignature": "219697d9-d6eb-4f4a-97d6-1fc8acac27a7",
+      "FunctionType": "Graph",
+      "NodeType": "FunctionNode",
+      "Id": "76ea86fe472a4209a6de050a7366c41b",
+      "Inputs": [
+        {
+          "Id": "84f66ef8feca47f89f2401a71e90e4db",
+          "Name": "InputName",
+          "Description": "string\nDefault value : \"\"",
+          "UsingDefaultValue": true,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Id": "607b463f03b34f1593fbe99842f306e0",
+          "Name": "DefaulPath",
+          "Description": "string\nDefault value : \"FilePath\"",
+          "UsingDefaultValue": true,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Id": "52d9d1a721044d7da3960474d2e1baed",
+          "Name": "ButtonText",
+          "Description": "Is ignored if a default path is given\n\nstring\nDefault value : \"FilePath\"",
+          "UsingDefaultValue": true,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Outputs": [
+        {
+          "Id": "c1f175414da444609a19c28776acefa9",
+          "Name": "FilePath input",
+          "Description": "return value",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Auto",
+      "Description": "Create filepath input for UI.MultipleInputForm ++ . Check out www.data-shapes.net for more infos !"
+    },
+    {
+      "ConcreteType": "CoreNodeModels.Input.StringInput, CoreNodeModels",
+      "NodeType": "StringInputNode",
+      "InputValue": "Select/Browse Matrix Excel File",
+      "Id": "d843d730d80549cdacba2cd437618dff",
+      "Inputs": [],
+      "Outputs": [
+        {
+          "Id": "6c53194bb28e43d89e26de0410e4865c",
+          "Name": "",
+          "Description": "String",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Disabled",
+      "Description": "Creates a string."
+    },
+    {
+      "ConcreteType": "CoreNodeModels.Input.StringInput, CoreNodeModels",
+      "NodeType": "StringInputNode",
+      "InputValue": "Select/Browse Matrix Excel File",
+      "Id": "73fdc0146421424baf5a9d8ec74aac89",
+      "Inputs": [],
+      "Outputs": [
+        {
+          "Id": "4ea1a17b3a7945679e84cb6c63a093f3",
+          "Name": "",
+          "Description": "String",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Disabled",
+      "Description": "Creates a string."
+    },
+    {
+      "ConcreteType": "Dynamo.Graph.Nodes.CustomNodes.Function, DynamoCore",
+      "FunctionSignature": "4abff87f-8dad-41a9-bcf6-98784ac456eb",
+      "FunctionType": "Graph",
+      "NodeType": "FunctionNode",
+      "Id": "5e6155403c0b466caf96d4333053da9f",
+      "Inputs": [
+        {
+          "Id": "45e715ef05a841688cb716210a7dba0a",
+          "Name": "InputName_",
+          "Description": "string\nDefault value : \"\"",
+          "UsingDefaultValue": true,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Id": "b7b5f35507e9447dbf9cfcec6fa1cc31",
+          "Name": "Keys_",
+          "Description": "var[]..[]",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Id": "ab79d61acd8045279e574ce597c38e03",
+          "Name": "Values_",
+          "Description": "var[]..[]",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Id": "f278f39f6386431696ead02f6aa84130",
+          "Name": "DefaultValueIndex_",
+          "Description": "int\nDefault value : null",
+          "UsingDefaultValue": true,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Id": "e13f82d3a9314e6b99ddc337832a548a",
+          "Name": "GroupTitle_",
+          "Description": "string\nDefault value : \"\"",
+          "UsingDefaultValue": true,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Outputs": [
+        {
+          "Id": "8cad0d7ac33645dcb32c0a0477556bc7",
+          "Name": "RadioButton input",
+          "Description": "return value",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Auto",
+      "Description": "Create radio buttons input for UI.MultipleInputForm ++ . "
+    },
+    {
+      "ConcreteType": "CoreNodeModels.Input.StringInput, CoreNodeModels",
+      "NodeType": "StringInputNode",
+      "InputValue": "Move NO connectors?",
+      "Id": "cf626b4c64be4a3099151aef2d3c4687",
+      "Inputs": [],
+      "Outputs": [
+        {
+          "Id": "4eb2c1d8b87d42e582f6c51b622bfa21",
+          "Name": "",
+          "Description": "String",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Disabled",
+      "Description": "Creates a string."
+    },
+    {
+      "ConcreteType": "CoreNodeModels.CreateList, CoreNodeModels",
+      "VariableInputPorts": true,
+      "NodeType": "ExtensionNode",
+      "Id": "f17dbd16c04c42eb8fffc375a58d58af",
+      "Inputs": [
+        {
+          "Id": "a2974da99fcc4768b6f74a08f1c1db6b",
+          "Name": "item0",
+          "Description": "Item Index #0",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Id": "8ed372d6684149b5a573cb09a46c10dc",
+          "Name": "item1",
+          "Description": "Item Index #1",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Outputs": [
+        {
+          "Id": "79a1232b77c2443e9a3d4a4d0c957f26",
+          "Name": "list",
+          "Description": "A list (type: var[]..[])",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Disabled",
+      "Description": "Makes a new list out of the given inputs"
+    },
+    {
+      "ConcreteType": "CoreNodeModels.CreateList, CoreNodeModels",
+      "VariableInputPorts": true,
+      "NodeType": "ExtensionNode",
+      "Id": "88f77896174c4226943b64b67d640f6d",
+      "Inputs": [
+        {
+          "Id": "5a26b30938234e7180cb75294f9e3437",
+          "Name": "item0",
+          "Description": "Item Index #0",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Id": "4f71871b4c8a46919060464c7bffcbd3",
+          "Name": "item1",
+          "Description": "Item Index #1",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Outputs": [
+        {
+          "Id": "e3730cc70eca4a53a059313cc447b5e4",
+          "Name": "list",
+          "Description": "A list (type: var[]..[])",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Disabled",
+      "Description": "Makes a new list out of the given inputs"
+    },
+    {
+      "ConcreteType": "CoreNodeModels.Input.BoolSelector, CoreNodeModels",
+      "NodeType": "BooleanInputNode",
+      "InputValue": true,
+      "Id": "215423d76f8c46cea0ba09d95c912bff",
+      "Inputs": [],
+      "Outputs": [
+        {
+          "Id": "ceca19543a8749a79e22232aa0f3cbd9",
+          "Name": "",
+          "Description": "Boolean",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Disabled",
+      "Description": "Selection between a true and false."
+    },
+    {
+      "ConcreteType": "CoreNodeModels.Input.BoolSelector, CoreNodeModels",
+      "NodeType": "BooleanInputNode",
+      "InputValue": false,
+      "Id": "50ff0045fe0540b88046f03287bdc9fe",
+      "Inputs": [],
+      "Outputs": [
+        {
+          "Id": "687a5826d5c649b6ac180c9fda0c2918",
+          "Name": "",
+          "Description": "Boolean",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Disabled",
+      "Description": "Selection between a true and false."
+    },
+    {
+      "ConcreteType": "CoreNodeModels.Watch, CoreNodeModels",
+      "NodeType": "ExtensionNode",
+      "Id": "b2cd3f2a0b964add9754bcf936655c9a",
+      "Inputs": [
+        {
+          "Id": "41569a22ffc843c783615e707281ebc6",
+          "Name": "",
+          "Description": "Node to show output from",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Outputs": [
+        {
+          "Id": "16ee5d2676684980ad9db1b7feb1c131",
+          "Name": "",
+          "Description": "Node output",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Disabled",
+      "Description": "Visualize the node's output"
+    },
+    {
+      "ConcreteType": "CoreNodeModels.Watch, CoreNodeModels",
+      "NodeType": "ExtensionNode",
+      "Id": "88018b6a7581462dae5fe320962655d7",
+      "Inputs": [
+        {
+          "Id": "ddb490de64484c129169fcfa9f5f4f72",
+          "Name": "",
+          "Description": "Node to show output from",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Outputs": [
+        {
+          "Id": "b2eda0e6af6b4ed0b8004b5d1e41233f",
+          "Name": "",
+          "Description": "Node output",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Disabled",
+      "Description": "Visualize the node's output"
+    }
+  ],
+  "Connectors": [
+    {
+      "Start": "632634c434344666a5f49483c3372161",
+      "End": "9925526e9fd34a68b2cc6c4757c82fa9",
+      "Id": "7c2894ae3ef942b9bd9381f471db780f",
+      "IsHidden": "False"
+    },
+    {
+      "Start": "9c1ad1e5ffe344588ce94820c522971a",
+      "End": "c7412fb459194ec5b994233d693f1031",
+      "Id": "795cfbe9a2074f1ab17682b1ed6c6ae3",
+      "IsHidden": "False"
+    },
+    {
+      "Start": "f85abf5fffac465eb5e7d206408ad728",
+      "End": "4a18d57227674f54a227cbb82f8e38af",
+      "Id": "46c79ca3691d4e2baceaeec572982d0c",
+      "IsHidden": "False"
+    },
+    {
+      "Start": "541d886851844f11a642bc8aa1c59114",
+      "End": "284c697843414d63b7bdf9daaa136f31",
+      "Id": "161c8fc49bda424e8d02b27d68a471f5",
+      "IsHidden": "False"
+    },
+    {
+      "Start": "45c86226a8c24026b220e7fddd145d05",
+      "End": "c6ab3c8c4a224bc5a55a859ccbf869f2",
+      "Id": "ff81760e0f7142f3aea18f64bab0f678",
+      "IsHidden": "False"
+    },
+    {
+      "Start": "2486a3621d2946f68564fb93a142a69d",
+      "End": "3a50db3658204161925a65b69006f087",
+      "Id": "9ce0066656e1482fafce9c70457c1163",
+      "IsHidden": "False"
+    },
+    {
+      "Start": "2486a3621d2946f68564fb93a142a69d",
+      "End": "eb5888fd2d6b42c4bafdabc5485f3cb5",
+      "Id": "67898d4a4d104542b594be37db43cdd2",
+      "IsHidden": "False"
+    },
+    {
+      "Start": "226da3ea20d74de38a04151bb71b213b",
+      "End": "22d2191a45284cafb4b209bf6774f6fd",
+      "Id": "67f732cc18e2450a9d2d9fb36e10738c",
+      "IsHidden": "False"
+    },
+    {
+      "Start": "4c01651c9c2f4d4f85a67234abc50da6",
+      "End": "86c253f9c6d24edbaeef3833166402df",
+      "Id": "bf6fed643393409fb9100a7f41f3bf73",
+      "IsHidden": "False"
+    },
+    {
+      "Start": "2403414540484e64a1db4d8b7ceabe88",
+      "End": "1bffbfd9266141acae1297693b68a0ad",
+      "Id": "4185aaeae5e142ada6688b08a90411ed",
+      "IsHidden": "False"
+    },
+    {
+      "Start": "3e9b515832684b328be2ee6cabf2bca8",
+      "End": "b287552786634f70ba7bd3076d09a86b",
+      "Id": "d76888b5b4f344eeb7bbf6a90f8fcb5b",
+      "IsHidden": "False"
+    },
+    {
+      "Start": "3e9b515832684b328be2ee6cabf2bca8",
+      "End": "6c4244a19a9b42008b389e149b6b3098",
+      "Id": "8c43f97ee4d24f9084e9d1b3974d469c",
+      "IsHidden": "False"
+    },
+    {
+      "Start": "3e9b515832684b328be2ee6cabf2bca8",
+      "End": "2225b7e053f44fc4aa4faf92d5f9fe28",
+      "Id": "5ba3a90ca0b542198f767efd4a42e62c",
+      "IsHidden": "False"
+    },
+    {
+      "Start": "3e9b515832684b328be2ee6cabf2bca8",
+      "End": "2659412946ae4cdba0f634928d5fbd7e",
+      "Id": "58d274e988514d9eb04d114ea7bbe03d",
+      "IsHidden": "False"
+    },
+    {
+      "Start": "ca257e1e9de246fc967e95e79d9dcf38",
+      "End": "35d688725f634f75ae9290d2d2812ee6",
+      "Id": "397e4bb80a9b45f29d40b36caf5bb0a8",
+      "IsHidden": "False"
+    },
+    {
+      "Start": "55c676672fb64e30b9e9eae5d1be29eb",
+      "End": "815a7e0e319442918a8d54ff6fc33ed7",
+      "Id": "ca3dd798c5d840e6a6277c06229f16a6",
+      "IsHidden": "False"
+    },
+    {
+      "Start": "3d62a56e40c84c38b56b76e3945d1956",
+      "End": "991576c6724f4a0d81cb37fd6566da2b",
+      "Id": "e68ba0e6fbab463598250057ccaad913",
+      "IsHidden": "False"
+    },
+    {
+      "Start": "04a31f1af64a43e9869b06d3dea39c1a",
+      "End": "35b51e79f84646fd8b9143b90312c5dd",
+      "Id": "0da0e189aa874d7da93fd850693150b8",
+      "IsHidden": "False"
+    },
+    {
+      "Start": "11df6d0f07474350bf86d62fe9c2e748",
+      "End": "5215396524a84794b5984e5ee3c0d47b",
+      "Id": "b30c10454b1044399f9ef5480dc3eaa8",
+      "IsHidden": "False"
+    },
+    {
+      "Start": "5da12333555945a683c754e3ba95ec19",
+      "End": "82fd0c79cf3b4c6c8d3820b4c18eca06",
+      "Id": "184e6e32c52d4294bd9656c92d127338",
+      "IsHidden": "False"
+    },
+    {
+      "Start": "419a253684fd4c2d86abff2a5d02f777",
+      "End": "e51f25301f86473893fbda1ac7b6d95a",
+      "Id": "276cea37776845ee8f9ac71b795bd0f0",
+      "IsHidden": "False"
+    },
+    {
+      "Start": "ab6613da98194a98998239f2ac1a63fc",
+      "End": "f114fd44d0dd4859bffbf65ed7bd2282",
+      "Id": "fa06ea95391745a083122ce3077f2d16",
+      "IsHidden": "False"
+    },
+    {
+      "Start": "2a11e4fa03684db8a4145eb2c1d866fe",
+      "End": "16360788c80c44a1a48c8388025f77d9",
+      "Id": "350d60122c634b6d9aa5a5b66519d0b2",
+      "IsHidden": "False"
+    },
+    {
+      "Start": "5b4e2abb625d403c995cca6875ca5f78",
+      "End": "a8243138028b4efd9144e871ec63e5c6",
+      "Id": "dda06628de5e4a3591b093a627d572a4",
+      "IsHidden": "False"
+    },
+    {
+      "Start": "5b4e2abb625d403c995cca6875ca5f78",
+      "End": "126b53550c9546c2b779470ccacfa807",
+      "Id": "97c6efab17ee4a9fa99b2491fcb91d41",
+      "IsHidden": "False"
+    },
+    {
+      "Start": "5b4e2abb625d403c995cca6875ca5f78",
+      "End": "376418cf4746493b84642584b9c42535",
+      "Id": "3de925810e8b4d5dbdcb24815df07fcd",
+      "IsHidden": "False"
+    },
+    {
+      "Start": "19e8100b9970470385e265f2d7274170",
+      "End": "a2974da99fcc4768b6f74a08f1c1db6b",
+      "Id": "4057f7d42f8b459fbcd126cbd8d70824",
+      "IsHidden": "False"
+    },
+    {
+      "Start": "0e96b8db18814e11b12437c843eb7b69",
+      "End": "0132343021514ed6b5cb51d618acc52d",
+      "Id": "8aeb3dd7a22741e5b6b001a8b9badbb8",
+      "IsHidden": "False"
+    },
+    {
+      "Start": "0e96b8db18814e11b12437c843eb7b69",
+      "End": "ddb490de64484c129169fcfa9f5f4f72",
+      "Id": "0a82fcafc8144cac9fc8bc7bb3c103d2",
+      "IsHidden": "False"
+    },
+    {
+      "Start": "272d4ab4671c426083f20e1b0f298856",
+      "End": "51ff74210ecb4b859c123c17aeafb06c",
+      "Id": "c531f20b81da4ce69c630efb4bb48cda",
+      "IsHidden": "False"
+    },
+    {
+      "Start": "ae5f352e02bd4e62b9ef91a02b56d1a4",
+      "End": "c00473e83fe745f1b37e063cd1e4466c",
+      "Id": "013afc9a9a574b179c3dc7bf32027177",
+      "IsHidden": "False"
+    },
+    {
+      "Start": "71f706489e954a0bbaacf3a184e1bf9b",
+      "End": "de5617771c3246918a5aad3e4417a811",
+      "Id": "d45e78ff88e44566b11fa8a554fe4a43",
+      "IsHidden": "False"
+    },
+    {
+      "Start": "c1f175414da444609a19c28776acefa9",
+      "End": "0d92d3e21543452bb574fa0f2e5bacbf",
+      "Id": "61a694ad1fbb4a7ea8803858a87cd68c",
+      "IsHidden": "False"
+    },
+    {
+      "Start": "6c53194bb28e43d89e26de0410e4865c",
+      "End": "84f66ef8feca47f89f2401a71e90e4db",
+      "Id": "075e4ff11f5a4f74a2b65112e50069ea",
+      "IsHidden": "False"
+    },
+    {
+      "Start": "4ea1a17b3a7945679e84cb6c63a093f3",
+      "End": "52d9d1a721044d7da3960474d2e1baed",
+      "Id": "4237546efe1b43bb95dd11cb6f4a6f0e",
+      "IsHidden": "False"
+    },
+    {
+      "Start": "8cad0d7ac33645dcb32c0a0477556bc7",
+      "End": "64b8bf98c0744e61882aaeb01f9b61c9",
+      "Id": "9a1e775d585d4d5090f8b16ff911ea45",
+      "IsHidden": "False"
+    },
+    {
+      "Start": "8cad0d7ac33645dcb32c0a0477556bc7",
+      "End": "41569a22ffc843c783615e707281ebc6",
+      "Id": "ed24e12ce8494e7a903f4cde83aa8051",
+      "IsHidden": "False"
+    },
+    {
+      "Start": "4eb2c1d8b87d42e582f6c51b622bfa21",
+      "End": "8ed372d6684149b5a573cb09a46c10dc",
+      "Id": "3c5bfaed06b544a494efa57ca7ba43aa",
+      "IsHidden": "False"
+    },
+    {
+      "Start": "79a1232b77c2443e9a3d4a4d0c957f26",
+      "End": "b7b5f35507e9447dbf9cfcec6fa1cc31",
+      "Id": "2007bc4b693744baac3fdda5c6efa77c",
+      "IsHidden": "False"
+    },
+    {
+      "Start": "e3730cc70eca4a53a059313cc447b5e4",
+      "End": "ab79d61acd8045279e574ce597c38e03",
+      "Id": "9266bb037bd94b7c9a9861bfa93ac211",
+      "IsHidden": "False"
+    },
+    {
+      "Start": "ceca19543a8749a79e22232aa0f3cbd9",
+      "End": "5a26b30938234e7180cb75294f9e3437",
+      "Id": "5e9e98174be04185a55ce989bd84ed95",
+      "IsHidden": "False"
+    },
+    {
+      "Start": "687a5826d5c649b6ac180c9fda0c2918",
+      "End": "4f71871b4c8a46919060464c7bffcbd3",
+      "Id": "cf40eb636e484d979df714f5499130b0",
+      "IsHidden": "False"
+    }
+  ],
+  "Dependencies": [
+    "9fbd05c0-ec1f-4bd3-bf37-969a1552eab8",
+    "219697d9-d6eb-4f4a-97d6-1fc8acac27a7",
+    "4abff87f-8dad-41a9-bcf6-98784ac456eb"
+  ],
+  "NodeLibraryDependencies": [
+    {
+      "Name": "Data-Shapes",
+      "Version": "2026.4.2",
+      "ReferenceType": "Package",
+      "Nodes": [
+        "f0a22b8d9c6e47b994b0263b6bf1ae20",
+        "a4cc49dd4e6a4820bbb6321a4dbd1e9f",
+        "76ea86fe472a4209a6de050a7366c41b",
+        "5e6155403c0b466caf96d4333053da9f"
+      ]
+    }
+  ],
+  "Thumbnail": "",
+  "GraphDocumentationURL": null,
+  "ExtensionWorkspaceData": [
+    {
+      "ExtensionGuid": "28992e1d-abb9-417f-8b1b-05e053bee670",
+      "Name": "Properties",
+      "Version": "2.16",
+      "Data": {}
+    },
+    {
+      "ExtensionGuid": "DFBD9CC0-DB40-457A-939E-8C8555555A9D",
+      "Name": "Generative Design",
+      "Version": "3.0",
+      "Data": {}
+    }
+  ],
+  "Author": "None provided",
+  "Linting": {
+    "activeLinter": "None",
+    "activeLinterId": "7b75fb44-43fd-4631-a878-29f4d5d8399a",
+    "warningCount": 0,
+    "errorCount": 0
+  },
+  "Bindings": [],
+  "View": {
+    "Dynamo": {
+      "ScaleFactor": 1.0,
+      "HasRunWithoutCrash": true,
+      "IsVisibleInDynamoLibrary": true,
+      "Version": "2.16.4.10216",
+      "RunType": "Manual",
+      "RunPeriod": "1000"
+    },
+    "Camera": {
+      "Name": "Background Preview",
+      "EyeX": -17.0,
+      "EyeY": 24.0,
+      "EyeZ": 50.0,
+      "LookX": 12.0,
+      "LookY": -13.0,
+      "LookZ": -58.0,
+      "UpX": 0.0,
+      "UpY": 1.0,
+      "UpZ": 0.0
+    },
+    "ConnectorPins": [],
+    "NodeViews": [
+      {
+        "Name": "Extractor Config",
+        "ShowGeometry": true,
+        "Id": "7359c054c20c40e8ab450ecb03ab2925",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "X": -1213.9615283535727,
+        "Y": 296.018130746299
+      },
+      {
+        "Name": "Excel Data Extractor",
+        "ShowGeometry": true,
+        "Id": "4db0cfea468a4f1cab4dd4de2ff58c94",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "X": -267.12955665462778,
+        "Y": 189.08047073907119
+      },
+      {
+        "Name": "ConMan Config",
+        "ShowGeometry": true,
+        "Id": "22de31005e2849bbb3e2bab53712def9",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "X": -913.9838947123626,
+        "Y": -1022.4065360890904
+      },
+      {
+        "Name": "ConMan",
+        "ShowGeometry": true,
+        "Id": "773ef90fef2146ffb7939aa2bdde852e",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "X": -106.86380194788535,
+        "Y": -668.30871769955309
+      },
+      {
+        "Name": "Report Config",
+        "ShowGeometry": true,
+        "Id": "1ddf7a72791a4644921c9fd0565bbd74",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "X": 947.76793645356793,
+        "Y": -755.84069765512936
+      },
+      {
+        "Name": "Param Writer",
+        "ShowGeometry": true,
+        "Id": "dba33607c39f49948d5059d47ac0e432",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "X": 1815.552596749274,
+        "Y": -453.40743075661521
+      },
+      {
+        "Name": "Watch - ConMan Output",
+        "ShowGeometry": true,
+        "Id": "0c4aedebc3c143d1af22b178222386a6",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "X": 158.41142706364735,
+        "Y": -914.88008941122462
+      },
+      {
+        "Name": "Watch - ExcelGen Output",
+        "ShowGeometry": true,
+        "Id": "b193083fcba2414cb8605b0cb12bcd61",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "X": 2044.1634736398814,
+        "Y": -425.6938826526025
+      },
+      {
+        "Name": "ParamWriter Config",
+        "ShowGeometry": true,
+        "Id": "c63b908678d3433483bf5f432e01e56a",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "X": 410.5437527754957,
+        "Y": 547.60792442561933
+      },
+      {
+        "Name": "Param Writer",
+        "ShowGeometry": true,
+        "Id": "2c483f59f1ee4faaab4ceba273490d46",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "X": 954.95579128509053,
+        "Y": 272.56212441888692
+      },
+      {
+        "Name": "Watch - PW Output",
+        "ShowGeometry": true,
+        "Id": "3ddc11c17797421da56fefe03acb8984",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "X": 1193.7583037006152,
+        "Y": 316.0924798142255
+      },
+      {
+        "Name": "ConMan Index 0 (report_data)",
+        "ShowGeometry": true,
+        "Id": "6622c06a2af74c7fb5883ab8342fd0b5",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "X": 1139.0366227335608,
+        "Y": -457.85284758776061
+      },
+      {
+        "Name": "ConMan Index 1 (metrics_table)",
+        "ShowGeometry": true,
+        "Id": "aac9aaff2b1f45438b524d23dac0438b",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "X": 1124.8276026586009,
+        "Y": -325.08836880565082
+      },
+      {
+        "Name": "List.FirstItem",
+        "ShowGeometry": true,
+        "Id": "da290941254e4597af382618d1794ebe",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "X": -1849.1486252160421,
+        "Y": -116.16372152753343
+      },
+      {
+        "Name": "String",
+        "ShowGeometry": true,
+        "Id": "ea4075ff453b4db297b774793d4d9f13",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "X": -3012.4096672187929,
+        "Y": -1006.5987560204935
+      },
+      {
+        "Name": "MultipleInputForm ++",
+        "ShowGeometry": true,
+        "Id": "f0a22b8d9c6e47b994b0263b6bf1ae20",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "X": -2136.8481807823277,
+        "Y": -841.47242206137958
+      },
+      {
+        "Name": "Relocate Connectors",
+        "ShowGeometry": true,
+        "Id": "44570633d4b64c3083f9d68ae48105b3",
+        "IsSetAsInput": true,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "X": -2426.9541445199329,
+        "Y": -654.42671325667584
+      },
+      {
+        "Name": "MultipleInputForm ++",
+        "ShowGeometry": true,
+        "Id": "a4cc49dd4e6a4820bbb6321a4dbd1e9f",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "X": -2273.0184830083667,
+        "Y": -129.33037689617481
+      },
+      {
+        "Name": "Relocate Connectors",
+        "ShowGeometry": true,
+        "Id": "414c0af441af4e21b68d5028f2181bb8",
+        "IsSetAsInput": true,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "X": -2532.4812990540127,
+        "Y": 76.053805513930456
+      },
+      {
+        "Name": "FilePath Data",
+        "ShowGeometry": true,
+        "Id": "76ea86fe472a4209a6de050a7366c41b",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "X": -2584.5436246266431,
+        "Y": -114.34874121708208
+      },
+      {
+        "Name": "String",
+        "ShowGeometry": true,
+        "Id": "d843d730d80549cdacba2cd437618dff",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "X": -2845.4781673127081,
+        "Y": -150.73680511308294
+      },
+      {
+        "Name": "String",
+        "ShowGeometry": true,
+        "Id": "73fdc0146421424baf5a9d8ec74aac89",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "X": -2842.3376883375413,
+        "Y": -11.448346790209257
+      },
+      {
+        "Name": "RadioButtons Data",
+        "ShowGeometry": true,
+        "Id": "5e6155403c0b466caf96d4333053da9f",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "X": -2546.5519980696236,
+        "Y": -911.95513098709466
+      },
+      {
+        "Name": "String",
+        "ShowGeometry": true,
+        "Id": "cf626b4c64be4a3099151aef2d3c4687",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "X": -3008.6343090544433,
+        "Y": -890.01614577174223
+      },
+      {
+        "Name": "List Create",
+        "ShowGeometry": true,
+        "Id": "f17dbd16c04c42eb8fffc375a58d58af",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "X": -2750.6182944297507,
+        "Y": -970.62074108764068
+      },
+      {
+        "Name": "List Create",
+        "ShowGeometry": true,
+        "Id": "88f77896174c4226943b64b67d640f6d",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "X": -2754.744483544433,
+        "Y": -736.04836011029215
+      },
+      {
+        "Name": "Boolean",
+        "ShowGeometry": true,
+        "Id": "215423d76f8c46cea0ba09d95c912bff",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "X": -2977.4215372012864,
+        "Y": -771.423434981426
+      },
+      {
+        "Name": "Boolean",
+        "ShowGeometry": true,
+        "Id": "50ff0045fe0540b88046f03287bdc9fe",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "X": -2976.0954246710712,
+        "Y": -652.214107489953
+      },
+      {
+        "Name": "Watch",
+        "ShowGeometry": true,
+        "Id": "b2cd3f2a0b964add9754bcf936655c9a",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "X": -2123.8760607016848,
+        "Y": -1020.0005747939473
+      },
+      {
+        "Name": "Watch",
+        "ShowGeometry": true,
+        "Id": "88018b6a7581462dae5fe320962655d7",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "X": -1723.2473631104704,
+        "Y": -693.98831709330284
+      }
+    ],
+    "Annotations": [
+      {
+        "Id": "5b7979c9aec74431933a9878cd7b06a4",
+        "Title": "Move Connectors prompt yes/no",
+        "DescriptionText": "<Double click here to edit group description>",
+        "IsExpanded": true,
+        "WidthAdjustment": 0.0,
+        "HeightAdjustment": 0.0,
+        "Nodes": [
+          "ea4075ff453b4db297b774793d4d9f13",
+          "f0a22b8d9c6e47b994b0263b6bf1ae20",
+          "44570633d4b64c3083f9d68ae48105b3",
+          "5e6155403c0b466caf96d4333053da9f",
+          "cf626b4c64be4a3099151aef2d3c4687",
+          "f17dbd16c04c42eb8fffc375a58d58af",
+          "88f77896174c4226943b64b67d640f6d",
+          "215423d76f8c46cea0ba09d95c912bff",
+          "50ff0045fe0540b88046f03287bdc9fe",
+          "b2cd3f2a0b964add9754bcf936655c9a",
+          "88018b6a7581462dae5fe320962655d7"
+        ],
+        "HasNestedGroups": false,
+        "Left": -3022.4096672187929,
+        "Top": -1092.4005747939473,
+        "Width": 1587.5623041083227,
+        "Height": 694.72815273256765,
+        "FontSize": 36.0,
+        "InitialTop": -1020.0005747939473,
+        "InitialHeight": 512.78646730399419,
+        "TextblockHeight": 62.4,
+        "Background": "#FFC1D676"
+      },
+      {
+        "Id": "59f5e3e205254f1db37037c306cf3524",
+        "Title": "File Selector Prompt",
+        "DescriptionText": "<Double click here to edit group description>",
+        "IsExpanded": true,
+        "WidthAdjustment": 0.0,
+        "HeightAdjustment": 0.0,
+        "Nodes": [
+          "da290941254e4597af382618d1794ebe",
+          "a4cc49dd4e6a4820bbb6321a4dbd1e9f",
+          "414c0af441af4e21b68d5028f2181bb8",
+          "76ea86fe472a4209a6de050a7366c41b",
+          "d843d730d80549cdacba2cd437618dff",
+          "73fdc0146421424baf5a9d8ec74aac89"
+        ],
+        "HasNestedGroups": false,
+        "Left": -2855.4781673127081,
+        "Top": -223.13680511308294,
+        "Width": 1192.329542096666,
+        "Height": 537.60642821690817,
+        "FontSize": 36.0,
+        "InitialTop": -150.73680511308294,
+        "InitialHeight": 371.79061062701339,
+        "TextblockHeight": 62.4,
+        "Background": "#FFC1D676"
+      },
+      {
+        "Id": "c0f4fcd6c90d42b98a93fb44e5f9a101",
+        "Title": "Finds & Places Connectors & Parameters",
+        "DescriptionText": "Description:\nReads the Utility Matrix Excel file to determine what process connectors are needed for each piece of equipment. For each equipment item (Data Cube) in the model, it checks what connectors already exist and what's missing, then inserts any missing connector families at the correct location. Existing connectors can optionally be repositioned to align with their parent equipment. After placement, all connector parameters (service, functional area, line number, etc.) are automatically populated from the Utility Matrix using the UM-Revit Mapping sheet to ensure the right data goes to the right connector type. Any connectors found in the model that don't match the Matrix are flagged as rogues in the output report.",
+        "IsExpanded": true,
+        "WidthAdjustment": 0.0,
+        "HeightAdjustment": 0.0,
+        "Nodes": [
+          "22de31005e2849bbb3e2bab53712def9",
+          "773ef90fef2146ffb7939aa2bdde852e"
+        ],
+        "HasNestedGroups": false,
+        "Left": -923.9838947123626,
+        "Top": -1162.0065360890903,
+        "Width": 991.9200927644772,
+        "Height": 798.29781838953727,
+        "FontSize": 36.0,
+        "InitialTop": -1022.4065360890904,
+        "InitialHeight": 688.69781838953736,
+        "TextblockHeight": 129.6,
+        "Background": "#FFFF7BAC"
+      },
+      {
+        "Id": "51630e57e0d04373a511c91a8aba1819",
+        "Title": "Excel Data Extractor-reads the utility matrix and organizes it to hand off",
+        "DescriptionText": "Description:\nOpens the Utility Matrix Excel file and reads the Main sheet, pulling only the columns defined in the mapping list. Filters rows down to recognized Connection ID prefixes (CA, DRN, EL, EX, HH, INT, PCW, PHW, TD) and automatically excludes anything marked Obsolete. The extracted data is packaged into a structured dictionary with flat and grouped outputs for clean consumption by downstream nodes. If the file is open in Excel when the script runs, it prompts the user to close it before retrying rather than failing silently.",
+        "IsExpanded": true,
+        "WidthAdjustment": 0.0,
+        "HeightAdjustment": 0.0,
+        "Nodes": [
+          "7359c054c20c40e8ab450ecb03ab2925",
+          "4db0cfea468a4f1cab4dd4de2ff58c94"
+        ],
+        "HasNestedGroups": false,
+        "Left": -1223.9615283535727,
+        "Top": 78.280470739071191,
+        "Width": 1190.031971698945,
+        "Height": 931.93766000722781,
+        "FontSize": 36.0,
+        "InitialTop": 189.08047073907119,
+        "InitialHeight": 851.13766000722785,
+        "TextblockHeight": 100.8,
+        "Background": "#FF48B9FF"
+      },
+      {
+        "Id": "de5d45a5b08143b3ac4c2444bf0a35e8",
+        "Title": "Updates the parameters according to util matrix\r\n",
+        "DescriptionText": "Description:\nRuns after ConMan has finished placing and moving connectors. Reads the UM-Revit Mapping sheet directly from the Utility Matrix Excel file to determine which parameters apply to which connector family, then compares every mapped field against what's currently in Revit and writes only what has changed. Matches connectors from the specified categories to Excel rows using Connection ID as the key. Includes a fallback for connector families not listed in the mapping sheet — if the parameter physically exists on the element it gets written regardless. Outputs a full before/after report for every connector processed, ready for the Excel report generator.",
+        "IsExpanded": true,
+        "WidthAdjustment": 0.0,
+        "HeightAdjustment": 0.0,
+        "Nodes": [
+          "c63b908678d3433483bf5f432e01e56a",
+          "2c483f59f1ee4faaab4ceba273490d46",
+          "3ddc11c17797421da56fefe03acb8984"
+        ],
+        "HasNestedGroups": false,
+        "Left": 400.5437527754957,
+        "Top": 104.16212441888692,
+        "Width": 1081.6145509251196,
+        "Height": 748.04580000673241,
+        "FontSize": 36.0,
+        "InitialTop": 272.56212441888692,
+        "InitialHeight": 609.64580000673232,
+        "TextblockHeight": 158.4,
+        "Background": "#FF71C6A8"
+      },
+      {
+        "Id": "4221c0283de9471e99c1db4f779917d8",
+        "Title": "Excel Report Generator",
+        "DescriptionText": "Description:\nTakes the output data from upstream nodes and writes it into a formatted, multi-sheet Excel workbook. Automatically detects the data type for each sheet — if headers contain Original/Updated column pairs it formats the sheet as a Comparison report with row-level change highlighting and a summary block, otherwise it formats it as a clean Simple table with alternating row striping. Saves to the specified path and falls back to the Desktop if the path is invalid, or saves a timestamped copy if the file is already open. Always opens the file automatically on completion. Includes a Script Log sheet on every run showing timestamped execution details, warnings, and errors.",
+        "IsExpanded": true,
+        "WidthAdjustment": 0.0,
+        "HeightAdjustment": 0.0,
+        "Nodes": [
+          "1ddf7a72791a4644921c9fd0565bbd74",
+          "dba33607c39f49948d5059d47ac0e432",
+          "b193083fcba2414cb8605b0cb12bcd61",
+          "6622c06a2af74c7fb5883ab8342fd0b5",
+          "aac9aaff2b1f45438b524d23dac0438b"
+        ],
+        "HasNestedGroups": false,
+        "Left": 937.76793645356793,
+        "Top": -866.64069765512932,
+        "Width": 1394.7955371863136,
+        "Height": 682.63326689851408,
+        "FontSize": 36.0,
+        "InitialTop": -755.84069765512936,
+        "InitialHeight": 601.83326689851413,
+        "TextblockHeight": 100.8,
+        "Background": "#FFFFC999"
+      }
+    ],
+    "X": 595.15725677211117,
+    "Y": 344.47188023156195,
+    "Zoom": 0.15985347198152347
+  }
+}

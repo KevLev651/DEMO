@@ -1,0 +1,113 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ tool.title }} - Stellar Engineering{% endblock %}
+
+{% block content %}
+<div class="space-y-5">
+  <section class="space-y-5">
+    <div class="ui-panel rounded-lg p-4 sm:p-5">
+      <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+        <div>
+          <p class="text-xs font-bold uppercase tracking-wide ui-muted">{{ tool.title }}</p>
+          <h1 class="mt-1 font-display text-2xl font-semibold">{{ tool.title }}</h1>
+          <p class="mt-1 text-sm ui-muted">{{ tool.description }}</p>
+        </div>
+        <button type="button" data-feedback-open data-feedback-source="{{ tool.slug }}" class="ui-button ui-button-secondary">Feedback</button>
+      </div>
+    </div>
+
+    <div class="ui-panel overflow-hidden rounded-lg">
+      <div class="flex">
+        <div class="w-1 shrink-0 bg-amber-400"></div>
+        <div class="p-4">
+          <p class="text-xs font-bold uppercase tracking-wide text-amber-600 dark:text-amber-400">Important Notice</p>
+          <p class="mt-2 text-sm leading-6">This tool is built to <strong>assist and accelerate</strong> review workflows — it does not replace human verification. Automated outputs are subject to errors, missed items, and edge cases. Always apply professional judgment to every result and report issues through the Feedback button.</p>
+          <label class="mt-4 flex cursor-pointer items-center gap-3">
+            <input type="checkbox" id="disclaimerCheck" class="h-4 w-4 rounded accent-[var(--action)]">
+            <span class="text-sm font-semibold">I understand — this tool assists but does not replace my professional judgment</span>
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <section id="downloadsSection" class="ui-panel rounded-lg" style="opacity:0.35;pointer-events:none;">
+      <div class="border-b border-[var(--line)] px-4 py-3">
+        <h2 class="font-display text-lg font-semibold">Downloads</h2>
+      </div>
+      <div class="grid gap-px bg-[var(--line)] md:grid-cols-2">
+        {% for item in downloads %}
+          <div class="flex flex-col justify-between gap-4 bg-[var(--surface)] p-4">
+            <div>
+              <h3 class="font-display text-lg font-semibold">{{ item.label }}</h3>
+              <p class="mt-1 text-sm ui-muted">{{ item.description }}</p>
+              <div class="mt-3 rounded-md bg-slate-100 px-3 py-2 text-sm ui-muted dark:bg-slate-800">
+                <span class="font-mono">{{ item.display_filename }}</span>
+                {% if item.size_kb %}
+                  <span> - {{ item.size_kb }} KB</span>
+                {% endif %}
+              </div>
+            </div>
+            <div class="flex flex-wrap gap-2">
+              {% if item.exists %}
+                <a href="{{ item.download_url }}" class="ui-button ui-button-primary min-w-32">Download</a>
+              {% else %}
+                <button type="button" class="ui-button ui-button-secondary min-w-32 cursor-not-allowed opacity-60" disabled>File missing</button>
+              {% endif %}
+              <a href="{{ url_for('index') }}" class="ui-button ui-button-secondary min-w-24" aria-label="Home page">Home</a>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    </section>
+  </section>
+</div>
+{% if tool.slug == 'data_cube' %}
+<div id="dataCubeDevModal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 px-4">
+  <div class="ui-panel w-full max-w-lg overflow-hidden rounded-lg shadow-xl">
+    <div class="flex">
+      <div class="w-1.5 shrink-0 bg-[var(--action)]"></div>
+      <div class="p-6">
+        <p class="text-xs font-bold uppercase tracking-widest text-[var(--action)]">Development Notice</p>
+        <h2 class="mt-2 font-display text-xl font-semibold">Dynamo Data Cube — Parts 2 &amp; 3 of 3</h2>
+        <p class="mt-3 text-sm leading-7 ui-muted">
+          This tool provides <strong>Part 2</strong> (Populate) and <strong>Part 3</strong> (Update) of a
+          three-part workflow system. <strong>Part 1</strong> is currently pending files and data from a team
+          member and is not yet available. The scripts here are ready to use for their respective steps, but
+          the full end-to-end workflow will not be complete until Part 1 is finished.
+        </p>
+        <p class="mt-3 text-sm leading-7 ui-muted">
+          If you have questions about Part 1 or the overall workflow, reach out through the Feedback button.
+        </p>
+        <div class="mt-5">
+          <button id="dataCubeDevModalClose" type="button" class="ui-button ui-button-primary w-full">I understand — continue to downloads</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endif %}
+
+<script>
+  (function () {
+    const check = document.getElementById('disclaimerCheck');
+    const section = document.getElementById('downloadsSection');
+    if (!check || !section) return;
+    function sync() {
+      section.style.opacity = check.checked ? '1' : '0.35';
+      section.style.pointerEvents = check.checked ? '' : 'none';
+    }
+    check.addEventListener('change', sync);
+    sync();
+  }());
+
+  (function () {
+    const modal = document.getElementById('dataCubeDevModal');
+    const closeBtn = document.getElementById('dataCubeDevModalClose');
+    if (!modal || !closeBtn) return;
+    closeBtn.addEventListener('click', function () {
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    });
+  }());
+</script>
+{% endblock %}

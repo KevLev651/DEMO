@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 654 216" role="img" aria-labelledby="title desc">
+  <title id="title">Our Vision</title>
+  <desc id="desc">To enrich the lives of our employees, earn loyalty from our customers, and inspire a culture of excellence.</desc>
+  <rect width="654" height="216" fill="#f3f3f3"/>
+  <text x="35" y="48" fill="#202833" font-family="Arial, Helvetica, sans-serif" font-size="40" font-weight="300">Our Vision</text>
+  <text x="35" y="101" fill="#202833" font-family="Arial, Helvetica, sans-serif" font-size="22">
+    <tspan x="35" dy="0">To enrich the lives of our employees, earn loyalty from our customers,</tspan>
+    <tspan x="35" dy="30">and inspire a culture of excellence.</tspan>
+  </text>
+</svg>

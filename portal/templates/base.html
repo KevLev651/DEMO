@@ -1,0 +1,704 @@
+<!doctype html>
+<html lang="en" class="h-full">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Stellar Engineering Tools{% endblock %}</title>
+  <script>
+    const savedTheme = localStorage.getItem('stellarTheme');
+    const savedThemeIsUserSet = localStorage.getItem('stellarThemeUserSet') === 'true';
+    if ((savedThemeIsUserSet && savedTheme === 'dark') || (!savedThemeIsUserSet && savedTheme !== 'light')) {
+      document.documentElement.classList.add('dark');
+    }
+  </script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Source Sans 3', 'system-ui', 'sans-serif'],
+            display: ['Lexend', 'system-ui', 'sans-serif']
+          },
+          colors: {
+            brand: {
+              50: '#ecfeff',
+              600: '#0891b2',
+              700: '#0e7490',
+              900: '#164e63'
+            }
+          }
+        }
+      }
+    };
+  </script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;600;700&family=Source+Sans+3:wght@400;500;600;700&display=swap');
+
+    :root {
+      --page: #f6f8fb;
+      --surface: #ffffff;
+      --line: #d8e0ea;
+      --text: #080c10;
+      --muted: #1e2c3a;
+      --action: #0891b2;
+      --action-hover: #0e7490;
+      --portal-bg-current: url("{{ url_for('static', filename='img/backgrounds/factory-orange-bottles.png') }}");
+      --portal-bg-next: url("{{ url_for('static', filename='img/backgrounds/factory-orange-floor.jpg') }}");
+      --portal-bg-next-opacity: 0;
+      --portal-bg-position-current: center center;
+      --portal-bg-position-next: center center;
+    }
+
+    .dark {
+      --page: #0b1118;
+      --surface: #111827;
+      --line: #2b3645;
+      --text: #f9fafb;
+      --muted: #cbd5e1;
+      --action: #22d3ee;
+      --action-hover: #67e8f9;
+    }
+
+    body {
+      position: relative;
+      background: var(--page);
+      color: var(--text);
+      font-family: 'Source Sans 3', system-ui, sans-serif;
+      font-weight: 500;
+    }
+
+    body::before,
+    body::after {
+      content: "";
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      background-repeat: no-repeat;
+      background-size: cover;
+      background-attachment: fixed;
+    }
+
+    body::before {
+      background-image: var(--portal-bg-current);
+      background-position: var(--portal-bg-position-current);
+    }
+
+    body::after {
+      background-image: var(--portal-bg-next);
+      background-position: var(--portal-bg-position-next);
+      opacity: var(--portal-bg-next-opacity);
+      transition: opacity 1200ms ease;
+    }
+
+    .site-shell {
+      position: relative;
+      z-index: 1;
+    }
+
+    .ui-panel {
+      background: var(--surface);
+      border: 1px solid var(--line);
+    }
+
+    .ui-muted {
+      color: var(--muted);
+    }
+
+    .ui-input {
+      height: 2.5rem;
+      width: 100%;
+      border-radius: 0.5rem;
+      border: 1px solid var(--line);
+      background: var(--surface);
+      padding: 0 0.75rem;
+      color: var(--text);
+      outline: none;
+    }
+
+    .ui-input:focus {
+      border-color: var(--action);
+      box-shadow: 0 0 0 3px rgba(8, 145, 178, 0.16);
+    }
+
+    .ui-button {
+      display: inline-flex;
+      min-height: 2.5rem;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      border-radius: 0.5rem;
+      padding: 0.5rem 0.875rem;
+      font-size: 0.875rem;
+      font-weight: 700;
+      transition: background-color 150ms ease, border-color 150ms ease, color 150ms ease;
+    }
+
+    .ui-button-compact {
+      min-height: 2.25rem;
+      border-radius: 0.45rem;
+      padding: 0.45rem 0.8rem;
+      white-space: nowrap;
+    }
+
+    .ui-button-primary {
+      background: var(--action);
+      color: white;
+    }
+
+    .ui-button-primary:hover {
+      background: var(--action-hover);
+    }
+
+    .dark .ui-button-primary {
+      color: #082f49;
+    }
+
+    .ui-button-secondary {
+      border: 1px solid var(--line);
+      color: var(--text);
+    }
+
+    .ui-button-secondary:hover {
+      background: rgba(8, 145, 178, 0.08);
+    }
+
+    .ui-button:disabled,
+    .ui-button[disabled] {
+      opacity: 0.38;
+      cursor: not-allowed;
+      pointer-events: auto;
+    }
+
+    .tool-card-body {
+      align-items: center;
+    }
+
+    .tool-action-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(7.75rem, 1fr));
+      gap: 0.55rem;
+      align-items: center;
+      justify-content: start;
+      width: min(100%, 16.25rem);
+    }
+
+    .tool-action-grid .ui-button {
+      width: 100%;
+    }
+
+    @media (max-width: 420px) {
+      .tool-action-grid {
+        grid-template-columns: 1fr;
+        width: 100%;
+      }
+
+      .tool-action-grid .ui-button {
+        width: 100%;
+      }
+    }
+
+    .dropzone-active {
+      border-color: var(--action) !important;
+      background: rgba(8, 145, 178, 0.08) !important;
+    }
+
+    .has-file {
+      border-color: #10b981 !important;
+      background: rgba(16, 185, 129, 0.08) !important;
+    }
+
+    .spinner {
+      height: 1rem;
+      width: 1rem;
+      border-radius: 9999px;
+      border: 2px solid rgba(255, 255, 255, 0.45);
+      border-top-color: white;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    @keyframes disclaimer-flash {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(251,191,36,0); border-color: var(--line); }
+      20%       { box-shadow: 0 0 0 4px rgba(251,191,36,0.55); border-color: #fbbf24; }
+      60%       { box-shadow: 0 0 0 4px rgba(251,191,36,0.2);  border-color: #fbbf24; }
+    }
+
+    .disclaimer-flash {
+      animation: disclaimer-flash 1s ease forwards;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+  </style>
+</head>
+{% set show_feedback_ui = show_feedback_ui if show_feedback_ui is defined else true %}
+{% set page_feedback_source = page_feedback_source|default('portal') %}
+{% set endpoint = request.endpoint or '' %}
+<body class="min-h-full">
+  <div class="site-shell flex min-h-screen flex-col">
+    <header class="sticky top-0 z-40 border-b border-[var(--line)] bg-[var(--surface)]">
+      <div class="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-3 px-4 py-3 sm:px-6 lg:px-8">
+        <a href="{{ url_for('index') }}" class="flex min-w-0 items-center gap-3" aria-label="Home page - Stellar Engineering Process Tools">
+          <img src="{{ url_for('static', filename='img/stellar-star.png') }}" alt="Stellar Engineering logo" class="h-16 w-16 rounded border border-[var(--line)] bg-white object-contain p-1">
+          <div class="min-w-0">
+            <div class="font-display text-base font-semibold leading-5">Stellar Engineering</div>
+            <div class="truncate text-sm ui-muted">Process Tools</div>
+            <div class="truncate text-xs ui-muted">Author: Kevin Levasseur - Process under Chris Staker</div>
+          </div>
+        </a>
+
+        <nav class="flex flex-wrap items-center gap-1">
+          <a href="{{ url_for('index') }}" aria-label="Home page" title="Home page" class="rounded-md px-3 py-2 text-sm font-semibold {{ 'bg-brand-600 text-white dark:text-slate-950' if endpoint == 'index' else 'border border-[var(--line)] text-[var(--text)] hover:bg-slate-100 dark:hover:bg-slate-800' }}">Home</a>
+          <a href="{{ url_for('about') }}" class="rounded-md px-3 py-2 text-sm font-semibold {{ 'bg-brand-600 text-white dark:text-slate-950' if endpoint == 'about' else 'border border-[var(--line)] text-[var(--text)] hover:bg-slate-100 dark:hover:bg-slate-800' }}">About</a>
+
+          <!-- Tools dropdown -->
+          <div class="relative" id="toolsDropdownWrapper">
+            <button id="toolsDropdownBtn" type="button" class="rounded-md px-3 py-2 text-sm font-semibold flex items-center gap-1 {{ 'bg-brand-600 text-white dark:text-slate-950' if endpoint in ['tool_scanner','tool_comparator','tool_ifb_gmp_compare'] else 'border border-[var(--line)] text-[var(--text)] hover:bg-slate-100 dark:hover:bg-slate-800' }}">
+              Tools
+              <svg id="toolsDropdownChevron" class="h-3.5 w-3.5 transition-transform duration-150" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M2 4l4 4 4-4"/>
+              </svg>
+            </button>
+            <div id="toolsDropdownMenu" class="absolute left-0 top-full z-50 mt-1 hidden w-60 rounded-lg border border-[var(--line)] bg-[var(--surface)] py-1 shadow-xl">
+              <a href="{{ url_for('tool_scanner') }}" class="flex flex-col px-4 py-2.5 hover:bg-slate-100 dark:hover:bg-slate-800 {{ 'bg-slate-100 dark:bg-slate-800' if endpoint == 'tool_scanner' }}">
+                <span class="text-sm font-semibold">P&amp;ID Scanner</span>
+                <span class="text-xs ui-muted">Scan PDF → Excel tag report</span>
+              </a>
+              <a href="{{ url_for('tool_comparator') }}" class="flex flex-col px-4 py-2.5 hover:bg-slate-100 dark:hover:bg-slate-800 {{ 'bg-slate-100 dark:bg-slate-800' if endpoint == 'tool_comparator' }}">
+                <span class="text-sm font-semibold">P&amp;ID Comparator</span>
+                <span class="text-xs ui-muted">Compare PDF vs Excel tag list</span>
+              </a>
+              <a href="{{ url_for('tool_ifb_gmp_compare') }}" class="flex flex-col px-4 py-2.5 hover:bg-slate-100 dark:hover:bg-slate-800 {{ 'bg-slate-100 dark:bg-slate-800' if endpoint == 'tool_ifb_gmp_compare' }}">
+                <span class="text-sm font-semibold">IFB / GMP Compare</span>
+                <span class="text-xs ui-muted">Drawing revision comparison</span>
+              </a>
+              <div class="my-1 border-t border-[var(--line)]"></div>
+              <a href="{{ url_for('tool_downloads', tool_slug='data-cube') }}" class="flex flex-col px-4 py-2.5 hover:bg-slate-100 dark:hover:bg-slate-800">
+                <span class="text-sm font-semibold">Dynamo Data Cube</span>
+                <span class="text-xs ui-muted">Download Populate &amp; Update scripts</span>
+              </a>
+              <a href="{{ url_for('tool_downloads', tool_slug='one-line-from-excel') }}" class="flex flex-col px-4 py-2.5 hover:bg-slate-100 dark:hover:bg-slate-800">
+                <span class="text-sm font-semibold">Place One-Line From Excel</span>
+                <span class="text-xs ui-muted">Download Dynamo script &amp; template</span>
+              </a>
+            </div>
+          </div>
+          {% if current_user.is_authenticated %}
+            <a href="{{ url_for('admin_dashboard' if current_user.is_admin else 'admin_login') }}" class="rounded-md px-3 py-2 text-sm font-semibold {{ 'bg-brand-600 text-white dark:text-slate-950' if endpoint in ['admin_dashboard', 'admin_login'] else 'ui-muted hover:bg-slate-100 dark:hover:bg-slate-800' }}">{{ 'Admin' if current_user.is_admin else 'Admin Login' }}</a>
+            <form action="{{ url_for('logout') }}" method="post" class="inline">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <button type="submit" class="rounded-md px-3 py-2 text-sm font-semibold ui-muted hover:bg-slate-100 dark:hover:bg-slate-800">Logout</button>
+            </form>
+          {% else %}
+            <a href="{{ url_for('team_login') }}" class="rounded-md px-3 py-2 text-sm font-semibold {{ 'bg-brand-600 text-white dark:text-slate-950' if endpoint == 'team_login' else 'ui-muted hover:bg-slate-100 dark:hover:bg-slate-800' }}">Team Login</a>
+            <a href="{{ url_for('admin_login') }}" class="rounded-md px-3 py-2 text-sm font-semibold {{ 'bg-brand-600 text-white dark:text-slate-950' if endpoint == 'admin_login' else 'ui-muted hover:bg-slate-100 dark:hover:bg-slate-800' }}">Admin</a>
+          {% endif %}
+          <button type="button" data-feedback-open data-feedback-source="portal" class="ui-button ui-button-secondary ml-1">Feedback</button>
+          <button id="themeToggle" type="button" class="ui-button ui-button-secondary ml-1">
+            <span id="themeLabel">Dark</span>
+          </button>
+        </nav>
+      </div>
+    </header>
+
+    <main class="flex-1">
+      <div class="mx-auto max-w-7xl px-4 py-5 sm:px-6 lg:px-8">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            <div class="mb-4 space-y-2">
+              {% for category, message in messages %}
+                <div class="rounded-md border px-3 py-2 text-sm {{ 'border-emerald-300 bg-emerald-50 text-emerald-900 dark:border-emerald-800 dark:bg-emerald-950 dark:text-emerald-200' if category == 'success' else 'border-amber-300 bg-amber-50 text-amber-900 dark:border-amber-800 dark:bg-amber-950 dark:text-amber-200' }}">
+                  {{ message }}
+                </div>
+              {% endfor %}
+            </div>
+          {% endif %}
+        {% endwith %}
+
+        {% block content %}{% endblock %}
+      </div>
+    </main>
+
+    <footer class="border-t border-[var(--line)] bg-[var(--surface)]">
+      <div class="mx-auto flex max-w-7xl flex-col gap-2 px-4 py-4 text-sm ui-muted sm:px-6 lg:flex-row lg:items-center lg:justify-between lg:px-8">
+        <span>Stellar Engineering Process Team</span>
+        <span>Internal use only</span>
+      </div>
+    </footer>
+  </div>
+
+  {% if show_feedback_ui %}
+    <div id="feedbackModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-950/55 px-4">
+      <div class="ui-panel w-full max-w-xl rounded-lg shadow-xl">
+        <div class="flex items-start justify-between border-b border-[var(--line)] px-5 py-4">
+          <div>
+            <h2 class="font-display text-lg font-semibold">Submit Feedback</h2>
+            <p class="text-sm ui-muted">Bug reports, feature requests, workflow improvements, and tool recommendations — all help the portal grow.</p>
+          </div>
+          <button type="button" id="feedbackClose" class="ui-button ui-button-secondary">Close</button>
+        </div>
+        <form id="feedbackForm" class="space-y-4 px-5 py-4" enctype="multipart/form-data">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <input id="feedbackSource" type="hidden" name="source" value="{{ page_feedback_source }}">
+          <div class="grid gap-3 sm:grid-cols-2">
+            <div>
+              <label class="text-sm font-semibold">Source</label>
+              <div id="feedbackSourceLabel" class="mt-1 rounded-md border border-[var(--line)] px-3 py-2 text-sm">Home</div>
+            </div>
+            <div>
+              <label for="feedbackCategory" class="text-sm font-semibold">Category</label>
+              <select id="feedbackCategory" name="category" class="ui-input mt-1">
+                <option value="Bug / Issue Report">Bug / Issue Report</option>
+                <option value="Feature Request">Feature Request</option>
+                <option value="Workflow Improvement">Workflow Improvement</option>
+                <option value="Tool Recommendation">Tool Recommendation</option>
+                <option value="General Comment">General Comment</option>
+              </select>
+            </div>
+          </div>
+
+          <div>
+            <label for="feedbackMessage" id="feedbackMessageLabel" class="text-sm font-semibold">Description</label>
+            <p id="feedbackMessageHint" class="mt-0.5 text-xs ui-muted">Describe the issue, request, or improvement clearly.</p>
+            <textarea id="feedbackMessage" name="message" rows="5" class="mt-1 w-full rounded-md border border-[var(--line)] bg-[var(--surface)] px-3 py-2 text-sm outline-none focus:border-brand-600" placeholder="Describe the issue, request, or improvement clearly."></textarea>
+          </div>
+
+          <div id="feedbackAttachmentSection" class="hidden space-y-2">
+            <label class="text-sm font-semibold">Supporting Files <span class="font-normal ui-muted">(optional — up to 8 files)</span></label>
+            <p class="text-xs ui-muted">Attach drawings, screenshots, spreadsheets, or any reference material that helps explain what you're envisioning. The more context the better.</p>
+            <input type="file" name="attachments" id="feedbackAttachments" multiple accept=".pdf,.xlsx,.xls,.csv,.dwg,.png,.jpg,.jpeg,.zip,.docx,.txt" class="block w-full rounded-md border border-[var(--line)] bg-[var(--surface)] px-3 py-2 text-sm ui-muted file:mr-3 file:rounded file:border-0 file:bg-[var(--action)] file:px-3 file:py-1 file:text-xs file:font-bold file:text-white">
+          </div>
+
+          <div id="feedbackEmailSection" class="hidden space-y-1">
+            <label for="feedbackEmail" class="text-sm font-semibold">Your Email <span class="font-normal ui-muted">(optional)</span></label>
+            <p class="text-xs ui-muted">Include your email and we'll follow up with updates on feasibility, timeline, or any questions while building the tool.</p>
+            <input type="email" name="submitter_email" id="feedbackEmail" placeholder="your.name@stellar.net" class="mt-1 w-full rounded-md border border-[var(--line)] bg-[var(--surface)] px-3 py-2 text-sm outline-none focus:border-brand-600">
+          </div>
+
+          <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <p id="feedbackStatus" class="text-sm ui-muted"></p>
+            <button type="submit" class="ui-button ui-button-primary">
+              <span data-feedback-submit-label>Submit</span>
+              <span data-feedback-submit-loading class="hidden items-center gap-2"><span class="spinner"></span>Sending</span>
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  {% endif %}
+
+  <script>
+    (function () {
+      const backgrounds = [
+        {
+          src: "{{ url_for('static', filename='img/backgrounds/factory-orange-bottles.png') }}",
+          position: "center center"
+        },
+        {
+          src: "{{ url_for('static', filename='img/backgrounds/factory-orange-floor.jpg') }}",
+          position: "center center"
+        },
+        {
+          src: "{{ url_for('static', filename='img/backgrounds/factory-red-bottle-conveyor.jpg') }}",
+          position: "center center"
+        },
+        {
+          src: "{{ url_for('static', filename='img/backgrounds/factory-yellow-production.jpg') }}",
+          position: "center center"
+        }
+      ];
+      const body = document.body;
+      const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+      let active = 0;
+
+      function setLayer(prefix, item) {
+        body.style.setProperty('--portal-bg-' + prefix, 'url("' + item.src + '")');
+        body.style.setProperty('--portal-bg-position-' + prefix, item.position);
+      }
+
+      backgrounds.forEach(function (item) {
+        const img = new Image();
+        img.src = item.src;
+      });
+
+      setLayer('current', backgrounds[0]);
+      setLayer('next', backgrounds[1 % backgrounds.length]);
+
+      if (backgrounds.length < 2 || reduceMotion.matches) return;
+
+      window.setInterval(function () {
+        const next = (active + 1) % backgrounds.length;
+        setLayer('next', backgrounds[next]);
+        body.style.setProperty('--portal-bg-next-opacity', '1');
+        window.setTimeout(function () {
+          active = next;
+          setLayer('current', backgrounds[active]);
+          body.style.setProperty('--portal-bg-next-opacity', '0');
+        }, 1300);
+      }, 12000);
+    }());
+
+    (function () {
+      const root = document.documentElement;
+      const label = document.getElementById('themeLabel');
+      const toggle = document.getElementById('themeToggle');
+
+      function setTheme(theme, remember) {
+        root.classList.toggle('dark', theme === 'dark');
+        if (remember) {
+          localStorage.setItem('stellarTheme', theme);
+          localStorage.setItem('stellarThemeUserSet', 'true');
+        }
+        if (label) label.textContent = theme === 'dark' ? 'Light' : 'Dark';
+      }
+
+      const savedTheme = localStorage.getItem('stellarTheme');
+      const savedThemeIsUserSet = localStorage.getItem('stellarThemeUserSet') === 'true';
+      setTheme(savedThemeIsUserSet && savedTheme ? savedTheme : 'dark', false);
+      if (toggle) {
+        toggle.addEventListener('click', function () {
+          setTheme(root.classList.contains('dark') ? 'light' : 'dark', true);
+        });
+      }
+    }());
+
+    (function () {
+      const btn = document.getElementById('toolsDropdownBtn');
+      const menu = document.getElementById('toolsDropdownMenu');
+      const chevron = document.getElementById('toolsDropdownChevron');
+      if (!btn || !menu) return;
+      function open() {
+        menu.classList.remove('hidden');
+        chevron.style.transform = 'rotate(180deg)';
+      }
+      function close() {
+        menu.classList.add('hidden');
+        chevron.style.transform = '';
+      }
+      btn.addEventListener('click', function (e) {
+        e.stopPropagation();
+        menu.classList.contains('hidden') ? open() : close();
+      });
+      document.addEventListener('click', function (e) {
+        if (!document.getElementById('toolsDropdownWrapper').contains(e.target)) close();
+      });
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') close();
+      });
+    }());
+
+    (function () {
+      const modal = document.getElementById('feedbackModal');
+      if (!modal) return;
+
+      const csrfToken = {{ csrf_token()|tojson }};
+      const form = document.getElementById('feedbackForm');
+      const sourceInput = document.getElementById('feedbackSource');
+      const sourceLabel = document.getElementById('feedbackSourceLabel');
+      const categoryInput = document.getElementById('feedbackCategory');
+      const messageInput = document.getElementById('feedbackMessage');
+      const status = document.getElementById('feedbackStatus');
+      const names = {{ feedback_source_labels|tojson }};
+      const messageHint = document.getElementById('feedbackMessageHint');
+      const attachmentSection = document.getElementById('feedbackAttachmentSection');
+      const emailSection = document.getElementById('feedbackEmailSection');
+
+      const categoryConfig = {
+        'Bug / Issue Report':     { hint: 'Describe what went wrong, what you expected to happen, and which tool it occurred in.', placeholder: 'Describe the bug or issue in detail...' },
+        'Feature Request':        { hint: 'Describe the feature or capability you would like added.', placeholder: 'What should the tool or portal be able to do?' },
+        'Workflow Improvement':   { hint: 'Describe the current workflow pain point and how you think it could be improved.', placeholder: 'What part of the workflow is slow, unclear, or manual that could be better?' },
+        'Tool Recommendation':    { hint: 'Be as thorough as possible — describe the tool idea, the problem it solves, who would use it, and how it should work. Attach any relevant files, drawings, or references.', placeholder: 'Describe the tool idea thoroughly: what it does, the problem it solves, who uses it, inputs, outputs, and any examples you can think of. The more detail, the better.' },
+        'General Comment':        { hint: 'Any other notes, questions, or observations for the Process team.', placeholder: 'Your comment or question...' },
+      };
+
+      function onCategoryChange() {
+        const cfg = categoryConfig[categoryInput.value] || categoryConfig['General Comment'];
+        messageHint.textContent = cfg.hint;
+        messageInput.placeholder = cfg.placeholder;
+        const isToolRec = categoryInput.value === 'Tool Recommendation';
+        attachmentSection.classList.toggle('hidden', !isToolRec);
+        if (emailSection) emailSection.classList.toggle('hidden', !isToolRec);
+      }
+
+      if (categoryInput) {
+        categoryInput.addEventListener('change', onCategoryChange);
+        onCategoryChange();
+      }
+
+      window.openFeedback = function openFeedback(source) {
+        const active = names[source] ? source : 'portal';
+        sourceInput.value = active;
+        sourceLabel.textContent = names[active];
+        status.textContent = '';
+        onCategoryChange();
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+        setTimeout(function () { messageInput.focus(); }, 50);
+      }
+
+      function closeFeedback() {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+      }
+
+      document.querySelectorAll('[data-feedback-open]').forEach(function (button) {
+        button.addEventListener('click', function () {
+          openFeedback(button.dataset.feedbackSource || 'portal');
+        });
+      });
+      document.getElementById('feedbackClose').addEventListener('click', closeFeedback);
+      modal.addEventListener('click', function (event) {
+        if (event.target === modal) closeFeedback();
+      });
+
+      form.addEventListener('submit', async function (event) {
+        event.preventDefault();
+        const message = messageInput.value.trim();
+        if (!message) {
+          status.textContent = 'Enter a message before submitting.';
+          return;
+        }
+
+        const button = form.querySelector('button[type="submit"]');
+        const normal = form.querySelector('[data-feedback-submit-label]');
+        const loading = form.querySelector('[data-feedback-submit-loading]');
+        button.disabled = true;
+        normal.classList.add('hidden');
+        loading.classList.remove('hidden');
+        loading.classList.add('inline-flex');
+
+        const submittedSource = names[sourceInput.value] ? sourceInput.value : 'portal';
+        const submittedCategory = categoryInput ? categoryInput.value : 'General comment';
+        const data = new FormData(form);
+        data.set('source', submittedSource);
+        data.set('category', submittedCategory);
+        data.set('message', message);
+        try {
+          const response = await fetch('{{ url_for("feedback") }}', {
+            method: 'POST',
+            headers: { 'X-CSRF-Token': csrfToken },
+            body: data
+          });
+          if (!response.ok) {
+            const body = await response.json();
+            status.textContent = body.error || 'Feedback failed.';
+            return;
+          }
+          form.reset();
+          sourceInput.value = submittedSource;
+          sourceLabel.textContent = names[submittedSource];
+          status.textContent = 'Feedback received.';
+          setTimeout(closeFeedback, 500);
+        } catch (error) {
+          status.textContent = 'Network error.';
+        } finally {
+          button.disabled = false;
+          normal.classList.remove('hidden');
+          loading.classList.add('hidden');
+          loading.classList.remove('inline-flex');
+        }
+      });
+    }());
+
+    (function () {
+      function sizeText(bytes) {
+        if (!bytes) return 'No file selected';
+        const units = ['B', 'KB', 'MB', 'GB'];
+        const i = Math.min(Math.floor(Math.log(bytes) / Math.log(1024)), units.length - 1);
+        return (bytes / Math.pow(1024, i)).toFixed(i ? 1 : 0) + ' ' + units[i];
+      }
+
+      document.querySelectorAll('[data-dropzone]').forEach(function (zone) {
+        if (zone.dataset.customUploadHandling) return;
+        const input = zone.querySelector('input[type="file"]');
+        const name = zone.querySelector('[data-file-name]');
+        const size = zone.querySelector('[data-file-size]');
+        const browse = zone.querySelector('[data-browse-file]');
+        if (!input) return;
+
+        function update() {
+          const files = input.files ? Array.from(input.files) : [];
+          const file = files[0];
+          const hasFiles = files.length > 0;
+          zone.classList.toggle('has-file', hasFiles);
+          if (name) {
+            if (!hasFiles) {
+              name.textContent = zone.dataset.emptyName || 'No file selected';
+            } else if (files.length === 1) {
+              name.textContent = file.name;
+            } else {
+              name.textContent = files.length + ' files selected';
+            }
+          }
+          if (size) {
+            if (!hasFiles) {
+              size.textContent = zone.dataset.emptySize || 'Waiting';
+            } else {
+              const totalBytes = files.reduce(function (sum, item) { return sum + (item.size || 0); }, 0);
+              size.textContent = files.length === 1 ? sizeText(file.size) : sizeText(totalBytes) + ' total';
+            }
+          }
+        }
+
+        zone.addEventListener('click', function (event) {
+          if (!event.target.closest('button')) input.click();
+        });
+        if (browse) browse.addEventListener('click', function (event) {
+          event.preventDefault();
+          input.click();
+        });
+        ['dragenter', 'dragover'].forEach(function (type) {
+          zone.addEventListener(type, function (event) {
+            event.preventDefault();
+            zone.classList.add('dropzone-active');
+          });
+        });
+        ['dragleave', 'drop'].forEach(function (type) {
+          zone.addEventListener(type, function (event) {
+            event.preventDefault();
+            zone.classList.remove('dropzone-active');
+          });
+        });
+        zone.addEventListener('drop', function (event) {
+          if (event.dataTransfer.files.length) {
+            input.files = event.dataTransfer.files;
+            update();
+          }
+        });
+        input.addEventListener('change', update);
+        update();
+      });
+
+      document.querySelectorAll('form[data-upload-form]').forEach(function (form) {
+        form.addEventListener('submit', function () {
+          const button = form.querySelector('[data-submit-button]');
+          if (!button) return;
+          button.disabled = true;
+          button.querySelector('[data-submit-label]')?.classList.add('hidden');
+          const loading = button.querySelector('[data-submit-loading]');
+          if (loading) {
+            loading.classList.remove('hidden');
+            loading.classList.add('inline-flex');
+          }
+        });
+      });
+
+      document.querySelectorAll('form[data-confirm]').forEach(function (form) {
+        form.addEventListener('submit', function (event) {
+          if (!confirm(form.dataset.confirm)) event.preventDefault();
+        });
+      });
+    }());
+  </script>
+</body>
+</html>

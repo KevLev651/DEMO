@@ -1,0 +1,273 @@
+{% extends 'base.html' %}
+{% set page_feedback_source = 'portal' %}
+
+{% block title %}Stellar Engineering Tools{% endblock %}
+
+{% block content %}
+<div class="space-y-5">
+  <section class="ui-panel rounded-lg p-4 sm:p-5">
+    <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+      <div>
+        <div class="flex items-center gap-3">
+          <img src="{{ url_for('static', filename='img/stellar-wordmark.png') }}" alt="Stellar Engineering logo" class="h-24 w-auto rounded border border-[var(--line)] bg-white object-contain p-2">
+          <div>
+            <h1 class="font-display text-2xl font-semibold tracking-tight sm:text-3xl">Process Tools</h1>
+            <p class="text-sm ui-muted">Internal tools built by the Process team for the Process team.</p>
+          </div>
+        </div>
+      </div>
+      <div class="rounded-lg border-2 border-[var(--action)] bg-[var(--action)]/10 p-4 max-w-xs w-full lg:w-auto">
+        <p class="text-sm font-bold text-[var(--action)] uppercase tracking-wide">Got a tedious task?</p>
+        <p class="mt-1 text-sm ui-muted leading-5">Have a repetitive workflow that could be automated into a tool? Tell us about it — we'll build it. Or you can try making your own tool—check out the demo below!</p>
+        <button
+          type="button"
+          id="requestToolBtn"
+          class="mt-3 w-full ui-button ui-button-primary"
+        >
+          Request a New Tool
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <section class="grid gap-4 lg:grid-cols-2">
+    {% for tool in tools %}
+      <article class="tool-card ui-panel rounded-lg">
+        <div class="border-b border-[var(--line)] p-4">
+          <div>
+            <div>
+              <h2 class="mt-1 font-display text-xl font-semibold">{{ tool.title }}</h2>
+              <p class="mt-1 text-sm ui-muted">{{ tool.short_summary }}</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="tool-card-body grid gap-4 p-4 md:grid-cols-[minmax(12rem,0.95fr)_minmax(16.5rem,0.72fr)]">
+          <div class="flex items-center justify-center overflow-hidden rounded-md border border-[var(--line)] {{ tool.image_surface }} {{ tool.image_padding }}" style="aspect-ratio: {{ tool.image_aspect }};">
+            <img src="{{ url_for('static', filename=tool.image) }}" alt="{{ tool.title }} preview" class="h-full w-full object-contain">
+          </div>
+          <div class="tool-card-actions flex min-h-full flex-col justify-center">
+            <div class="tool-action-grid">
+              {% if tool.launch_label == 'Coming Soon' %}
+                <button type="button" class="ui-button ui-button-compact ui-button-secondary" disabled>Coming Soon</button>
+              {% else %}
+                <a href="{{ tool.href }}" class="ui-button ui-button-compact ui-button-primary">{{ tool.launch_label|default('Launch Tool') }}</a>
+              {% endif %}
+              <button type="button" data-feedback-open data-feedback-source="{{ tool.slug }}" class="ui-button ui-button-compact ui-button-secondary">Send Feedback</button>
+              <button
+                type="button"
+                data-tool-info-open
+                data-tool-slug="{{ tool.slug }}"
+                class="ui-button ui-button-compact ui-button-secondary"
+              >
+                How It Works
+              </button>
+              <button
+                type="button"
+                data-tool-video-open
+                data-tool-slug="{{ tool.slug }}"
+                class="ui-button ui-button-compact ui-button-secondary"
+              >
+                Example Video
+              </button>
+            </div>
+          </div>
+        </div>
+      </article>
+    {% endfor %}
+  </section>
+
+</div>
+
+<div id="toolVideoModal" class="fixed inset-0 z-50 hidden h-full w-full bg-black text-white overflow-hidden">
+  <div class="flex h-full w-full flex-col">
+    <!-- Full-Width Dark Header -->
+    <div class="flex w-full items-center justify-between border-b border-white/10 px-6 py-5">
+      <div>
+        <p class="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400">Example Video</p>
+        <h2 id="toolVideoTitle" class="mt-1 font-display text-2xl font-medium tracking-tight">Tool</h2>
+        <p id="toolVideoFilename" class="mt-1 text-xs font-mono text-slate-500 hidden"></p>
+      </div>
+      <button type="button" id="toolVideoClose" class="rounded-full border border-white/20 bg-white/5 px-6 py-2 text-sm font-semibold transition-colors hover:bg-white/10">Close</button>
+    </div>
+
+    <!-- Centered Video Container -->
+    <div class="relative flex w-full flex-1 items-center justify-center overflow-hidden">
+      <video id="toolVideoPlayer" controls controlslist="nofullscreen" preload="metadata" class="hidden h-full max-h-full w-full max-w-full shadow-2xl">
+        <source id="toolVideoSource">
+      </video>
+      
+      <!-- Clean Missing State -->
+      <div id="toolVideoMissing" class="hidden w-full h-full">
+        <div class="flex h-full w-full flex-col items-center justify-center p-8 text-center">
+          <div class="mb-8 max-w-xl overflow-hidden rounded-xl border border-white/10 shadow-2xl">
+            <img id="toolVideoPoster" alt="" class="block h-auto w-full object-contain" style="aspect-ratio: 16/9;">
+          </div>
+          <h3 class="font-display text-3xl font-medium">Coming Soon</h3>
+          <p class="mt-4 max-w-sm text-lg leading-relaxed text-slate-400">We're currently preparing the example video for this tool. Please check back shortly.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="toolInfoModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-950/65 px-4">
+  <div class="ui-panel max-h-[86vh] w-full max-w-3xl overflow-auto rounded-lg shadow-xl">
+    <div class="flex items-start justify-between gap-4 border-b border-[var(--line)] px-5 py-4">
+      <div>
+        <p class="text-xs font-bold uppercase tracking-wide ui-muted">How this tool works</p>
+        <h2 id="toolInfoTitle" class="mt-1 font-display text-xl font-semibold">Tool</h2>
+      </div>
+      <button type="button" id="toolInfoClose" class="ui-button ui-button-secondary">Close</button>
+    </div>
+
+    <div class="space-y-4 px-5 py-4">
+      <div>
+        <h3 class="font-display text-base font-semibold">What it is and how to use it</h3>
+        <p id="toolInfoWhat" class="mt-2 text-sm leading-6 ui-muted"></p>
+      </div>
+      <div class="border-t border-[var(--line)] pt-4">
+        <h3 class="font-display text-base font-semibold">How the tool works behind the scenes</h3>
+        <p id="toolInfoCode" class="mt-2 text-sm leading-6 ui-muted"></p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  (function () {
+    const modal = document.getElementById('toolInfoModal');
+    const title = document.getElementById('toolInfoTitle');
+    const whatText = document.getElementById('toolInfoWhat');
+    const codeText = document.getElementById('toolInfoCode');
+    const close = document.getElementById('toolInfoClose');
+    const tools = {
+      {% for tool in tools %}
+        {{ tool.slug|tojson }}: {
+          title: {{ tool.title|tojson }},
+          what: {{ tool.what_how|tojson }},
+          code: {{ tool.behind_scenes|tojson }},
+          videoUrl: {{ tool.video.url|tojson }},
+          videoFilename: {{ tool.video.filename|tojson }},
+          videoMime: {{ tool.video.mime_type|tojson }},
+          poster: {{ url_for('static', filename=tool.image)|tojson }}
+        }{{ "," if not loop.last }}
+      {% endfor %}
+    };
+    let activeTool = null;
+
+    function openToolInfo(slug) {
+      activeTool = tools[slug];
+      if (!activeTool) return;
+      title.textContent = activeTool.title;
+      whatText.textContent = activeTool.what;
+      codeText.textContent = activeTool.code;
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    }
+
+    function closeToolInfo() {
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+      activeTool = null;
+    }
+
+    document.querySelectorAll('[data-tool-info-open]').forEach(function (button) {
+      button.addEventListener('click', function () {
+        openToolInfo(button.dataset.toolSlug);
+      });
+    });
+    close.addEventListener('click', closeToolInfo);
+    modal.addEventListener('click', function (event) {
+      if (event.target === modal) closeToolInfo();
+    });
+    document.addEventListener('keydown', function (event) {
+      if (event.key === 'Escape' && !modal.classList.contains('hidden')) {
+        closeToolInfo();
+      }
+    });
+  }());
+
+  (function () {
+    const modal = document.getElementById('toolVideoModal');
+    const title = document.getElementById('toolVideoTitle');
+    const filename = document.getElementById('toolVideoFilename');
+    const close = document.getElementById('toolVideoClose');
+    const video = document.getElementById('toolVideoPlayer');
+    const source = document.getElementById('toolVideoSource');
+    const missing = document.getElementById('toolVideoMissing');
+    const poster = document.getElementById('toolVideoPoster');
+    const tools = {
+      {% for tool in tools %}
+        {{ tool.slug|tojson }}: {
+          title: {{ tool.title|tojson }},
+          videoUrl: {{ tool.video.url|tojson }},
+          videoFilename: {{ tool.video.filename|tojson }},
+          videoMime: {{ tool.video.mime_type|tojson }},
+          poster: {{ url_for('static', filename=tool.image)|tojson }}
+        }{{ "," if not loop.last }}
+      {% endfor %}
+    };
+
+    function openVideo(slug) {
+      const tool = tools[slug];
+      if (!tool) return;
+      title.textContent = tool.title;
+      filename.textContent = tool.videoFilename || '';
+      poster.src = tool.poster;
+      poster.alt = tool.title + ' preview';
+      if (tool.videoUrl) {
+        source.src = tool.videoUrl;
+        source.type = tool.videoMime || '';
+        video.poster = tool.poster;
+        video.load();
+        video.classList.remove('hidden');
+        missing.classList.add('hidden');
+      } else {
+        video.pause();
+        source.removeAttribute('src');
+        source.removeAttribute('type');
+        video.removeAttribute('poster');
+        video.load();
+        video.classList.add('hidden');
+        missing.classList.remove('hidden');
+      }
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    }
+
+    function closeVideo() {
+      video.pause();
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+
+    document.querySelectorAll('[data-tool-video-open]').forEach(function (button) {
+      button.addEventListener('click', function () {
+        openVideo(button.dataset.toolSlug);
+      });
+    });
+    close.addEventListener('click', closeVideo);
+    modal.addEventListener('click', function (event) {
+      if (event.target === modal) closeVideo();
+    });
+    document.addEventListener('keydown', function (event) {
+      if (event.key === 'Escape' && !modal.classList.contains('hidden')) {
+        closeVideo();
+      }
+    });
+  }());
+</script>
+<script>
+  (function () {
+    document.getElementById('requestToolBtn').addEventListener('click', function () {
+      var cat = document.getElementById('feedbackCategory');
+      if (cat) {
+        cat.value = 'Tool Recommendation';
+        cat.dispatchEvent(new Event('change'));
+      }
+      openFeedback('portal');
+    });
+  }());
+</script>
+{% endblock %}

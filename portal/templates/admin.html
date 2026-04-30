@@ -1,0 +1,116 @@
+{% extends 'base.html' %}
+{% set show_feedback_ui = false %}
+
+{% block title %}Admin - Stellar Engineering{% endblock %}
+
+{% block content %}
+<div class="space-y-5">
+  <section class="ui-panel rounded-lg p-4 sm:p-5">
+    <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+      <div>
+        <p class="text-xs font-bold uppercase tracking-wide ui-muted">Admin</p>
+        <h1 class="mt-1 font-display text-2xl font-semibold">Portal management</h1>
+        <p class="mt-1 text-sm ui-muted">Feedback review and temporary job cleanup.</p>
+      </div>
+      <form action="{{ url_for('admin_logout') }}" method="post">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <button type="submit" class="ui-button ui-button-secondary">Logout</button>
+      </form>
+    </div>
+  </section>
+
+  <section class="grid gap-5 xl:grid-cols-[1fr_420px]">
+    <div class="space-y-5">
+      <section class="ui-panel rounded-lg">
+        <div class="flex flex-col gap-3 border-b border-[var(--line)] px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h2 class="font-display text-lg font-semibold">Feedback</h2>
+            <p class="text-sm ui-muted">Filter by source and delete individual entries.</p>
+          </div>
+          <div class="flex flex-wrap gap-1">
+            <a href="{{ url_for('admin_dashboard') }}" class="rounded-md px-3 py-2 text-sm font-semibold {{ 'bg-brand-600 text-white dark:text-slate-950' if current_filter == 'all' else 'ui-muted hover:bg-slate-100 dark:hover:bg-slate-800' }}">All</a>
+            {% for filter_key, filter_label in feedback_source_labels.items() %}
+              <a href="{{ url_for('admin_dashboard', filter=filter_key if filter_key != 'all' else None) }}" class="rounded-md px-3 py-2 text-sm font-semibold {{ 'bg-brand-600 text-white dark:text-slate-950' if current_filter == filter_key else 'ui-muted hover:bg-slate-100 dark:hover:bg-slate-800' }}">{{ filter_label }}</a>
+            {% endfor %}
+          </div>
+        </div>
+        <div class="divide-y divide-[var(--line)]">
+          {% if feedback %}
+            {% for entry in feedback %}
+              <div class="grid gap-3 p-4 lg:grid-cols-[120px_150px_1fr_auto] lg:items-start">
+                <div>
+                  <div class="text-xs font-bold uppercase tracking-wide ui-muted">Source</div>
+                  <div class="mt-1 text-sm font-semibold">{{ entry.source }}</div>
+                </div>
+                <div>
+                  <div class="text-xs font-bold uppercase tracking-wide ui-muted">Category</div>
+                  <div class="mt-1 text-sm font-semibold">{{ entry.category|default('Uncategorized', true) }}</div>
+                </div>
+                <div>
+                  <div class="font-mono text-xs ui-muted">{{ entry.timestamp }}</div>
+                  <p class="mt-1 text-sm">{{ entry.message }}</p>
+                </div>
+                <form action="{{ url_for('admin_delete_feedback', feedback_id=entry.id) }}" method="post" data-confirm="Delete this feedback entry?">
+                  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                  <button type="submit" class="ui-button ui-button-secondary">Delete</button>
+                </form>
+              </div>
+            {% endfor %}
+          {% else %}
+            <div class="p-4 text-sm ui-muted">No feedback entries for this filter.</div>
+          {% endif %}
+        </div>
+      </section>
+    </div>
+
+    <aside class="space-y-5">
+      <section class="ui-panel rounded-lg">
+        <div class="border-b border-[var(--line)] px-4 py-3">
+          <h2 class="font-display text-lg font-semibold">Job folders</h2>
+          <p class="text-sm ui-muted">Contents of `temporary_memory`.</p>
+        </div>
+        <div class="space-y-3 p-4">
+          <div class="grid gap-2 sm:grid-cols-2">
+            <form action="{{ url_for('admin_cleanup_jobs') }}" method="post">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <button type="submit" class="ui-button ui-button-primary w-full">Cleanup expired</button>
+            </form>
+            <form action="{{ url_for('admin_purge_jobs') }}" method="post" data-confirm="Delete all job folders?">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <button type="submit" class="ui-button ui-button-secondary w-full">Delete all</button>
+            </form>
+          </div>
+
+          {% if jobs %}
+            <div class="space-y-3">
+              {% for job in jobs %}
+                <div class="rounded-md border border-[var(--line)] p-3">
+                  <div class="flex items-start justify-between gap-3">
+                    <div class="min-w-0">
+                      <div class="truncate font-mono text-sm">{{ job.id }}</div>
+                      <div class="mt-1 text-xs ui-muted">{{ job.created }}</div>
+                    </div>
+                    <form action="{{ url_for('admin_delete_job', job_id=job.id) }}" method="post" data-confirm="Delete this job folder?">
+                      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                      <button type="submit" class="ui-button ui-button-secondary">Delete</button>
+                    </form>
+                  </div>
+                  <div class="mt-3 flex flex-wrap gap-1">
+                    {% for filename in job.files %}
+                      <span class="rounded border border-[var(--line)] px-2 py-1 text-xs ui-muted">{{ filename }}</span>
+                    {% else %}
+                      <span class="text-xs ui-muted">No files</span>
+                    {% endfor %}
+                  </div>
+                </div>
+              {% endfor %}
+            </div>
+          {% else %}
+            <div class="rounded-md border border-[var(--line)] p-3 text-sm ui-muted">No job folders found.</div>
+          {% endif %}
+        </div>
+      </section>
+    </aside>
+  </section>
+</div>
+{% endblock %}

@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ tool.title }} - Stellar Engineering{% endblock %}
+
+{% block content %}
+<div class="mx-auto max-w-4xl space-y-5">
+  <section class="ui-panel rounded-lg p-4 sm:p-5">
+    <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+      <div>
+        <p class="text-xs font-bold uppercase tracking-wide ui-muted">{{ tool.slug }}</p>
+        <h1 class="mt-1 font-display text-2xl font-semibold">{{ tool.title }}</h1>
+        <p class="mt-1 text-sm ui-muted">{{ tool.description }}</p>
+      </div>
+      <span class="w-max rounded-md border border-[var(--line)] px-3 py-2 text-sm font-semibold ui-muted">Coming soon</span>
+    </div>
+  </section>
+
+  <section class="ui-panel rounded-lg">
+    <div class="grid gap-4 p-4 md:grid-cols-[1fr_1.1fr] md:items-center">
+      <div class="flex items-center justify-center overflow-hidden rounded-md border border-[var(--line)] {{ tool.image_surface }} {{ tool.image_padding }}" style="aspect-ratio: {{ tool.image_aspect }};">
+        <img src="{{ url_for('static', filename=tool.image) }}" alt="{{ tool.title }} preview" class="h-full w-full object-contain">
+      </div>
+      <div>
+        <h2 class="font-display text-lg font-semibold">Revision X vs Revision Y</h2>
+        <p class="mt-2 text-sm ui-muted">This tool is reserved for comparing one PDF drawing revision against another PDF drawing revision.</p>
+        <div class="mt-4 flex flex-wrap gap-2">
+          <a href="{{ url_for('index') }}" class="ui-button ui-button-primary" aria-label="Back to home page">Back home</a>
+          <button type="button" data-feedback-open data-feedback-source="{{ tool.slug }}" class="ui-button ui-button-secondary">Feedback</button>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+{% endblock %}

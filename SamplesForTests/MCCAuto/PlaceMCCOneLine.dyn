@@ -1,0 +1,450 @@
+{
+  "Uuid": "04d17911-378c-4e49-bed7-5548f18d4346",
+  "IsCustomNode": false,
+  "Description": "claude1: geministepping bus dropdown + precise centering, plus test2's Excel pick, sheet pick, and motor placement. Motor positions are placeholder; tune the MOTOR LAYOUT constants once measurements are confirmed.",
+  "Name": "claude1",
+  "ElementResolver": {
+    "ResolutionMap": {}
+  },
+  "Inputs": [],
+  "Outputs": [],
+  "Nodes": [
+    {
+      "ConcreteType": "PythonNodeModels.PythonNode, PythonNodeModels",
+      "NodeType": "PythonScriptNode",
+      "Code": "import clr\nclr.AddReference('System.Windows.Forms')\n\nfrom System import Environment\nfrom System.Windows.Forms import (\n    OpenFileDialog, DialogResult, MessageBox,\n    MessageBoxButtons, MessageBoxIcon\n)\n\nMessageBox.Show(\n    'Select your MCC/Motor data excel sheet.\\n\\n'\n    'The workbook must contain a sheet named \"MCC Info\" '\n    'with columns: MCC, BUCKET, EQUIP ID, DESCRIPTION, '\n    'BUCKET TYPE, REVIT FAMILY, FAMILY TYPE.',\n    'claude1 - MCC One-Line Layout',\n    MessageBoxButtons.OK,\n    MessageBoxIcon.Information\n)\n\ndialog = OpenFileDialog()\ndialog.Title = 'Select your MCC/Motor data excel sheet'\ndialog.Filter = 'Excel workbooks (*.xlsm;*.xlsx)|*.xlsm;*.xlsx|All files (*.*)|*.*'\ndialog.CheckFileExists = True\ndialog.Multiselect = False\ndialog.RestoreDirectory = True\ndialog.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.Desktop)\n\nif dialog.ShowDialog() != DialogResult.OK:\n    raise Exception('Excel file selection was cancelled.')\n\nOUT = dialog.FileName\n",
+      "Engine": "CPython3",
+      "EngineName": "CPython3",
+      "VariableInputPorts": true,
+      "Id": "25a533eea8924b3da94a6596ea375b2a",
+      "Inputs": [],
+      "Outputs": [
+        {
+          "Id": "a7f59ae9c19645f48f8614048ad6d226",
+          "Name": "OUT",
+          "Description": "Selected Excel file path",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Disabled",
+      "Description": "Prompts for the Excel workbook path each time the Dynamo graph runs."
+    },
+    {
+      "ConcreteType": "CoreNodeModels.Input.DoubleInput, CoreNodeModels",
+      "NodeType": "NumberInputNode",
+      "NumberType": "Double",
+      "InputValue": 0.0,
+      "Id": "da2c02a731d54875a75a9f55bb67ac23",
+      "Inputs": [],
+      "Outputs": [
+        {
+          "Id": "73a269ced682431788e049073fedad6b",
+          "Name": "",
+          "Description": "Double",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Disabled",
+      "Description": "Header row index in the Excel sheet, 0-based."
+    },
+    {
+      "ConcreteType": "CoreNodeModels.Input.DoubleInput, CoreNodeModels",
+      "NodeType": "NumberInputNode",
+      "NumberType": "Double",
+      "InputValue": 6.0,
+      "Id": "b1d30625fb114cb1a50f41ccf2443f3f",
+      "Inputs": [],
+      "Outputs": [
+        {
+          "Id": "e465d5179901439289eed2697925082f",
+          "Name": "",
+          "Description": "Double",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Disabled",
+      "Description": "Fallback Family Type column index, 0-based."
+    },
+    {
+      "ConcreteType": "CoreNodeModels.Input.DoubleInput, CoreNodeModels",
+      "NodeType": "NumberInputNode",
+      "NumberType": "Double",
+      "InputValue": 0.0,
+      "Id": "f5d1b5f7c645491dac9cd0c7cfd219ac",
+      "Inputs": [],
+      "Outputs": [
+        {
+          "Id": "c807c6f0e30b4becaeef0d0737a215f5",
+          "Name": "",
+          "Description": "Double",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Disabled",
+      "Description": "Additive gap between motors in feet. Negative tightens packing."
+    },
+    {
+      "ConcreteType": "CoreNodeModels.Input.DoubleInput, CoreNodeModels",
+      "NodeType": "NumberInputNode",
+      "NumberType": "Double",
+      "InputValue": 0.0,
+      "Id": "3c0b0d51b0a34401ae841ba465880519",
+      "Inputs": [],
+      "Outputs": [
+        {
+          "Id": "12547cc69fa7419ca5021f2c7dd2c8f8",
+          "Name": "",
+          "Description": "Double",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Disabled",
+      "Description": "Unused (placement is offset-driven). Kept for graph compatibility."
+    },
+    {
+      "ConcreteType": "CoreNodeModels.Input.DoubleInput, CoreNodeModels",
+      "NodeType": "NumberInputNode",
+      "NumberType": "Double",
+      "InputValue": 0.0,
+      "Id": "844b6b717c024212af48750ee301c925",
+      "Inputs": [],
+      "Outputs": [
+        {
+          "Id": "f753c7a0896c4440af46a3c4a9a2919b",
+          "Name": "",
+          "Description": "Double",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Disabled",
+      "Description": "Unused (placement is offset-driven). Kept for graph compatibility."
+    },
+    {
+      "ConcreteType": "PythonNodeModels.PythonNode, PythonNodeModels",
+      "NodeType": "PythonScriptNode",
+      "Code": "import clr\nimport math\nimport posixpath\nimport re\nimport zipfile\nimport xml.etree.ElementTree as ET\n\nclr.AddReference('System.Windows.Forms')\nclr.AddReference('System.Drawing')\nclr.AddReference('RevitAPI')\nclr.AddReference('RevitServices')\nclr.AddReference('RevitNodes')\n\nfrom Autodesk.Revit.DB import *\nfrom RevitServices.Persistence import DocumentManager\nfrom RevitServices.Transactions import TransactionManager\nfrom System.Collections.Generic import List\nfrom System.Drawing import Point, Size\nfrom System.Windows.Forms import (\n    Form as WinForm, Label, ComboBox, Button, DialogResult,\n    FormStartPosition, ComboBoxStyle\n)\n\n# ===== claude1: geministepping (bus dropdown + precise centering) =====\n# combined with test2 (Excel pick, sheet pick, motor placement).\n# Motor placement is PLACEHOLDER - user will provide exact measurements\n# and they should be applied to the constants in the \"MOTOR LAYOUT\" block.\n\nMAIN_NS = 'http://schemas.openxmlformats.org/spreadsheetml/2006/main'\nREL_NS = 'http://schemas.openxmlformats.org/officeDocument/2006/relationships'\nPKG_REL_NS = 'http://schemas.openxmlformats.org/package/2006/relationships'\nDESIRED_SHEET = 'MCC Info'\n\n# ----- BUS PLACEMENT (from geministepping, do not change without remeasuring) -----\n# Offsets applied to titleblock center to land the bus where geministepping put it.\nBUS_CENTER_X_OFFSET = -1.4765603\nBUS_CENTER_Y_OFFSET = -1.302083\n\n# ----- MOTOR LAYOUT (PLACEHOLDER - tune after user provides measurements) -----\n# Vertical pitch between adjacent bus lines (5-1/4\" from test2).\nBUS_LINE_VERTICAL_SPACING_FT = 0.520833  # 0' 6-1/4\" measured between MCC bus lines\n# Y of the topmost bus line, measured DOWN from the bus family origin point\n# (i.e. from the placement coordinate, not from the bbox).\nTOP_LINE_OFFSET_FROM_BUS_ORIGIN_FT = 0.0\n# Where the motor band starts horizontally, measured from the bus origin.\nMOTOR_BAND_LEFT_FROM_ORIGIN_FT = 0.35\n# Width of the motor band in feet. From test2: 2' 0-13/16\" = 2.0677 ft.\nMOTOR_BAND_WIDTH_FT = 2.0677\n# Default additive gap between motors (negative tightens, positive loosens).\nMOTOR_DEFAULT_GAP_FT = 0.0\n\nMAX_BUS_LINES = 4\nBUS_OPTIONS = ['MCC_MB-Bus1', 'MCC_MB-Bus2', 'MCC_MB-Bus3', 'MCC_MB-Bus4']\n\n\n# ===== helpers =====\ndef qname(ns, name):\n    return '{%s}%s' % (ns, name)\n\n\ndef safe_text(value):\n    if value is None:\n        return ''\n    return str(value).strip()\n\n\ndef as_int(value, default=0):\n    try:\n        return int(round(float(value)))\n    except:\n        return default\n\n\ndef as_float(value, default=0.0):\n    try:\n        return float(value)\n    except:\n        return default\n\n\ndef normalize_name(value):\n    return ''.join(safe_text(value).lower().split())\n\n\ndef normalize_header(value):\n    return ' '.join(safe_text(value).replace('\\n', ' ').split()).upper()\n\n\ndef workbook_part_path(target):\n    target = safe_text(target).replace('\\\\', '/')\n    if target.startswith('/'):\n        return target.lstrip('/')\n    return posixpath.normpath(posixpath.join('xl', target))\n\n\ndef col_ref_to_index(cell_ref):\n    letters = ''.join(ch for ch in safe_text(cell_ref) if ch.isalpha()).upper()\n    if not letters:\n        return None\n    index = 0\n    for ch in letters:\n        index = index * 26 + (ord(ch) - ord('A') + 1)\n    return index - 1\n\n\ndef read_shared_strings(zf):\n    if 'xl/sharedStrings.xml' not in zf.namelist():\n        return []\n    root = ET.fromstring(zf.read('xl/sharedStrings.xml'))\n    strings = []\n    for si in root.findall(qname(MAIN_NS, 'si')):\n        text = ''.join(t.text or '' for t in si.iter(qname(MAIN_NS, 't')))\n        strings.append(text)\n    return strings\n\n\ndef cell_value(cell, shared_strings):\n    cell_type = cell.attrib.get('t', '')\n    if cell_type == 'inlineStr':\n        inline = cell.find(qname(MAIN_NS, 'is'))\n        if inline is None:\n            return ''\n        return ''.join(t.text or '' for t in inline.iter(qname(MAIN_NS, 't')))\n    value_node = cell.find(qname(MAIN_NS, 'v'))\n    if value_node is None or value_node.text is None:\n        return ''\n    raw = value_node.text\n    if cell_type == 's':\n        try:\n            return shared_strings[int(float(raw))]\n        except:\n            return raw\n    if cell_type == 'b':\n        return 'TRUE' if raw in ('1', 'true', 'TRUE') else 'FALSE'\n    return raw\n\n\ndef read_xlsx_sheet(file_path, desired_sheet):\n    if not zipfile.is_zipfile(file_path):\n        raise Exception('Selected workbook is not a .xlsx/.xlsm package. Save it as .xlsx or .xlsm and run again.')\n    with zipfile.ZipFile(file_path, 'r') as zf:\n        workbook_root = ET.fromstring(zf.read('xl/workbook.xml'))\n        rels_root = ET.fromstring(zf.read('xl/_rels/workbook.xml.rels'))\n        rel_targets = {}\n        for rel in rels_root.findall(qname(PKG_REL_NS, 'Relationship')):\n            rel_targets[rel.attrib.get('Id')] = rel.attrib.get('Target')\n        sheets = []\n        sheets_parent = workbook_root.find(qname(MAIN_NS, 'sheets'))\n        if sheets_parent is not None:\n            for sheet in sheets_parent.findall(qname(MAIN_NS, 'sheet')):\n                name = sheet.attrib.get('name', '')\n                rel_id = sheet.attrib.get(qname(REL_NS, 'id'))\n                target = rel_targets.get(rel_id)\n                if target:\n                    sheets.append((name, workbook_part_path(target)))\n        if not sheets:\n            raise Exception('No worksheets in workbook.')\n        wanted = normalize_name(desired_sheet)\n        selected = None\n        for name, target in sheets:\n            if normalize_name(name) == wanted:\n                selected = (name, target)\n                break\n        if selected is None:\n            for name, target in sheets:\n                normalized = normalize_name(name)\n                if 'mcc' in normalized and 'info' in normalized:\n                    selected = (name, target)\n                    break\n        if selected is None:\n            available = ', '.join(name for name, _t in sheets)\n            raise Exception('Could not find an MCC Info worksheet. Available: ' + available)\n        sheet_name, sheet_path = selected\n        shared_strings = read_shared_strings(zf)\n        sheet_root = ET.fromstring(zf.read(sheet_path))\n        rows = []\n        sheet_data = sheet_root.find(qname(MAIN_NS, 'sheetData'))\n        if sheet_data is not None:\n            for row in sheet_data.findall(qname(MAIN_NS, 'row')):\n                values = []\n                next_col = 0\n                for cell in row.findall(qname(MAIN_NS, 'c')):\n                    col_index = col_ref_to_index(cell.attrib.get('r', ''))\n                    if col_index is None:\n                        col_index = next_col\n                    while len(values) <= col_index:\n                        values.append('')\n                    values[col_index] = safe_text(cell_value(cell, shared_strings))\n                    next_col = col_index + 1\n                rows.append(values)\n        return rows, sheet_name, [name for name, _t in sheets]\n\n\ndef parse_int_text(value):\n    text = safe_text(value)\n    if not text:\n        return None\n    try:\n        return int(round(float(text)))\n    except:\n        match = re.search(r'-?\\d+', text)\n        if match:\n            try:\n                return int(match.group(0))\n            except:\n                return None\n    return None\n\n\ndef is_mcc_bus_type(type_name):\n    return re.match(r'^MCC_(MB|MLO)-Bus\\d+$', safe_text(type_name), re.IGNORECASE) is not None\n\n\ndef sheet_label(sheet):\n    try:\n        number = safe_text(sheet.SheetNumber)\n    except:\n        number = ''\n    try:\n        name = safe_text(sheet.Name)\n    except:\n        name = ''\n    if number and name:\n        return '{} - {}'.format(number, name)\n    return number or name or 'Unnamed Sheet'\n\n\ndef is_drawingsheet(view):\n    try:\n        return view is not None and view.ViewType == ViewType.DrawingSheet\n    except:\n        return False\n\n\ndef current_revit_view(doc):\n    try:\n        uidoc = DocumentManager.Instance.CurrentUIApplication.ActiveUIDocument\n        if uidoc is not None and uidoc.ActiveView is not None:\n            return uidoc.ActiveView\n    except:\n        pass\n    try:\n        return doc.ActiveView\n    except:\n        return None\n\n\ndef collect_target_sheets(doc):\n    sheets = []\n    for sheet in FilteredElementCollector(doc).OfClass(ViewSheet):\n        try:\n            if sheet.IsPlaceholder:\n                continue\n        except:\n            pass\n        sheets.append(sheet)\n    sheets.sort(key=lambda s: sheet_label(s))\n    return sheets\n\n\ndef same_element_id(left, right):\n    try:\n        return left is not None and right is not None and left.IntegerValue == right.IntegerValue\n    except:\n        return False\n\n\ndef prompt_for_sheet(doc, active_view, diag):\n    sheets = collect_target_sheets(doc)\n    if not sheets:\n        raise Exception('No non-placeholder sheets in this Revit model.')\n    form = WinForm()\n    form.Text = 'claude1 - select target sheet'\n    form.StartPosition = FormStartPosition.CenterScreen\n    form.Size = Size(560, 155)\n    form.MinimizeBox = False\n    form.MaximizeBox = False\n    label = Label()\n    label.Text = 'Select the sheet to place the MCC layout on. Active sheet preselected when detected.'\n    label.Location = Point(12, 12)\n    label.Size = Size(525, 22)\n    form.Controls.Add(label)\n    combo = ComboBox()\n    combo.DropDownStyle = ComboBoxStyle.DropDownList\n    combo.Location = Point(12, 40)\n    combo.Size = Size(525, 24)\n    selected_index = 0\n    for idx, sheet in enumerate(sheets):\n        combo.Items.Add(sheet_label(sheet))\n        if is_drawingsheet(active_view) and same_element_id(sheet.Id, active_view.Id):\n            selected_index = idx\n    combo.SelectedIndex = selected_index\n    form.Controls.Add(combo)\n    ok_button = Button()\n    ok_button.Text = 'OK'\n    ok_button.Location = Point(375, 78)\n    ok_button.Size = Size(75, 26)\n    form.Controls.Add(ok_button)\n    cancel_button = Button()\n    cancel_button.Text = 'Cancel'\n    cancel_button.Location = Point(462, 78)\n    cancel_button.Size = Size(75, 26)\n    form.Controls.Add(cancel_button)\n\n    def on_ok(s, a):\n        form.DialogResult = DialogResult.OK\n        form.Close()\n\n    def on_cancel(s, a):\n        form.DialogResult = DialogResult.Cancel\n        form.Close()\n\n    ok_button.Click += on_ok\n    cancel_button.Click += on_cancel\n    form.AcceptButton = ok_button\n    form.CancelButton = cancel_button\n    if form.ShowDialog() != DialogResult.OK:\n        raise Exception('Sheet selection cancelled.')\n    picked = sheets[combo.SelectedIndex]\n    diag.append('Sheet picked: {}'.format(sheet_label(picked)))\n    return picked\n\n\ndef titleblock_box(sheet, diag):\n    try:\n        titleblocks = (FilteredElementCollector(doc)\n                       .OwnedByView(sheet.Id)\n                       .OfCategory(BuiltInCategory.OST_TitleBlocks)\n                       .WhereElementIsNotElementType())\n        boxes = []\n        for titleblock in titleblocks:\n            box = titleblock.get_BoundingBox(sheet)\n            if box is not None:\n                boxes.append(box)\n        if boxes:\n            min_x = min(b.Min.X for b in boxes)\n            min_y = min(b.Min.Y for b in boxes)\n            max_x = max(b.Max.X for b in boxes)\n            max_y = max(b.Max.Y for b in boxes)\n            diag.append('Titleblock box Min=({},{}) Max=({},{})'.format(\n                round(min_x, 4), round(min_y, 4), round(max_x, 4), round(max_y, 4)))\n            return min_x, min_y, max_x, max_y\n    except Exception as ex:\n        diag.append('Could not read titleblock: {}'.format(ex))\n    return None\n\n\ndef bbox_dims(element, view):\n    try:\n        box = element.get_BoundingBox(view)\n        if box is None:\n            return None\n        width = abs(box.Max.X - box.Min.X)\n        height = abs(box.Max.Y - box.Min.Y)\n        center_x = (box.Min.X + box.Max.X) / 2.0\n        center_y = (box.Min.Y + box.Max.Y) / 2.0\n        return box, width, height, center_x, center_y\n    except:\n        return None\n\n\ndef _write(param, value):\n    try:\n        st = param.StorageType\n        if st == StorageType.String:\n            param.Set(value)\n            return True\n        if st == StorageType.Double:\n            param.Set(float(value))\n            return True\n        if st == StorageType.Integer:\n            param.Set(int(round(float(value))))\n            return True\n    except:\n        pass\n    return False\n\n\ndef set_param(element, param_name, value):\n    val = safe_text(value)\n    if val == '' or val.lower() == 'none':\n        return 'skip'\n    targets = [element]\n    type_id = element.GetTypeId()\n    if type_id != ElementId.InvalidElementId:\n        targets.append(doc.GetElement(type_id))\n    wanted = param_name.lower().replace(' ', '')\n    for t in targets:\n        if t is None:\n            continue\n        p = t.LookupParameter(param_name)\n        if p is not None and not p.IsReadOnly and _write(p, val):\n            return 'OK'\n        for c in t.Parameters:\n            if c.Definition.Name.lower().replace(' ', '') == wanted and not c.IsReadOnly:\n                if _write(c, val):\n                    return 'OK-fuzzy'\n    return 'FAIL'\n\n\ndef zoom_to_created(element_ids, diag):\n    if not element_ids:\n        return\n    try:\n        uidoc = DocumentManager.Instance.CurrentUIApplication.ActiveUIDocument\n        ids = List[ElementId]()\n        for eid in element_ids:\n            ids.Add(eid)\n        uidoc.ShowElements(ids)\n        diag.append('Zoomed to {} elements.'.format(len(element_ids)))\n    except Exception as ex:\n        diag.append('Zoom failed: {}'.format(ex))\n\n\n# ===== inputs =====\nexcel_file_path = safe_text(IN[0])\nheader_row_index = as_int(IN[1], 0)\nfamilytype_col_input = as_int(IN[2], 6)\nminimum_gap = as_float(IN[3], MOTOR_DEFAULT_GAP_FT)\n# IN[4]/IN[5] retained for graph compatibility but unused (placement is offset-driven).\n_unused_x = as_float(IN[4], 0.0)\n_unused_y = as_float(IN[5], 0.0)\n\ndoc = DocumentManager.Instance.CurrentDBDocument\ndiag = ['Excel file: {}'.format(excel_file_path)]\nplaced = []\nerrors = []\nparam_log = []\n\ntry:\n    excel_data, sheet_used, available_sheets = read_xlsx_sheet(excel_file_path, DESIRED_SHEET)\nexcept Exception as ex:\n    OUT = [placed, ['Excel read failed: {}'.format(ex)], param_log, diag]\nelse:\n    diag.append('Sheet used: {}'.format(sheet_used))\n    diag.append('Row count: {}'.format(len(excel_data)))\n\n    headers = []\n    if len(excel_data) > header_row_index:\n        headers = [safe_text(h) for h in excel_data[header_row_index]]\n        diag.append('Headers: {}'.format(headers))\n\n    header_lookup = {}\n    for idx, header in enumerate(headers):\n        key = normalize_header(header)\n        if key and key not in header_lookup:\n            header_lookup[key] = idx\n\n    def col_index(name):\n        return header_lookup.get(normalize_header(name), -1)\n\n    def read_cell(row, col):\n        if col < 0 or col >= len(row):\n            return ''\n        return safe_text(row[col])\n\n    familytype_col = col_index('FAMILY TYPE')\n    if familytype_col < 0:\n        familytype_col = familytype_col_input\n    diag.append('Family Type column: {}'.format(familytype_col))\n\n    PARAM_MAP = [\n        ('EQUIP ID', 'Equipment ID'),\n        ('MCC', 'MCC'),\n        ('BUCKET', 'Unit Number'),\n        ('BUCKET TYPE', 'Unit Type'),\n        ('DESCRIPTION', 'Equipment Description'),\n        ('SF', 'Space Factor'),\n        ('MOTOR HP', 'Motor HP'),\n        ('STARTER HP RATING', 'Elec Starter Size'),\n        ('STARTER SIZE', 'Elec Starter Size'),\n        ('VFD AMP RATING', 'VFD Output Current'),\n        ('CB TRIP', 'Breaker Trip'),\n        ('CB FRAME', 'Breaker Frame'),\n        ('FUSE TRIP', 'Fuse Trip'),\n        ('CABLE', 'Wire Size'),\n        ('NOTES', 'Notes'),\n    ]\n    col_map = []\n    seen_revit = set()\n    for excel_name, revit_name in PARAM_MAP:\n        idx = col_index(excel_name)\n        if idx >= 0 and revit_name not in seen_revit:\n            col_map.append((excel_name, revit_name, idx))\n            seen_revit.add(revit_name)\n    diag.append('Active parameter mappings: {}'.format(len(col_map)))\n\n    equip_col = col_index('EQUIP ID')\n\n\n    active = current_revit_view(doc)\n    target_sheet = prompt_for_sheet(doc, active, diag)\n\n    if not is_drawingsheet(target_sheet):\n        OUT = [placed, ['Target view is not a sheet.'], param_log, diag]\n    else:\n        devices = []\n        for source_index, row in enumerate(excel_data[header_row_index + 1:], start=header_row_index + 2):\n            if familytype_col >= len(row):\n                continue\n            type_name = read_cell(row, familytype_col)\n            if not type_name or type_name.lower() == 'none':\n                continue\n            if is_mcc_bus_type(type_name):\n                continue\n            devices.append({\n                'source_index': source_index,\n                'row': row,\n                'type_name': type_name,\n                'equipment_id': read_cell(row, equip_col) or '?',\n            })\n        diag.append('Device rows to place: {}'.format(len(devices)))\n        # ----- Auto-select MCC Bus family based on motor count -----\n        num_motors = len(devices)\n        # Capacity logic: Row 0 = 15, Row 1+ = 17 each\n        if num_motors <= 15:\n            chosen_bus = 'MCC_MB-Bus1'\n        elif num_motors <= 15 + 17:\n            chosen_bus = 'MCC_MB-Bus2'\n        elif num_motors <= 15 + 17 + 17:\n            chosen_bus = 'MCC_MB-Bus3'\n        else:\n            chosen_bus = 'MCC_MB-Bus4'\n        diag.append('Auto-selected bus: {} ({} motors)'.format(chosen_bus, num_motors))\n\n\n        collector = (FilteredElementCollector(doc)\n                     .OfClass(FamilySymbol)\n                     .OfCategory(BuiltInCategory.OST_GenericAnnotation))\n        symbol_dict = {}\n        for sym in collector:\n            symbol_dict[sym.get_Name()] = sym\n\n        if chosen_bus not in symbol_dict:\n            OUT = [placed, ['Bus family symbol not loaded: ' + chosen_bus], param_log, diag]\n        else:\n            tb_box = titleblock_box(target_sheet, diag)\n            if tb_box:\n                min_x, min_y, max_x, max_y = tb_box\n                center_x = (min_x + max_x) / 2.0\n                center_y = (min_y + max_y) / 2.0\n            else:\n                center_x, center_y = 0.0, 0.0\n                diag.append('No titleblock found, defaulting to (0,0).')\n\n            target_x = center_x + BUS_CENTER_X_OFFSET\n            target_y = center_y + BUS_CENTER_Y_OFFSET\n            diag.append('Bus origin target: ({}, {})'.format(round(target_x, 4), round(target_y, 4)))\n\n            placed_ids = []\n            transaction_started = False\n            try:\n                TransactionManager.Instance.EnsureInTransaction(doc)\n                transaction_started = True\n\n                bus_symbol = symbol_dict[chosen_bus]\n                if not bus_symbol.IsActive:\n                    bus_symbol.Activate()\n                    doc.Regenerate()\n                bus_inst = doc.Create.NewFamilyInstance(XYZ(target_x, target_y, 0), bus_symbol, target_sheet)\n                placed_ids.append(bus_inst.Id)\n                doc.Regenerate()\n\n                # Read actual bbox top and right after placement (test2 approach)\n                bus_top = target_y\n                bus_left = target_x - 1.0\n                bus_right = target_x + 1.0\n                bdims = bbox_dims(bus_inst, target_sheet)\n                if bdims:\n                    bb, bw, bh, bcx, bcy = bdims\n                    bus_top = bb.Max.Y\n                    bus_left = bb.Min.X\n                    bus_right = bb.Max.X\n                    diag.append('Bus bbox Min=({},{}) Max=({},{}) size=({}x{})'.format(\n                        round(bb.Min.X, 4), round(bb.Min.Y, 4),\n                        round(bb.Max.X, 4), round(bb.Max.Y, 4),\n                        round(bw, 4), round(bh, 4)))\n\n                placed.append('Bus {} placed at origin ({}, {}) | bus_top={}'.format(\n                    chosen_bus, round(target_x, 4), round(target_y, 4), round(bus_top, 4)))\n\n                m = re.match(r'^MCC_(?:MB|MLO)-Bus(\\d+)$', chosen_bus)\n                bus_line_count = int(m.group(1)) if m else 1\n                bus_line_count = max(1, min(MAX_BUS_LINES, bus_line_count))\n                diag.append('Bus line count: {}'.format(bus_line_count))\n\n                # ----- pre-measure unique motor symbols -----\n                unique_types = []\n                seen_types = set()\n                for d in devices:\n                    t = d['type_name']\n                    if t and t not in seen_types and t in symbol_dict:\n                        seen_types.add(t)\n                        unique_types.append(t)\n\n                max_motor_w = 0.0\n                max_motor_h = 0.0\n                motor_meta = {}\n                stage_x = (tb_box[2] if tb_box else target_x + 50.0) + 50.0\n                stage_y = (tb_box[1] if tb_box else target_y) - 50.0\n                for tname in unique_types:\n                    sym = symbol_dict[tname]\n                    if not sym.IsActive:\n                        sym.Activate()\n                        doc.Regenerate()\n                    try:\n                        ti = doc.Create.NewFamilyInstance(XYZ(stage_x, stage_y, 0), sym, target_sheet)\n                        doc.Regenerate()\n                        td = bbox_dims(ti, target_sheet)\n                        if td:\n                            bb, w, h, _, _ = td\n                            origin_to_left = bb.Min.X - stage_x\n                            origin_to_top = bb.Max.Y - stage_y\n                            motor_meta[tname] = (origin_to_left, origin_to_top, w, h)\n                            if w > max_motor_w:\n                                max_motor_w = w\n                            if h > max_motor_h:\n                                max_motor_h = h\n                            diag.append('Motor {}: w={} h={} otl={} ott={}'.format(\n                                tname, round(w, 4), round(h, 4),\n                                round(origin_to_left, 4), round(origin_to_top, 4)))\n                        doc.Delete(ti.Id)\n                        doc.Regenerate()\n                    except Exception as ex:\n                        diag.append('Could not measure {}: {}'.format(tname, ex))\n\n                if max_motor_w <= 0:\n                    max_motor_w = 0.28\n                if max_motor_h <= 0:\n                    max_motor_h = max_motor_w\n\n                # Fixed center-to-center spacing: 0' 1-9/16\" = 0.130208 ft\n                col_spacing = 0.130208\n                diag.append('col_spacing={} (max_w={} + gap={})'.format(\n                    round(col_spacing, 4), round(max_motor_w, 4), round(minimum_gap, 4)))\n\n                # Row 0: 15 motors. Row 1+: 17 motors (bus graphic has 2 built-in on left)\n                ROW0_CAPACITY   = 15\n                ROW1PLUS_CAPACITY = 17\n                # Row 1+ starts 2 motor spacings to the LEFT of row 0\n                ROW1PLUS_X_SHIFT = -2 * col_spacing\n                # Drop all motors down by 0' 2-15/16\" = 0.244792 ft\n                MOTOR_Y_DROP_FT = 0.244792\n                diag.append('motors per row (top/others): {}/{}'.format(ROW0_CAPACITY, ROW1PLUS_CAPACITY))\n\n                # Bus line Y positions from ACTUAL bbox top, exactly like test2.dyn\n                bus_line_ys = []\n                for i in range(bus_line_count):\n                    bus_line_ys.append(bus_top - i * BUS_LINE_VERTICAL_SPACING_FT)\n                diag.append('Bus line Ys (top->bottom): {}'.format([round(y, 4) for y in bus_line_ys]))\n\n                # Motor band X: from bus bbox right edge, shifted left to close gap to 1-9/16\"\n                # Measured gap was 2-7/8\", target 1-9/16\", shift = 1-5/16\" = 0.109375 ft\n                motor_band_left = bus_right - MOTOR_BAND_WIDTH_FT - 0.109375\n                diag.append('Motor band left X: {}'.format(round(motor_band_left, 4)))\n\n                # Per-row placement: row 0 = 15 motors at motor_band_left\n                #                    row 1+ = 17 motors, shifted 2 slots left\n                cur_line = 0\n                cur_col  = 0\n                for d in devices:\n                    type_name = d['type_name']\n                    if type_name not in symbol_dict:\n                        errors.append(\"Excel row {}: '{}' not loaded.\".format(d['source_index'], type_name))\n                        continue\n\n                    line_capacity = ROW0_CAPACITY if cur_line == 0 else ROW1PLUS_CAPACITY\n                    if cur_col >= line_capacity:\n                        cur_line += 1\n                        cur_col   = 0\n                        if cur_line >= bus_line_count:\n                            cur_line = bus_line_count - 1\n\n                    row_x_start = motor_band_left if cur_line == 0 else motor_band_left + ROW1PLUS_X_SHIFT\n                    bus_y       = bus_line_ys[cur_line]\n                    target_left = row_x_start + cur_col * col_spacing\n                    line        = cur_line\n                    col         = cur_col\n\n                    if type_name in motor_meta:\n                        otl, ott, _w, _h = motor_meta[type_name]\n                        place_x = target_left - otl\n                        place_y = bus_y - ott - MOTOR_Y_DROP_FT\n                    else:\n                        place_x = target_left\n                        place_y = bus_y - max_motor_h - MOTOR_Y_DROP_FT\n\n                    sym = symbol_dict[type_name]\n                    if not sym.IsActive:\n                        sym.Activate()\n                        doc.Regenerate()\n                    inst = doc.Create.NewFamilyInstance(XYZ(place_x, place_y, 0), sym, target_sheet)\n                    placed_ids.append(inst.Id)\n\n                    row_log = []\n                    for excel_name, revit_name, ci in col_map:\n                        cell = read_cell(d['row'], ci)\n                        result = set_param(inst, revit_name, cell)\n                        row_log.append(\"{} = '{}' [{}]\".format(revit_name, cell, result))\n                    param_log.extend(row_log)\n                    doc.Regenerate()\n                    placed.append('{} | {} line={} col={} target=({},{})'.format(\n                        d['equipment_id'], type_name, line, col,\n                        round(target_left, 4), round(bus_y, 4)))\n                    cur_col += 1\n            finally:\n                if transaction_started:\n                    TransactionManager.Instance.TransactionTaskDone()\n\n            zoom_to_created(placed_ids, diag)\n\n            try:\n                import os\n                log_dir = os.path.dirname(excel_file_path) if excel_file_path else 'C:\\\\Temp'\n                log_path = os.path.join(log_dir, 'mcc_diag_claude1.txt')\n                with open(log_path, 'w') as f:\n                    f.write('\\n'.join(str(x) for x in diag))\n                diag.append('Diag log: ' + log_path)\n            except Exception as ex:\n                diag.append('Could not write diag: {}'.format(ex))\n\n            OUT = [placed, errors, param_log, diag]\n",
+      "Engine": "CPython3",
+      "EngineName": "CPython3",
+      "VariableInputPorts": true,
+      "Id": "c2dc4a011b114e69a057db7cd910a6fb",
+      "Inputs": [
+        {
+          "Id": "51e6ae31329640d9a5bf75879ea46abf",
+          "Name": "IN[0]",
+          "Description": "Selected Excel workbook path",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Id": "aea4ca799a074b5ca5e9f7234271a2e9",
+          "Name": "IN[1]",
+          "Description": "Header row index",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Id": "698b4506089d463881971adf3d3d4e74",
+          "Name": "IN[2]",
+          "Description": "FamilyType column index",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Id": "2271559d62ed4a6c9c9d2c95ab361d5b",
+          "Name": "IN[3]",
+          "Description": "Minimum clear gap between placed symbols",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Id": "9a20e62dabd04c5ba245d304a9bdeb91",
+          "Name": "IN[4]",
+          "Description": "Unused",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Id": "ce270822056c4869b0558cda88ad6c05",
+          "Name": "IN[5]",
+          "Description": "Unused",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Outputs": [
+        {
+          "Id": "0b40969b4bc34394b75f3c34d5319e7f",
+          "Name": "OUT",
+          "Description": "Results [placed, errors, param_log, diag]",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Disabled",
+      "Description": "claude1 main: bus dropdown + precise centering, Excel-driven motor placement on the chosen bus."
+    }
+  ],
+  "Connectors": [
+    {
+      "Start": "73a269ced682431788e049073fedad6b",
+      "End": "aea4ca799a074b5ca5e9f7234271a2e9",
+      "Id": "0348e7e5f57a45c9bdafe1820d06bf94",
+      "IsHidden": "False"
+    },
+    {
+      "Start": "e465d5179901439289eed2697925082f",
+      "End": "698b4506089d463881971adf3d3d4e74",
+      "Id": "7dbdc6ae41034e4d9468022fe827e914",
+      "IsHidden": "False"
+    },
+    {
+      "Start": "c807c6f0e30b4becaeef0d0737a215f5",
+      "End": "2271559d62ed4a6c9c9d2c95ab361d5b",
+      "Id": "2033112a74b44ebc9b43cf3944786a0c",
+      "IsHidden": "False"
+    },
+    {
+      "Start": "12547cc69fa7419ca5021f2c7dd2c8f8",
+      "End": "9a20e62dabd04c5ba245d304a9bdeb91",
+      "Id": "f3ca37ee4636436ea57bcaa1090cb7aa",
+      "IsHidden": "False"
+    },
+    {
+      "Start": "f753c7a0896c4440af46a3c4a9a2919b",
+      "End": "ce270822056c4869b0558cda88ad6c05",
+      "Id": "338e6f5c98214af8b432d0044efd8607",
+      "IsHidden": "False"
+    },
+    {
+      "Start": "a7f59ae9c19645f48f8614048ad6d226",
+      "End": "51e6ae31329640d9a5bf75879ea46abf",
+      "Id": "fc270bb6e34f49ff85ad4dfc0b58ce89",
+      "IsHidden": "False"
+    }
+  ],
+  "Dependencies": [],
+  "NodeLibraryDependencies": [],
+  "Thumbnail": "",
+  "GraphDocumentationURL": null,
+  "ExtensionWorkspaceData": [
+    {
+      "ExtensionGuid": "28992e1d-abb9-417f-8b1b-05e053bee670",
+      "Name": "Properties",
+      "Version": "2.16",
+      "Data": {}
+    },
+    {
+      "ExtensionGuid": "DFBD9CC0-DB40-457A-939E-8C8555555A9D",
+      "Name": "Generative Design",
+      "Version": "3.0",
+      "Data": {}
+    }
+  ],
+  "Author": "",
+  "Linting": {
+    "activeLinter": "None",
+    "activeLinterId": "7b75fb44-43fd-4631-a878-29f4d5d8399a",
+    "warningCount": 0,
+    "errorCount": 0
+  },
+  "Bindings": [],
+  "View": {
+    "Dynamo": {
+      "ScaleFactor": 1.0,
+      "HasRunWithoutCrash": true,
+      "IsVisibleInDynamoLibrary": true,
+      "Version": "2.16.4.10216",
+      "RunType": "Manual",
+      "RunPeriod": "1000"
+    },
+    "Camera": {
+      "Name": "Background Preview",
+      "EyeX": 0.0,
+      "EyeY": 0.0,
+      "EyeZ": 0.0,
+      "LookX": 0.0,
+      "LookY": 0.0,
+      "LookZ": 0.0,
+      "UpX": 0.0,
+      "UpY": 0.0,
+      "UpZ": 0.0
+    },
+    "ConnectorPins": [],
+    "NodeViews": [
+      {
+        "Name": "Header Row Index",
+        "ShowGeometry": true,
+        "Id": "da2c02a731d54875a75a9f55bb67ac23",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "X": -520.0,
+        "Y": 300.0
+      },
+      {
+        "Name": "Family Type Column",
+        "ShowGeometry": true,
+        "Id": "b1d30625fb114cb1a50f41ccf2443f3f",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "X": -520.0,
+        "Y": 425.0
+      },
+      {
+        "Name": "Motor Gap (additive ft)",
+        "ShowGeometry": true,
+        "Id": "f5d1b5f7c645491dac9cd0c7cfd219ac",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "X": -520.0,
+        "Y": 550.0
+      },
+      {
+        "Name": "Unused 1",
+        "ShowGeometry": true,
+        "Id": "3c0b0d51b0a34401ae841ba465880519",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "X": -520.0,
+        "Y": 675.0
+      },
+      {
+        "Name": "Unused 2",
+        "ShowGeometry": true,
+        "Id": "844b6b717c024212af48750ee301c925",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "X": -520.0,
+        "Y": 800.0
+      },
+      {
+        "Name": "claude1 - place bus + motors",
+        "ShowGeometry": true,
+        "Id": "c2dc4a011b114e69a057db7cd910a6fb",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "X": 40.0,
+        "Y": 275.0
+      },
+      {
+        "Name": "Pick Excel File",
+        "ShowGeometry": true,
+        "Id": "25a533eea8924b3da94a6596ea375b2a",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "X": -520.0,
+        "Y": 60.0
+      }
+    ],
+    "Annotations": [
+      {
+        "Id": "d0b6874edaf041e281eaa7790b6b9dac",
+        "Title": "1. Pick workbook",
+        "DescriptionText": null,
+        "IsExpanded": true,
+        "WidthAdjustment": 0.0,
+        "HeightAdjustment": 0.0,
+        "Nodes": [
+          "25a533eea8924b3da94a6596ea375b2a"
+        ],
+        "HasNestedGroups": false,
+        "Left": -560.0,
+        "Top": 10.0,
+        "Width": 315.0,
+        "Height": 175.0,
+        "FontSize": 24.0,
+        "InitialTop": 10.0,
+        "InitialHeight": 175.0,
+        "TextblockHeight": 0.0,
+        "Background": "#FFD7EAF8"
+      },
+      {
+        "Id": "cacbecfe29ba4198b698fd5ee5a023be",
+        "Title": "2. Layout controls",
+        "DescriptionText": null,
+        "IsExpanded": true,
+        "WidthAdjustment": 0.0,
+        "HeightAdjustment": 0.0,
+        "Nodes": [
+          "da2c02a731d54875a75a9f55bb67ac23",
+          "b1d30625fb114cb1a50f41ccf2443f3f",
+          "f5d1b5f7c645491dac9cd0c7cfd219ac",
+          "3c0b0d51b0a34401ae841ba465880519",
+          "844b6b717c024212af48750ee301c925"
+        ],
+        "HasNestedGroups": false,
+        "Left": -560.0,
+        "Top": 250.0,
+        "Width": 345.0,
+        "Height": 705.0,
+        "FontSize": 24.0,
+        "InitialTop": 250.0,
+        "InitialHeight": 705.0,
+        "TextblockHeight": 0.0,
+        "Background": "#FFFFF4CC"
+      },
+      {
+        "Id": "ee75314dd01f4ee8bd4749235bf297a7",
+        "Title": "3. Pick bus + sheet, place bus precisely, place motors",
+        "DescriptionText": null,
+        "IsExpanded": true,
+        "WidthAdjustment": 0.0,
+        "HeightAdjustment": 0.0,
+        "Nodes": [
+          "c2dc4a011b114e69a057db7cd910a6fb"
+        ],
+        "HasNestedGroups": false,
+        "Left": 0.0,
+        "Top": 225.0,
+        "Width": 500.0,
+        "Height": 460.0,
+        "FontSize": 24.0,
+        "InitialTop": 225.0,
+        "InitialHeight": 460.0,
+        "TextblockHeight": 0.0,
+        "Background": "#FFD8EAD3"
+      }
+    ],
+    "X": 351.8416520388177,
+    "Y": 102.68308924025109,
+    "Zoom": 0.48415498653945954
+  }
+}

@@ -1,0 +1,154 @@
+{% extends 'base.html' %}
+{% set show_feedback_ui = true %}
+{% set page_feedback_source = 'portal' %}
+
+{% block title %}Vision – Stellar Process Tools{% endblock %}
+
+{% block content %}
+<div class="space-y-12 max-w-5xl mx-auto pb-20">
+
+  <!-- Mission Section -->
+  <section class="ui-panel rounded-2xl overflow-hidden border-0 shadow-2xl bg-gradient-to-br from-slate-900 via-slate-900 to-slate-800 text-white">
+    <div class="flex">
+      <div class="w-2 shrink-0 bg-gradient-to-b from-[var(--action)] to-cyan-500"></div>
+      <div class="p-10 sm:p-14">
+        <p class="text-xs font-black uppercase tracking-[0.3em] text-[var(--action)]">Strategic Internal Portal</p>
+        <h1 class="mt-6 font-display text-5xl font-bold tracking-tight sm:text-7xl">The Process Toolbox</h1>
+        <p class="mt-8 text-2xl font-semibold leading-relaxed text-slate-200">
+          A high-performance ecosystem engineered to consolidate institutional knowledge and eliminate workflow friction. 
+          Immediate, professional-grade automation accessible to the entire team.
+        </p>
+        
+        <div class="mt-10 grid gap-10 md:grid-cols-2 text-lg font-medium leading-relaxed text-slate-300">
+          <p>
+            Most teams possess significant untapped automation capability. This portal centralizes those scattered assets into a single, version-controlled hub that ensures our collective expertise is preserved and accessible.
+          </p>
+          <p>
+            By wrapping complex backend logic in a sleek, intuitive interface, we empower every engineer to leverage the full power of the team's shared technology stack in their daily execution.
+          </p>
+        </div>
+
+        <div class="mt-12 flex flex-wrap gap-5">
+          <a href="{{ url_for('index') }}" class="ui-button ui-button-primary px-10 py-4 text-lg font-bold shadow-lg shadow-[var(--action)]/20">Explore the Toolbox</a>
+          <button type="button" data-feedback-open data-feedback-source="portal" class="ui-button ui-button-secondary px-8 py-4 text-lg font-bold border-white/20 hover:bg-white/10">Provide Feedback</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Vision & Strategy -->
+  <section class="grid gap-8 md:grid-cols-2">
+    <div class="ui-panel rounded-2xl p-10 bg-slate-900 text-white shadow-xl">
+      <h2 class="font-display text-4xl font-bold">The Vision</h2>
+      <p class="mt-6 text-lg font-semibold leading-relaxed text-slate-300">
+        This is a bespoke enterprise platform—similar to SAP or Salesforce—engineered exclusively for our workflows. A custom hub that evolves in real-time to match our operational needs without vendor limitations.
+      </p>
+      <div class="mt-8 p-6 rounded-xl bg-[var(--action)]/10 border-2 border-[var(--action)]/30 shadow-inner">
+        <p class="text-lg font-black text-[var(--action)] uppercase tracking-wider">The Strategic Roadmap</p>
+        <p class="mt-3 text-xl font-bold leading-relaxed text-white">
+          Our immediate priority is the delivery of a <strong>clean, reliable toolbox</strong>. Once this foundation is solid, our expansion is limited only by the team's imagination.
+        </p>
+      </div>
+    </div>
+
+    <div class="ui-panel rounded-2xl p-10 bg-slate-900 text-white shadow-xl">
+      <h2 class="font-display text-4xl font-bold">Why It Exists</h2>
+      <ul class="mt-8 space-y-6">
+        <li class="flex gap-5">
+          <div class="mt-1 h-8 w-8 shrink-0 rounded-full bg-emerald-500/20 flex items-center justify-center text-emerald-400 border border-emerald-500/30">
+            <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+          </div>
+          <div>
+            <span class="block font-bold text-xl">Eliminate Manual Effort</span>
+            <span class="block text-base font-semibold text-slate-400 mt-2">Compressing hours of repetitive tasks into instantaneous outputs.</span>
+          </div>
+        </li>
+        <li class="flex gap-5">
+          <div class="mt-1 h-8 w-8 shrink-0 rounded-full bg-blue-500/20 flex items-center justify-center text-blue-400 border border-blue-500/30">
+            <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+          </div>
+          <div>
+            <span class="block font-bold text-xl">Democratize Technology</span>
+            <span class="block text-base font-semibold text-slate-400 mt-2">Removing local barriers so anyone can run professional scripts from any machine.</span>
+          </div>
+        </li>
+        <li class="flex gap-5">
+          <div class="mt-1 h-8 w-8 shrink-0 rounded-full bg-purple-500/20 flex items-center justify-center text-purple-400 border border-purple-500/30">
+            <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+          </div>
+          <div>
+            <span class="block font-bold text-xl">Capture Expertise</span>
+            <span class="block text-base font-semibold text-slate-400 mt-2">Embedding elite workflow logic directly into the team's shared toolkit.</span>
+          </div>
+        </li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- Future Potential -->
+  <section class="ui-panel rounded-2xl p-10 sm:p-14 bg-slate-900 text-white shadow-2xl">
+    <div class="flex items-center justify-between border-b border-white/10 pb-8">
+      <div>
+        <h2 class="font-display text-4xl font-bold">Future Potential</h2>
+        <p class="mt-2 text-lg font-semibold text-slate-400">Strategic extensions to amplify team output.</p>
+      </div>
+    </div>
+    
+    <div class="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+      <div class="group p-6 rounded-2xl border-2 border-white/5 bg-white/5 hover:border-[var(--action)]/50 hover:bg-[var(--action)]/10 transition-all duration-300">
+        <h3 class="font-bold text-lg">Standards & Templates</h3>
+        <p class="mt-3 text-sm font-semibold leading-relaxed text-slate-400">Instant access to Stellar detail standards and control system templates.</p>
+      </div>
+      <div class="group p-6 rounded-2xl border-2 border-white/5 bg-white/5 hover:border-[var(--action)]/50 hover:bg-[var(--action)]/10 transition-all duration-300">
+        <h3 class="font-bold text-lg">Onboarding Resources</h3>
+        <p class="mt-3 text-sm font-semibold leading-relaxed text-slate-400">Embedded training and guides to accelerate professional development.</p>
+      </div>
+      <div class="group p-6 rounded-2xl border-2 border-white/5 bg-white/5 hover:border-[var(--action)]/50 hover:bg-[var(--action)]/10 transition-all duration-300">
+        <h3 class="font-bold text-lg">Best Practice Libraries</h3>
+        <p class="mt-3 text-sm font-semibold leading-relaxed text-slate-400">Searchable databases of lessons learned and controls architecture.</p>
+      </div>
+      <div class="group p-6 rounded-2xl border-2 border-white/5 bg-white/5 hover:border-[var(--action)]/50 hover:bg-[var(--action)]/10 transition-all duration-300">
+        <h3 class="font-bold text-lg">Project Integration</h3>
+        <p class="mt-3 text-sm font-semibold leading-relaxed text-slate-400">Live connections to active project folders for real-time data sync.</p>
+      </div>
+      <div class="group p-6 rounded-2xl border-2 border-white/5 bg-white/5 hover:border-[var(--action)]/50 hover:bg-[var(--action)]/10 transition-all duration-300">
+        <h3 class="font-bold text-lg">Vendor References</h3>
+        <p class="mt-3 text-sm font-semibold leading-relaxed text-slate-400">Optimized access to preferred vendor models and wiring diagrams.</p>
+      </div>
+      <div class="group p-6 rounded-2xl border-2 border-white/5 bg-white/5 hover:border-[var(--action)]/50 hover:bg-[var(--action)]/10 transition-all duration-300">
+        <h3 class="font-bold text-lg">Automated QA</h3>
+        <p class="mt-3 text-sm font-semibold leading-relaxed text-slate-400">Intelligent validation for deliverable accuracy and consistency.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Bottom Notice -->
+  <section class="ui-panel rounded-2xl overflow-hidden border-0 bg-white text-slate-900 shadow-2xl">
+    <div class="flex">
+      <div class="w-2 shrink-0 bg-amber-500"></div>
+      <div class="p-10 sm:p-14">
+        <h2 class="font-display text-3xl font-bold">A Note on Engineering Oversight</h2>
+        <p class="mt-6 text-xl font-bold leading-relaxed text-slate-700">
+          These tools are built to <strong>assist and accelerate</strong>, not to replace professional judgment. All automated outputs require meticulous review by a qualified engineer to ensure compliance and project integrity.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer Info -->
+  <div class="flex flex-col gap-8 sm:flex-row sm:items-center sm:justify-between px-4">
+    <div class="flex items-center gap-6">
+      <img src="{{ url_for('static', filename='img/stellar-wordmark.png') }}" alt="Stellar Engineering" class="h-16 w-auto rounded-xl border border-white/10 bg-white object-contain p-2 shadow-lg">
+      <div>
+        <p class="text-xl font-bold">Kevin Levasseur</p>
+        <p class="text-base font-bold text-slate-500 uppercase tracking-widest">Process Engineering — Lead</p>
+      </div>
+    </div>
+    <div class="text-base font-bold text-slate-500 sm:text-right">
+      QUESTIONS OR STRATEGIC IDEAS? <br class="hidden sm:block">
+      <a href="mailto:klevasseur@stellar.net" class="text-2xl font-black text-[var(--action)] hover:underline">klevasseur@stellar.net</a>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

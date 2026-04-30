@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+{% set show_feedback_ui = false %}
+
+{% block title %}{{ login_title|default('Login') }} - Stellar Engineering{% endblock %}
+
+{% block content %}
+<div class="mx-auto max-w-md">
+  <section class="ui-panel rounded-lg">
+    <div class="border-b border-[var(--line)] px-5 py-4">
+      <img src="{{ url_for('static', filename='img/stellar-wordmark.png') }}" alt="Stellar Engineering logo" class="mb-4 h-16 w-auto rounded border border-[var(--line)] bg-white object-contain p-2">
+      <h1 class="font-display text-xl font-semibold">{{ login_title|default('Private access') }}</h1>
+      <p class="mt-1 text-sm ui-muted">{{ login_description|default('Authorized Stellar Process users only.') }}</p>
+    </div>
+    <form action="{{ url_for(form_endpoint|default('team_login'), next=request.args.get('next')) }}" method="post" class="space-y-4 px-5 py-4" autocomplete="off">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      {% if error %}
+        <div class="rounded-md border border-rose-300 bg-rose-50 px-3 py-2 text-sm text-rose-900 dark:border-rose-800 dark:bg-rose-950 dark:text-rose-200">{{ error }}</div>
+      {% endif %}
+      <label class="block">
+        <span class="text-sm font-semibold">Name</span>
+        <input name="username" type="text" required class="ui-input mt-1" autocomplete="off">
+      </label>
+      <label class="block">
+        <span class="text-sm font-semibold">Password</span>
+        <input name="password" type="password" required class="ui-input mt-1" autocomplete="current-password">
+      </label>
+      <button type="submit" class="ui-button ui-button-primary w-full">{{ button_label|default('Sign in') }}</button>
+      {% if show_admin_access %}
+        <a href="{{ url_for('admin_login') }}" class="ui-button ui-button-secondary w-full">Admin login</a>
+      {% endif %}
+      {% if show_team_access %}
+        <a href="{{ url_for('team_login') }}" class="ui-button ui-button-secondary w-full">Team login</a>
+      {% endif %}
+    </form>
+  </section>
+</div>
+{% endblock %}

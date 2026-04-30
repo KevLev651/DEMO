@@ -1,0 +1,1247 @@
+{
+  "Uuid": "46340c6e-8c8c-4d38-9bd3-6db8df87be91",
+  "IsCustomNode": false,
+  "Description": "Part 2 v2 - Connector parameter sync with WinForms family move dialog.",
+  "Name": "Script2",
+  "ElementResolver": {
+    "ResolutionMap": {
+      "DesignScript.Builtin.Dictionary": {
+        "Key": "DesignScript.Builtin.Dictionary",
+        "Value": "DesignScriptBuiltin.dll"
+      }
+    }
+  },
+  "Inputs": [
+    {
+      "Id": "da5f7a9b0dda4a94810e4f092fdea61c",
+      "Name": "Relocate Connectors",
+      "Type": "boolean",
+      "Type2": "boolean",
+      "Value": "true",
+      "Description": "Selection between a true and false.",
+      "SelectedIndex": 0
+    }
+  ],
+  "Outputs": [],
+  "Nodes": [
+    {
+      "ConcreteType": "Dynamo.Graph.Nodes.CodeBlockNodeModel, DynamoCore",
+      "NodeType": "CodeBlockNode",
+      "Code": "// ═══════════════════════════════════════════════════════════════════════════════\n// GRAPH 2 — EXTRACTOR CONFIGURATION\n//\n// Feeds the Excel Data Extractor node with:\n//   OUT[0] Sheet name           → Extractor.IN[1]\n//   OUT[1] Excel→Revit mapping  → Extractor.IN[2]\n//            Full set matching the UM-Revit Mapping sheet.\n//            \"Frequency\" and \"Short Circuit Rating\" excluded — not in Main sheet.\n//   OUT[2] Header row index (4) → Extractor.IN[3]\n//   OUT[3] Primary filter       → Extractor.IN[4]\n//            Filters rows to known service abbreviations only.\n//   OUT[4] Supplementary filter → Extractor.IN[5]\n//            Excludes rows marked Obsolete.\n// ═══════════════════════════════════════════════════════════════════════════════\n\n\"Main\";\n // OUT[0] → Extractor.IN[1];\n\n// OUT[1] → Extractor.IN[2]\n// All columns present in the Main sheet that have a UM-Revit Mapping entry.\n// The second element of each pair is the Revit parameter name — used only as\n// a fallback label. The writer resolves all param names from the UM-Revit\n// Mapping sheet at runtime, so this list drives WHAT to pull from Excel.\n[\n    [\"Equipment ID\",                       \"Equipment ID\"],\n    [\"Equipment Description\",              \"Equipment Description\"],\n    [\"Connection ID\",                      \"Connection ID\"],\n    [\"Equipment Condition\",                \"Condition\"],\n    [\"Equipment Type\",                     \"Equipment Type\"],\n    [\"Functional Area\",                    \"Functional Area\"],\n    [\"Line Number\",                        \"Line Designator\"],\n    [\"Manufacturer\",                       \"OEM\"],\n    [\"Model Number\",                       \"Model Number\"],\n    [\"Vendor Drawing\",                     \"OEM Drawing\"],\n    [\"Power Source (Control Panel)\",       \"Power Source Control Panel\"],\n    [\"Connection Type\",                    \"Connection Type\"],\n    [\"Connection Size\",                    \"Nominal Diameter,Connection Size\"],\n    [\"Service Abbreviation\",               \"Service\"],\n    [\"Service Category\",                   \"System Type\"],\n    [\"OEM Device ID\",                      \"OEM Device ID\"],\n    [\"OEM Device Description\",             \"OEM Device Description\"],\n    [\"Installation Notes\",                 \"Installation Notes\"],\n    [\"Utility Status\",                     \"Utility Status\"],\n    [\"Mech - Diversity\",                   \"Mechanical Demand Factor\"],\n    [\"Mech - Fed From\",                    \"Fed From\"],\n    [\"Flow\",                               \"Flow-Unitless\"],\n    [\"Flow Unit\",                          \"Flow Unit\"],\n    [\"Temp (F°)\",                          \"Operating Temperature\"],\n    [\"Pressure\",                           \"Pressure-Unitless\"],\n    [\"Pressure Unit\",                      \"Pressure Unit\"],\n    [\"Isolation Valve Supplied By\",        \"Isolation Valve\"],\n    [\"Filter Regulator Supplied By\",       \"Filter Regulator\"],\n    [\"Air Handling- Intake Source Room\",   \"Source\"],\n    [\"Air Handling - Operation Mode\",      \"Air Operation Mode\"],\n    [\"Air Handling - Termination\",         \"Termination\"],\n    [\"Apparent Load (FLA)\",                \"Full Load Current\"],\n    [\"Elec - Diversity\",                   \"Elec Demand Factor\"],\n    [\"Horsepower\",                         \"Design Total Power\"],\n    [\"LMD Supplied By\",                    \"Local Motor Disconnect\"],\n    [\"Maximum Overcurrent Protection (A)\", \"Maximum Overcurrent Protection\"],\n    [\"Tele - IP Address\",                  \"Network Address\"],\n    [\"Tele - Subnet\",                      \"Subnet\"],\n    [\"Voltage & Phase\",                    \"Family Type,Neutral Required\"],\n    [\"Weight - Non-Operating (lbs)\",       \"Weight\"],\n    [\"Weight - Operating (lbs)\",           \"Operating Weight\"]\n];\n // OUT[1] → Extractor.IN[2];\n\n4;\n // OUT[2] → Extractor.IN[3]  (header row is row 4 in the Main sheet);\n\n// OUT[3] → Extractor.IN[4]  Primary filter: service abbreviation whitelist\n[\"Connection ID\",\n    [\n        \"CA\", \"DRN\", \"EL\", \"EX\", \"HH\",\n        \"INT\", \"PCW\", \"PHW\", \"TD\"\n    ]\n];\n // OUT[3];\n\n// OUT[4] → Extractor.IN[5]  Supplementary filter: exclude obsolete rows\n{\n    \"logic\": \"AND\",\n    \"filters\": [[\"Obsolete\", [\"\"]]]\n};\n // OUT[4];",
+      "Id": "e94bc789325d4274bff4224c29ea9288",
+      "Inputs": [],
+      "Outputs": [
+        {
+          "Id": "1c724aadab844a7cbbd1ecf7b8d03c6f",
+          "Name": "",
+          "Description": "Value of expression at line 16",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Id": "67598ab79d4b48efbc39bf26887ec7ba",
+          "Name": "",
+          "Description": "Value of expression at line 24",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Id": "5d42c00e975c4e07a957af292bf2833b",
+          "Name": "",
+          "Description": "Value of expression at line 69",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Id": "e9453459cc4d4f4489312a50f61931d8",
+          "Name": "",
+          "Description": "Value of expression at line 73",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Id": "52dbab4e7fd84e9091c58fc113b16b15",
+          "Name": "",
+          "Description": "Value of expression at line 82",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Disabled",
+      "Description": "Allows for DesignScript code to be authored directly"
+    },
+    {
+      "ConcreteType": "PythonNodeModels.PythonNode, PythonNodeModels",
+      "NodeType": "PythonScriptNode",
+      "Code": "# Excel Data Extractor ## Revit 2023 / Dynamo 2.16 / CPython3\r\n\r\n# Developed By - Chris Staker\r\n# v2.0.0 - Semantic Versioning. Output structured as a Dictionary for seamless downstream consumption. Fixed column name casing bug.\r\n\r\nimport sys\r\nimport os\r\nimport ctypes\r\n\r\n# Add custom Python support packages path\r\n# v1.0.0 (Kevin branch) - fixed sys.path for multi-machine support\r\n_pkg_paths = [\r\n    r\"C:\\Dynamo\\2.16\\Python Support Pckg\",\r\n    r\"K:\\CAD\\_Revit2023\\Add_Ins\\Python Support Pckg\",\r\n]\r\nfor _p in _pkg_paths:\r\n    import os as _os\r\n    if _os.path.isdir(_p) and _p not in sys.path:\r\n        sys.path.insert(0, _p)\r\n        break\r\n\r\ntry:\r\n    from openpyxl import load_workbook\r\nexcept ImportError:\r\n    raise ImportError(\r\n        \"openpyxl not found. The Python Support Package must be installed at one of:\\n\"\r\n        \"  C:\\\\Dynamo\\\\2.16\\\\Python Support Pckg\\n\"\r\n        \"  K:\\\\CAD\\\\_Revit2023\\\\Add_Ins\\\\Python Support Pckg\\n\"\r\n        \"Ask your BIM manager to set up the Python Support Package on this machine.\"\r\n    )\r\n\r\n# Get inputs from Dynamo\r\nfile_path = IN[0]\r\ntable_name = IN[1]\r\nexcel_to_revit_mapping_list = IN[2]\r\nheader_row_index_input = IN[3] if len(IN) > 3 else None\r\nprimary_filter_input = IN[4] if len(IN) > 4 else None\r\nsupplementary_filter_input = IN[5] if len(IN) > 5 else None\r\n\r\ndef show_popup_message(title, message, icon_type=0, button_type=0):\r\n    try:\r\n        return ctypes.windll.user32.MessageBoxW(0, message, title, icon_type | button_type)\r\n    except:\r\n        return 1\r\n\r\ndef matches_filter_value(cell_value, filter_value):\r\n    if cell_value is None:\r\n        cell_str = \"\"\r\n    else:\r\n        cell_str = str(cell_value).strip().lower()\r\n    filter_str = str(filter_value).strip().lower()\r\n    return filter_str in cell_str\r\n\r\ndef check_supplementary_filters(record, supp_filter_config, column_indices):\r\n    if not supp_filter_config or 'filters' not in supp_filter_config:\r\n        return True \r\n    \r\n    logic = supp_filter_config.get('logic', 'AND').upper()\r\n    filters = supp_filter_config['filters']\r\n    matches = []\r\n    \r\n    for filter_column, filter_values in filters:\r\n        column_lower = filter_column.strip().lower()\r\n        if column_lower not in column_indices:\r\n            matches.append(False)\r\n            continue\r\n        \r\n        cell_value = record.get(column_lower)\r\n        column_match = any(matches_filter_value(cell_value, fv) for fv in filter_values)\r\n        matches.append(column_match)\r\n    \r\n    return all(matches) if logic == 'AND' else any(matches)\r\n\r\ndef group_data_by_filters(data, primary_filter_config, supp_filter_config, column_indices):\r\n    if not primary_filter_config or len(primary_filter_config) != 2:\r\n        return {'All': data}\r\n    \r\n    primary_column, primary_values = primary_filter_config\r\n    primary_column_lower = primary_column.strip().lower()\r\n    \r\n    if primary_column_lower not in column_indices:\r\n        return {'All': data}\r\n    \r\n    grouped = {filter_val: [] for filter_val in primary_values}\r\n    grouped['Other'] = []\r\n    \r\n    for record in data:\r\n        cell_value = record.get(primary_column_lower)\r\n        matched_group = None\r\n        \r\n        for filter_val in primary_values:\r\n            if matches_filter_value(cell_value, filter_val):\r\n                matched_group = filter_val\r\n                break\r\n        \r\n        if matched_group is None:\r\n            grouped['Other'].append(record)\r\n            continue\r\n        \r\n        if check_supplementary_filters(record, supp_filter_config, column_indices):\r\n            grouped[matched_group].append(record)\r\n        else:\r\n            grouped['Other'].append(record)\r\n            \r\n    return grouped\r\n\r\ndef build_output_structure(grouped_data, formatted_mapping):\r\n    flat_data = []\r\n    log_entries = []\r\n    \r\n    sorted_groups = sorted([k for k in grouped_data.keys() if k != 'Other'])\r\n    if 'Other' in grouped_data:\r\n        sorted_groups.append('Other')\r\n    \r\n    for idx, group_name in enumerate(sorted_groups):\r\n        group_data = grouped_data[group_name]\r\n        if group_data:\r\n            flat_data.extend(group_data)\r\n            log_entries.append({\r\n                'Group': group_name,\r\n                'Count': len(group_data),\r\n                'Output Index': idx\r\n            })\r\n            \r\n    # Output cleanly as a dictionary for downstream nodes\r\n    return {\r\n        \"GroupedData\": grouped_data,\r\n        \"FlatData\": flat_data,\r\n        \"Mapping\": formatted_mapping,\r\n        \"Log\": log_entries\r\n    }\r\n\r\ndef read_excel_data(file_path, table_name, mapping_list, header_row_input=None, primary_filter=None, supp_filter=None):\r\n    if not os.path.exists(file_path):\r\n        return {\"Error\": f\"File not found at {file_path}\"}\r\n    \r\n    while True:\r\n        workbook = None\r\n        try:\r\n            try:\r\n                workbook = load_workbook(file_path, read_only=True, keep_vba=True, data_only=True)\r\n                if table_name not in workbook.sheetnames:\r\n                    return {\"Error\": f\"'{table_name}' sheet not found.\"}\r\n                            \r\n                worksheet = workbook[table_name]\r\n\r\n                def coerce_header_row_index(val):\r\n                    if val is None: return 1\r\n                    try:\r\n                        idx = int(float(str(val).strip()))\r\n                        return max(idx, 1)\r\n                    except: return 1\r\n\r\n                header_row_index = coerce_header_row_index(header_row_input)\r\n                max_rows = worksheet.max_row if worksheet.max_row is not None else 1\r\n                if header_row_index > max_rows: header_row_index = 1\r\n                            \r\n                headers = [str(cell.value).strip().lower() if cell.value else None for cell in worksheet[header_row_index]]\r\n                excel_columns = [item[0] for item in mapping_list]\r\n                column_indices = {}\r\n                            \r\n                for col in excel_columns:\r\n                    try:\r\n                        column_indices[col] = headers.index(col.strip().lower())\r\n                    except ValueError:\r\n                        return {\"Error\": f\"Column '{col}' not found.\"}\r\n                \r\n                all_column_indices = {header: idx for idx, header in enumerate(headers) if header}\r\n                data = []\r\n                \r\n                for row_num, row in enumerate(worksheet.iter_rows(min_row=header_row_index + 1), start=header_row_index + 1):\r\n                    record = {}\r\n                    for col_name, col_idx in all_column_indices.items():\r\n                        if col_idx < len(row):\r\n                            record[col_name] = row[col_idx].value\r\n                            \r\n                    if any(record.get(headers[column_indices[col]]) is not None for col in excel_columns if col in column_indices):\r\n                        data.append(record)\r\n                                \r\n            finally:\r\n                if workbook: workbook.close()\r\n            \r\n            grouped_data = group_data_by_filters(data, primary_filter, supp_filter, all_column_indices)\r\n            formatted_mapping = [{'Excel Header': pair[0], 'Revit Parameter': pair[1]} for pair in mapping_list]\r\n            return build_output_structure(grouped_data, formatted_mapping)\r\n        \r\n        except (PermissionError, OSError):\r\n            res = show_popup_message(\"File Access Error\", f\"Excel file '{os.path.basename(file_path)}' is open.\", 0, 53)\r\n            if res == 4: continue\r\n            else: return {\"Error\": \"Operation cancelled by user.\"}\r\n        except Exception as e:\r\n            return {\"Error\": str(e)}\r\n\r\nOUT = read_excel_data(file_path, table_name, excel_to_revit_mapping_list, header_row_index_input, primary_filter_input, supplementary_filter_input)",
+      "Engine": "CPython3",
+      "EngineName": "CPython3",
+      "VariableInputPorts": true,
+      "Id": "5023219ce9b64671a82ba45213f05620",
+      "Inputs": [
+        {
+          "Id": "fc6ab025d002421d92d705b9ecd8cfb4",
+          "Name": "IN[0]",
+          "Description": "",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Id": "999dc88325f54f3bb32c2445d1bb54fd",
+          "Name": "IN[1]",
+          "Description": "",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Id": "05a5fb0a246b448e963dffc2e657bd63",
+          "Name": "IN[2]",
+          "Description": "",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Id": "2acb6025317d4b528ada58348a69265c",
+          "Name": "IN[3]",
+          "Description": "",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Id": "8571418bd7044a39830269ccff734376",
+          "Name": "IN[4]",
+          "Description": "",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Id": "c1a06c691e624b67a56e5c026b2e646d",
+          "Name": "IN[5]",
+          "Description": "",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Outputs": [
+        {
+          "Id": "d3a7c07c165d4e7da1feef3306608c81",
+          "Name": "OUT",
+          "Description": "",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Disabled",
+      "Description": "Runs an embedded Python script."
+    },
+    {
+      "ConcreteType": "Dynamo.Graph.Nodes.CodeBlockNodeModel, DynamoCore",
+      "NodeType": "CodeBlockNode",
+      "Code": "// Graph 2 - Parameter Writer Config\n\n// OUT[0]: Categories\n[\n    \"Electrical Equipment\",\n    \"Data Devices\",\n    \"Mechanical Equipment\",\n    \"Generic Models\"\n];\n\n// OUT[1]: Key parameter\n\"Connection ID\";\n\n// OUT[2]: Mapping\n[\n    [\"Equipment ID\",          \"Equipment ID\"],\n    [\"Equipment Description\", \"Equipment Description\"],\n    [\"Connection ID\",         \"Connection ID\"],\n    [\"Equipment Condition\",   \"Condition\"],\n    [\"Voltage & Phase\",       \"System Voltage\"],\n    [\"Connection Size\",       \"Nominal Diameter\"],\n    [\"Connection Size\",       \"Connection Size\"],\n    [\"Functional Area\",       \"Functional Area\"],\n    [\"Line Number\",           \"Line Designator\"],\n    [\"Service\",               \"Service\"]\n];",
+      "Id": "9cb1b91b506640ac9345b41b25ecf4a6",
+      "Inputs": [],
+      "Outputs": [
+        {
+          "Id": "7e9b266cb6d8437da162ed69620624ec",
+          "Name": "",
+          "Description": "Value of expression at line 4",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Id": "03912d77039b4a499a07dfe96de593c7",
+          "Name": "",
+          "Description": "Value of expression at line 12",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Id": "90608d2a5cb94e38af5abdfe593ce1f7",
+          "Name": "",
+          "Description": "Value of expression at line 15",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Disabled",
+      "Description": "Allows for DesignScript code to be authored directly"
+    },
+    {
+      "ConcreteType": "PythonNodeModels.PythonNode, PythonNodeModels",
+      "NodeType": "PythonScriptNode",
+      "Code": "# Revit Parameter Writer\n# Revit 2023 / Dynamo 2.16 / CPython3\n# Developed By - Chris Staker & Kevin Levasseur\n# v9.8.0 - Fixed element_lookup: use existing_connectors instead of all_elements.\n#           Prevents Data Cubes (or any non-connector element with Connection ID set)\n#           from overwriting connector entries and blocking all parameter writes.\n\n# ═══════════════════════════════════════════════════════════════════════════════\n# SECTION 1 — IMPORTS & CLR REFERENCES\n# ═══════════════════════════════════════════════════════════════════════════════\n\nimport sys\nimport clr\n\nclr.AddReference('RevitAPI')\nfrom Autodesk.Revit.DB import (\n    FilteredElementCollector, StorageType, LocationPoint, XYZ,\n    BuiltInParameter, BuiltInCategory\n)\n\nclr.AddReference('RevitServices')\nimport RevitServices\nfrom RevitServices.Persistence import DocumentManager\nfrom RevitServices.Transactions import TransactionManager\n\nclr.AddReference('System.Windows.Forms')\nclr.AddReference('System.Drawing')\nimport System.Windows.Forms as WinForms\nimport System.Drawing as Drawing\n\n# ═══════════════════════════════════════════════════════════════════════════════\n# SECTION 2 — INPUTS\n#\n#   IN[0] extractor_output  — structured dict from Excel Data Extractor node\n#   IN[1] (unused)          — legacy raw_mapping_table, superseded by UM-Revit Mapping\n#   IN[2] categories_input  — list of Revit category name strings to collect from\n#   IN[3] key_parameter     — Revit parameter name used as the match key (Connection ID)\n#   IN[4] excel_file_path   — path to the Utility Matrix .xlsx file\n# ═══════════════════════════════════════════════════════════════════════════════\n\ndoc              = DocumentManager.Instance.CurrentDBDocument\nextractor_output = IN[0]\n# IN[1] intentionally not consumed — UM-Revit Mapping is read directly from Excel\ncategories_input = IN[2]\nkey_parameter    = IN[3]\nexcel_file_path  = IN[4] if len(IN) > 4 else None\n\n# ═══════════════════════════════════════════════════════════════════════════════\n# SECTION 3 — UTILITY HELPER FUNCTIONS\n# ═══════════════════════════════════════════════════════════════════════════════\n\ndef safe_get(obj, key, default=None):\n    \"\"\"Key-safe getter for Python dicts, IronPython dicts, and Dynamo dicts.\"\"\"\n    try:\n        if hasattr(obj, \"get\"):\n            val = obj.get(key)\n            return val if val is not None else default\n        elif hasattr(obj, \"ContainsKey\"):\n            if obj.ContainsKey(key):\n                val = obj[key]\n                return val if val is not None else default\n        elif hasattr(obj, \"Keys\"):\n            for k in obj.Keys:\n                if str(k) == str(key):\n                    val = obj.GetValueAtKey(k) if hasattr(obj, \"GetValueAtKey\") else obj[k]\n                    return val if val is not None else default\n    except:\n        pass\n    return default\n\ndef get_param_value(elem, name):\n    \"\"\"Returns raw parameter value (Double, Integer, or String).\"\"\"\n    p = elem.LookupParameter(name)\n    if not p: return None\n    if p.StorageType == StorageType.Double:   return p.AsDouble()\n    elif p.StorageType == StorageType.Integer: return p.AsInteger()\n    else:                                      return p.AsString()\n\ndef get_param_display_value(param):\n    \"\"\"Returns the display string for a Revit parameter.\"\"\"\n    if not param: return \"\"\n    st = param.StorageType\n    if st == StorageType.String:\n        return param.AsString() or \"\"\n    elif st == StorageType.Double:\n        try:\n            v = param.AsValueString()\n            if v: return v\n        except:\n            pass\n        return str(round(param.AsDouble(), 4)) if param.AsDouble() is not None else \"\"\n    elif st == StorageType.Integer:\n        return str(param.AsInteger())\n    elif st == StorageType.ElementId:\n        return str(param.AsElementId().IntegerValue)\n    return \"\"\n\ndef check_param_match(param, target_val):\n    \"\"\"Returns True if the Revit parameter's current value matches target_val.\"\"\"\n    if not param or target_val is None: return False\n    st         = param.StorageType\n    target_str = str(target_val).strip()\n    if st == StorageType.String:\n        return (param.AsString() or \"\").strip().upper() == target_str.upper()\n    elif st == StorageType.Double:\n        revit_str = param.AsValueString()\n        if revit_str:\n            if revit_str == target_str:        return True\n            if revit_str == target_str + '\"':  return True\n            if revit_str == target_str + \"'\":  return True\n        try:\n            if param.AsDouble() is not None and abs(param.AsDouble() - float(target_val)) < 0.0001:\n                return True\n        except:\n            pass\n        return False\n    elif st == StorageType.Integer:\n        try:   return param.AsInteger() == int(float(target_val))\n        except: return False\n    return False\n\ndef compare_and_set_param(param, value):\n    \"\"\"\n    Idempotent parameter setter. Compares using Revit's own stored value as\n    ground truth — writes the value then reads back to confirm whether Revit's\n    internal representation actually changed. This guarantees that running the\n    same Excel data twice produces zero updates on the second pass.\n\n    Returns (was_changed: bool, after_display_value: str).\n    \"\"\"\n    if not param or param.IsReadOnly or value is None:\n        return False, get_param_display_value(param)\n\n    st        = param.StorageType\n    value_str = str(value).strip()\n\n    try:\n        if st == StorageType.String:\n            # Normalize to stripped uppercase — that is exactly what we store.\n            before_norm = (param.AsString() or \"\").strip().upper()\n            target_norm = value_str.upper()\n            if before_norm == target_norm:\n                # Already exactly correct — no write needed.\n                return False, param.AsString() or \"\"\n            param.Set(target_norm)\n            # Read back what Revit actually stored (should be target_norm).\n            return True, param.AsString() or \"\"\n\n        elif st == StorageType.Double:\n            # Use Revit's own AsDouble() before/after as the ground truth.\n            # SetValueString handles unit strings (e.g. \"2\\\"\", \"3/4\\\"\") natively.\n            before = param.AsDouble()\n            if param.SetValueString(value_str):\n                after = param.AsDouble()\n                changed = (before is None) or (abs(before - after) > 0.0001)\n                return changed, get_param_display_value(param)\n            # SetValueString failed — try raw float (unitless params).\n            try:\n                target_float = float(value)\n                if before is not None and abs(before - target_float) < 0.0001:\n                    return False, get_param_display_value(param)\n                param.Set(target_float)\n                after = param.AsDouble()\n                changed = (before is None) or (abs(before - after) > 0.0001)\n                return changed, get_param_display_value(param)\n            except:\n                return False, get_param_display_value(param)\n\n        elif st == StorageType.Integer:\n            try:\n                target_int = int(float(value))\n                if param.AsInteger() == target_int:\n                    return False, get_param_display_value(param)\n                param.Set(target_int)\n                changed = param.AsInteger() == target_int\n                return changed, get_param_display_value(param)\n            except:\n                return False, get_param_display_value(param)\n\n        return False, get_param_display_value(param)\n    except:\n        return False, get_param_display_value(param)\n\ndef extract_flat_data(data_input):\n    \"\"\"Flattens Extractor output dict or nested list into a flat list of row dicts.\"\"\"\n    flat_data = safe_get(data_input, \"FlatData\")\n    if flat_data is not None:\n        return flat_data\n    is_list_like = (\n        isinstance(data_input, list) or\n        (hasattr(data_input, '__iter__') and\n         not isinstance(data_input, str) and\n         not hasattr(data_input, 'ContainsKey') and\n         not hasattr(data_input, 'keys'))\n    )\n    if is_list_like:\n        flat = []\n        for item in data_input:\n            is_item_list = (\n                isinstance(item, list) or\n                (hasattr(item, '__iter__') and\n                 not isinstance(item, str) and\n                 not hasattr(item, 'ContainsKey') and\n                 not hasattr(item, 'keys'))\n            )\n            if is_item_list:\n                flat.extend(extract_flat_data(item))\n            elif safe_get(item, \"Excel Header\") is None and safe_get(item, \"Log\") is None:\n                flat.append(item)\n        return flat\n    return (\n        [data_input]\n        if (hasattr(data_input, 'keys') or hasattr(data_input, 'ContainsKey'))\n        else []\n    )\n\ndef get_family_name(elem):\n    \"\"\"Returns the Revit family name string for a family instance.\"\"\"\n    try:\n        fn_p = elem.Symbol.get_Parameter(BuiltInParameter.SYMBOL_FAMILY_NAME_PARAM)\n        return fn_p.AsString() if fn_p else \"\"\n    except:\n        return \"\"\n\ndef build_param_map(elem_or_type):\n    \"\"\"Returns a lowercase-name → parameter dict for an element or type.\"\"\"\n    pm = {}\n    try:\n        for p in elem_or_type.Parameters:\n            try: pm[p.Definition.Name.strip().lower()] = p\n            except: pass\n    except:\n        pass\n    return pm\n\ndef get_representative_display(param_names, inst_param_map, type_param_map, preferred_name=None):\n    \"\"\"\n    Return the best display value for a mapped Excel column from the current\n    Revit element/type state.\n\n    preferred_name is used first when provided, then we fall back to the first\n    non-empty mapped parameter display, then finally the first mapped param.\n    \"\"\"\n    ordered_names = []\n    if preferred_name:\n        ordered_names.append(preferred_name.strip().lower())\n    ordered_names.extend(\n        n.strip().lower() for n in param_names\n        if n and n.strip().lower() not in ordered_names\n    )\n\n    first_display = \"\"\n    for name in ordered_names:\n        param = inst_param_map.get(name) or type_param_map.get(name)\n        display = get_param_display_value(param) if param is not None else \"\"\n        if first_display == \"\":\n            first_display = display\n        if str(display).strip() != \"\":\n            return display\n    return first_display\n\n# ═══════════════════════════════════════════════════════════════════════════════\n# SECTION 4 — UM-REVIT MAPPING READER\n#\n#   Reads the \"UM-Revit Mapping\" sheet from the Utility Matrix Excel file.\n#\n#   Sheet layout (1-indexed rows):\n#     Row 1-2 : notes / warnings\n#     Row 3   : column headers →\n#                 [Utility Matrix Column] [Revit Parameter]\n#                 [Process Data Cube - Generic] [Process Pipe Connector]\n#                 [Process Duct Connector - Round] [Process Electrical Connector]\n#     Row 4+  : data rows, one per Excel column\n#\n#   Returns a dict keyed by lowercase Excel column name:\n#     {\n#       \"connection size\": {\n#           \"params\":   [\"Nominal Diameter\", \"Connection Size\"],\n#           \"families\": [\"Process Pipe Connector\", \"Process Duct Connector - Round\", ...]\n#       }, ...\n#     }\n#   \"families\" lists the family column headers where the row has \"Yes\".\n#   An empty \"families\" list means no restriction — applies to all.\n# ═══════════════════════════════════════════════════════════════════════════════\n\ndef read_um_revit_mapping(file_path):\n    um_map = {}\n    if not file_path:\n        return um_map\n    try:\n        _pkg_paths = [\n            r\"C:\\Dynamo\\2.16\\Python Support Pckg\",\n            r\"K:\\CAD\\_Revit2023\\Add_Ins\\Python Support Pckg\",\n        ]\n        for _p in _pkg_paths:\n            import os as _os\n            if _os.path.isdir(_p) and _p not in sys.path:\n                sys.path.insert(0, _p)\n                break\n        from openpyxl import load_workbook\n        wb = load_workbook(file_path, read_only=True, data_only=True)\n        if 'UM-Revit Mapping' not in wb.sheetnames:\n            wb.close()\n            return um_map\n\n        ws = wb['UM-Revit Mapping']\n\n        # Row 3 (1-indexed) = header row — read family column names from cols 3+\n        header_row  = [c.value for c in next(ws.iter_rows(min_row=3, max_row=3))]\n        family_cols = [str(h).strip() for h in header_row[2:] if h]  # e.g. [\"Process Data Cube...\", ...]\n\n        # Rows 4+ are data\n        for row in ws.iter_rows(min_row=4, values_only=True):\n            excel_col   = row[0]\n            revit_param = row[1]\n            if not excel_col or not revit_param:\n                continue\n\n            key         = str(excel_col).strip().lower()\n            params_list = [p.strip() for p in str(revit_param).strip().split(',') if p.strip()]\n\n            # Applicable families: columns where cell value is \"Yes\" (case-insensitive)\n            applicable = []\n            for i, fam_name in enumerate(family_cols):\n                col_idx = i + 2\n                if col_idx < len(row):\n                    cell_val = row[col_idx]\n                    if cell_val and str(cell_val).strip().lower() == \"yes\":\n                        applicable.append(fam_name)\n\n            # Skip rows where no connector family has \"Yes\"\n            # (e.g. Short Circuit Rating — all No or NaN — should never be written)\n            if not applicable:\n                continue\n\n            if key not in um_map:\n                um_map[key] = {\"params\": [], \"families\": set()}\n            for p in params_list:\n                if p not in um_map[key][\"params\"]:\n                    um_map[key][\"params\"].append(p)\n            for f in applicable:\n                um_map[key][\"families\"].add(f)\n\n        wb.close()\n        for k in um_map:\n            um_map[k][\"families\"] = list(um_map[k][\"families\"])\n\n    except Exception:\n        pass  # Fall back to direct param name matching if sheet can't be read\n\n    return um_map\n\n\ndef family_is_applicable(elem_family_name, applicable_families):\n    \"\"\"\n    Returns True if elem_family_name matches any entry in applicable_families\n    (substring match, case-insensitive).\n    NOTE: applicable_families is never empty for valid mapping entries —\n    entries with no 'Yes' family are excluded by read_um_revit_mapping.\n    \"\"\"\n    if not applicable_families:\n        return True\n    efn = elem_family_name.strip().lower()\n    for fam in applicable_families:\n        fam_lower = fam.strip().lower()\n        if fam_lower in efn or efn in fam_lower:\n            return True\n    return False\n\n\n# ═══════════════════════════════════════════════════════════════════════════════\n# SECTION 5 — REVIT ELEMENT COLLECTION\n#\n#   Collects all family instances from the specified Revit categories,\n#   then filters to connector families only (family name contains \"Connector\").\n# ═══════════════════════════════════════════════════════════════════════════════\n\nall_doc_categories    = {c.Name: c for c in doc.Settings.Categories}\ncategories_to_process = categories_input if isinstance(categories_input, list) else [categories_input]\n\nall_elements = []\nfor item in categories_to_process:\n    cat_obj = None\n    if hasattr(item, 'Id'):\n        cat_obj = item\n    elif isinstance(item, str) and item in all_doc_categories:\n        cat_obj = all_doc_categories[item]\n    if cat_obj:\n        collector = (FilteredElementCollector(doc)\n                     .OfCategoryId(cat_obj.Id)\n                     .WhereElementIsNotElementType()\n                     .ToElements())\n        all_elements.extend(collector)\n\n# Only process connector family instances\nexisting_connectors = [\n    e for e in all_elements\n    if e.Symbol and \"Connector\" in (e.Symbol.Family.Name or \"\")\n]\n\n# ═══════════════════════════════════════════════════════════════════════════════\n# SECTION 6 — FAMILY SELECTION DIALOG\n#\n#   WinForms dialog with two independent checklist sections:\n#     MOVE   — reposition connector to its parent Data Cube location\n#     UPDATE — write Utility Matrix parameter values to Revit\n#   All items are unchecked by default. User can check any combination.\n#   Clicking Run returns (move_families: set, update_families: set).\n#   Clicking Cancel returns (None, None) and exits the script.\n# ═══════════════════════════════════════════════════════════════════════════════\n\n# Build family name → instance count map from collected connectors\nfamily_count = {}\nfor ec in existing_connectors:\n    try:\n        fn_p = ec.Symbol.get_Parameter(BuiltInParameter.SYMBOL_FAMILY_NAME_PARAM)\n        fn   = fn_p.AsString() if fn_p else \"Unknown\"\n        family_count[fn] = family_count.get(fn, 0) + 1\n    except:\n        pass\n\ndef show_family_selection_dialog(family_names_with_counts):\n    DEF_FONT   = Drawing.SystemFonts.DefaultFont.FontFamily\n    DARK_BG    = Drawing.Color.FromArgb(45, 45, 48)\n    DARKER_BG  = Drawing.Color.FromArgb(37, 37, 38)\n    DIVIDER    = Drawing.Color.FromArgb(80, 80, 80)\n    SECTION_BG = Drawing.Color.FromArgb(55, 55, 60)\n    WHITE      = Drawing.Color.White\n    GREY       = Drawing.Color.FromArgb(180, 180, 180)\n    BLUE       = Drawing.Color.FromArgb(0, 122, 204)\n    GREEN      = Drawing.Color.FromArgb(0, 153, 76)\n    RED        = Drawing.Color.FromArgb(160, 50, 50)\n    MID_GREY   = Drawing.Color.FromArgb(80, 80, 80)\n\n    ROW_H   = 22\n    MAX_VIS = 8\n    N       = len(family_names_with_counts)\n    CLB_H   = min(N, MAX_VIS) * ROW_H + 4\n    FORM_W  = 520\n    INNER_W = FORM_W - 32\n\n    form = WinForms.Form()\n    form.Text            = \"ConMan Part 2 — Connector Options\"\n    form.Width           = FORM_W\n    form.StartPosition   = WinForms.FormStartPosition.CenterScreen\n    form.FormBorderStyle = WinForms.FormBorderStyle.FixedDialog\n    form.MaximizeBox     = False\n    form.MinimizeBox     = False\n    form.BackColor       = DARK_BG\n\n    y = 14\n\n    def add_label(text, font_size, bold, color, y_pos, height=20, indent=16):\n        lbl           = WinForms.Label()\n        lbl.Text      = text\n        lbl.ForeColor = color\n        lbl.Font      = Drawing.Font(\n            DEF_FONT, font_size,\n            Drawing.FontStyle.Bold if bold else Drawing.FontStyle.Regular\n        )\n        lbl.Location = Drawing.Point(indent, y_pos)\n        lbl.Size     = Drawing.Size(INNER_W, height)\n        form.Controls.Add(lbl)\n\n    def add_separator(y_pos):\n        sep           = WinForms.Panel()\n        sep.BackColor = DIVIDER\n        sep.Location  = Drawing.Point(16, y_pos)\n        sep.Size      = Drawing.Size(INNER_W, 1)\n        form.Controls.Add(sep)\n\n    def add_section_header(text, y_pos):\n        bg           = WinForms.Panel()\n        bg.BackColor = SECTION_BG\n        bg.Location  = Drawing.Point(0, y_pos)\n        bg.Size      = Drawing.Size(FORM_W, 28)\n        form.Controls.Add(bg)\n        lbl           = WinForms.Label()\n        lbl.Text      = text\n        lbl.ForeColor = WHITE\n        lbl.Font      = Drawing.Font(DEF_FONT, 9, Drawing.FontStyle.Bold)\n        lbl.Location  = Drawing.Point(12, 5)\n        lbl.Size      = Drawing.Size(INNER_W, 18)\n        lbl.BackColor = Drawing.Color.Transparent\n        bg.Controls.Add(lbl)\n        return y_pos + 28\n\n    def add_clb(y_pos):\n        clb              = WinForms.CheckedListBox()\n        clb.Location     = Drawing.Point(16, y_pos)\n        clb.Width        = INNER_W\n        clb.Height       = CLB_H\n        clb.BackColor    = DARKER_BG\n        clb.ForeColor    = WHITE\n        clb.Font         = Drawing.Font(DEF_FONT, 9)\n        clb.BorderStyle  = getattr(WinForms.BorderStyle, \"None\")\n        clb.CheckOnClick = True\n        for fam_name, count in family_names_with_counts:\n            clb.Items.Add(\"  {} ({} in model)\".format(fam_name, count), False)\n        form.Controls.Add(clb)\n        return clb\n\n    def add_all_none_buttons(y_pos, target_clb):\n        def on_all(s, e):\n            for i in range(target_clb.Items.Count):\n                target_clb.SetItemChecked(i, True)\n        def on_none(s, e):\n            for i in range(target_clb.Items.Count):\n                target_clb.SetItemChecked(i, False)\n\n        for label, x_pos, color, handler in [\n            (\"All\",  16,  BLUE,     on_all),\n            (\"None\", 94,  MID_GREY, on_none),\n        ]:\n            btn                           = WinForms.Button()\n            btn.Text                      = label\n            btn.Location                  = Drawing.Point(x_pos, y_pos)\n            btn.Size                      = Drawing.Size(70, 24)\n            btn.FlatStyle                 = WinForms.FlatStyle.Flat\n            btn.BackColor                 = color\n            btn.ForeColor                 = WHITE\n            btn.Font                      = Drawing.Font(DEF_FONT, 8)\n            btn.FlatAppearance.BorderSize = 0\n            btn.Click                    += handler\n            form.Controls.Add(btn)\n        return y_pos + 30\n\n    # — Section 1: MOVE ────────────────────────────────────────────────────────\n    y = add_section_header(\"  ↕  MOVE — Reposition connectors to their Data Cube?\", y)\n    add_label(\"Checked families will be repositioned. Unchecked stay in place.\", 8, False, GREY, y + 4, height=16)\n    y += 22\n    clb_move = add_clb(y)\n    y += CLB_H + 4\n    y = add_all_none_buttons(y, clb_move)\n\n    add_separator(y + 4)\n    y += 14\n\n    # — Section 2: UPDATE ──────────────────────────────────────────────────────\n    y = add_section_header(\"  ✎  UPDATE — Write Utility Matrix data to Revit parameters?\", y)\n    add_label(\"Checked families will have parameters written from the Matrix. Unchecked are skipped.\", 8, False, GREY, y + 4, height=16)\n    y += 22\n    clb_update = add_clb(y)\n    y += CLB_H + 4\n    y = add_all_none_buttons(y, clb_update)\n\n    add_separator(y + 4)\n    y += 14\n\n    # — Run / Cancel ───────────────────────────────────────────────────────────\n    for label, x_pos, width, color, dr in [\n        (\"Run\",    16,  230,           GREEN, WinForms.DialogResult.OK),\n        (\"Cancel\", 254, FORM_W - 270,  RED,   WinForms.DialogResult.Cancel),\n    ]:\n        btn                           = WinForms.Button()\n        btn.Text                      = label\n        btn.Location                  = Drawing.Point(x_pos, y)\n        btn.Size                      = Drawing.Size(width, 36)\n        btn.FlatStyle                 = WinForms.FlatStyle.Flat\n        btn.BackColor                 = color\n        btn.ForeColor                 = WHITE\n        btn.Font                      = Drawing.Font(\n            DEF_FONT, 10,\n            Drawing.FontStyle.Bold if label == \"Run\" else Drawing.FontStyle.Regular\n        )\n        btn.FlatAppearance.BorderSize = 0\n        btn.DialogResult              = dr\n        form.Controls.Add(btn)\n        if label == \"Run\":    form.AcceptButton = btn\n        if label == \"Cancel\": form.CancelButton = btn\n\n    form.Height = y + 36 + 52\n    dialog_result = form.ShowDialog()\n\n    if dialog_result != WinForms.DialogResult.OK:\n        return None, None\n\n    move_sel = {\n        family_names_with_counts[i][0]\n        for i in range(clb_move.Items.Count)\n        if clb_move.GetItemChecked(i)\n    }\n    update_sel = {\n        family_names_with_counts[i][0]\n        for i in range(clb_update.Items.Count)\n        if clb_update.GetItemChecked(i)\n    }\n    return move_sel, update_sel\n\n\nsorted_families = sorted(family_count.items(), key=lambda x: x[0])\n\nif sorted_families:\n    moveable_families, update_families = show_family_selection_dialog(sorted_families)\n    if moveable_families is None:\n        OUT = [[\"Cancelled by user.\"]], [[\"Key Value\", \"Status\"]], [], []\n        sys.exit()\nelse:\n    moveable_families = set()\n    update_families   = set()\n\n\n# ═══════════════════════════════════════════════════════════════════════════════\n# SECTION 7 — DATA CUBE LOOKUP\n#\n#   Collects all \"Process Data Cube - Generic\" instances and builds a dict:\n#     Equipment ID (uppercase) → Revit element\n#   Used by Move Logic to determine the target world-space location for\n#   each connector being repositioned.\n# ═══════════════════════════════════════════════════════════════════════════════\n\ndata_cubes = [\n    c for c in (\n        FilteredElementCollector(doc)\n        .OfCategory(BuiltInCategory.OST_GenericModel)\n        .WhereElementIsNotElementType()\n        .ToElements()\n    )\n    if c.Symbol and \"Process Data Cube - Generic\" in c.Symbol.Family.Name\n]\n\ncube_lookup = {}\nfor cube in data_cubes:\n    eid = get_param_value(cube, \"Equipment ID\")\n    if eid:\n        cube_lookup[str(eid).strip().upper()] = cube\n\n\n# ═══════════════════════════════════════════════════════════════════════════════\n# SECTION 8 — MOVE LOGIC\n#\n#   For each Equipment ID that has connectors in a selected Move family:\n#     1. Looks up its parent Data Cube element by Equipment ID.\n#     2. Reads the cube's Offset Front/Back/Left/Right/Top parameters to\n#        determine the connector placement region in local cube space.\n#     3. Distributes connectors evenly along the cube's longest horizontal axis.\n#     4. Transforms computed local points to world space via the cube transform.\n#     5. Sets each connector's LocationPoint to its computed world position.\n#   Connectors whose family is not in the Move selection are logged as Skipped.\n# ═══════════════════════════════════════════════════════════════════════════════\n\ndef set_location(elem, new_xyz):\n    \"\"\"Moves elem to new_xyz if it isn't already there. Returns (moved: bool, old_loc_str).\"\"\"\n    try:\n        loc = elem.Location\n        if isinstance(loc, LocationPoint):\n            old_pt  = loc.Point\n            old_str = \"X:{:.2f}, Y:{:.2f}, Z:{:.2f}\".format(old_pt.X, old_pt.Y, old_pt.Z)\n            if not old_pt.IsAlmostEqualTo(new_xyz, 0.0026):\n                loc.Point = new_xyz\n                return True, old_str\n            return False, old_str\n        return False, \"N/A\"\n    except:\n        return False, \"Error\"\n\nmove_report = []  # Each row: [elem_id, conn_id, equip_id, action, old_loc, new_loc]\n\nif moveable_families:\n    # Group connectors by Equipment ID for spacing calculation\n    conns_by_eid = {}\n    for ec in existing_connectors:\n        eid = get_param_value(ec, \"Equipment ID\")\n        if eid:\n            conns_by_eid.setdefault(str(eid).strip().upper(), []).append(ec)\n\n    TransactionManager.Instance.EnsureInTransaction(doc)\n\n    for eid_key, conns in conns_by_eid.items():\n        cube = cube_lookup.get(eid_key)\n        if not cube:\n            continue\n\n        # Read Data Cube offset parameters (Revit internal units = feet)\n        f  = get_param_value(cube, \"Offset Front\") or 0.0\n        bk = get_param_value(cube, \"Offset Back\")  or 0.0\n        l  = get_param_value(cube, \"Offset Left\")  or 0.0\n        r  = get_param_value(cube, \"Offset Right\") or 0.0\n        t  = get_param_value(cube, \"Offset Top\")   or 0.0\n\n        length_dim = abs(f) + abs(bk)\n        width_dim  = abs(l) + abs(r)\n        lx         = (r - l) / 2.0\n        ly         = (f - bk) / 2.0\n        lz         = t\n\n        total_n      = len(conns)\n        is_len       = length_dim >= width_dim\n        axis_dim     = length_dim if is_len else width_dim\n        spacing      = max(0.333, axis_dim / (total_n + 1))\n        start_offset = -((total_n - 1) * spacing) / 2.0\n        trans        = cube.GetTransform()\n\n        for i, ec in enumerate(conns):\n            fn      = get_family_name(ec)\n            conn_id = get_param_value(ec, \"Connection ID\") or \"\"\n            eid_raw = get_param_value(ec, \"Equipment ID\") or eid_key\n\n            step     = start_offset + (i * spacing)\n            local_pt = XYZ(lx, ly + step, lz) if is_len else XYZ(lx + step, ly, lz)\n            world_pt = trans.OfPoint(local_pt)\n            new_loc  = \"X:{:.2f}, Y:{:.2f}, Z:{:.2f}\".format(world_pt.X, world_pt.Y, world_pt.Z)\n\n            if fn in moveable_families:\n                moved, old_loc = set_location(ec, world_pt)\n                action = \"Moved\" if moved else \"No Change\"\n            else:\n                loc = ec.Location\n                old_loc = (\n                    \"X:{:.2f}, Y:{:.2f}, Z:{:.2f}\".format(loc.Point.X, loc.Point.Y, loc.Point.Z)\n                    if isinstance(loc, LocationPoint) else \"N/A\"\n                )\n                action  = \"Skipped (Family Not Selected)\"\n                new_loc = old_loc\n\n            move_report.append([str(ec.Id), conn_id, str(eid_raw), action, old_loc, new_loc])\n\n    TransactionManager.Instance.TransactionTaskDone()\n    doc.Regenerate()\n\n# Build Connection ID (upper) → move action and locations for use in write report\nmove_action_lookup = {\n    str(r[1]).strip().upper(): r[3]\n    for r in move_report if len(r) >= 4\n}\nmove_loc_lookup = {\n    str(r[1]).strip().upper(): (r[4], r[5])  # (old_loc, new_loc)\n    for r in move_report if len(r) >= 6\n}\n\n\n# ═══════════════════════════════════════════════════════════════════════════════\n# SECTION 9 — PARAMETER WRITE LOGIC\n#\n#   For each row in the Excel flat data:\n#     1. Match to a Revit connector element by Connection ID.\n#     2. Skip the element if its family is not in update_families.\n#     3. For each Excel column:\n#          a. Look up the Revit parameter name(s) in the UM-Revit Mapping.\n#          b. Check family applicability — skip if mapping says \"No\" for this family.\n#          c. Skip columns with empty / null / \"-\" Excel values.\n#          d. For instance parameters: write directly via compare_and_set_param.\n#          e. For type parameters: iterate family symbols to find a matching type\n#             (handles Voltage & Phase → Family Type swap).\n#\n#   Report header:\n#     [Revit Element ID] [Connection ID] [Family] [Update Status] [Moved]\n#     [Original: <col>] [Updated: <col>]  ← one pair per writable Excel column\n# ═══════════════════════════════════════════════════════════════════════════════\n\ndef write_parameters_to_revit(data_input, key_param_name, file_path):\n    data = extract_flat_data(data_input)\n    if not data or not key_param_name:\n        return [[\"Error: Inputs are empty.\"]], [], 0, 0\n\n    # Load UM-Revit Mapping (includes family applicability per column)\n    um_revit_map = read_um_revit_mapping(file_path)\n\n    # Build element lookup: Connection ID lowercase → connector element\n    # Use existing_connectors (not all_elements) — Data Cubes and other\n    # non-connector elements can have Connection ID set (Script 1), and if\n    # they land last in iteration they overwrite connector entries in the dict.\n    # The write loop then finds a Data Cube, sees it is not in update_families,\n    # sets update_allowed=False, and writes nothing. Connectors are missed entirely.\n    element_lookup = {}\n    for el in existing_connectors:\n        p = el.LookupParameter(key_param_name)\n        if p:\n            val = get_param_display_value(p)\n            if val:\n                element_lookup[val.strip().lower()] = el\n\n    # Recover display-case column names from extractor mapping metadata\n    col_case_map = {}\n    mapping_entries = safe_get(data_input, \"Mapping\")\n    if mapping_entries:\n        try:\n            for entry in mapping_entries:\n                orig = safe_get(entry, \"Excel Header\") or \"\"\n                if orig:\n                    col_case_map[str(orig).strip().lower()] = str(orig).strip()\n        except:\n            pass\n\n    # Build ordered list of Excel columns to process.\n    # IMPORTANT: restrict to only columns in the explicit mapping list (col_case_map).\n    # The extractor reads ALL sheet columns into each row dict, so raw passthrough\n    # columns (e.g. the bare \"Service\" column when \"Service Abbreviation\" is the\n    # mapped one) would otherwise sneak in here and trigger spurious writes.\n    # Order is preserved from the Mapping list to keep the report column order stable.\n    all_excel_cols = []\n    seen_lower     = set()\n    for mapped_lower, mapped_display in col_case_map.items():\n        if mapped_lower not in seen_lower:\n            seen_lower.add(mapped_lower)\n            all_excel_cols.append(mapped_display)\n\n    key_col_lower  = key_param_name.strip().lower()\n    writable_cols  = [c for c in all_excel_cols if c.strip().lower() != key_col_lower]\n    not_found_keys = set()\n    params_written = 0\n    params_skipped = 0\n\n    # Build report header\n    # \"Original: Location\" / \"Updated: Location\" give the ExcelGen a proper\n    # before/after pair for moves, so the change is visible and highlighted.\n    header_row = [\"Revit Element ID\", \"Connection ID\", \"Family\", \"Update Status\",\n                  \"Moved\", \"Parameters Changed\", \"Original: Location\", \"Updated: Location\"]\n    for col in writable_cols:\n        header_row.extend([\"Original: \" + col, \"Updated: \" + col])\n    processed_report = [header_row]\n\n    TransactionManager.Instance.EnsureInTransaction(doc)\n\n    for data_row in data:\n        key_value = safe_get(data_row, key_col_lower)\n        if key_value is None:\n            continue\n\n        element = element_lookup.get(str(key_value).strip().lower())\n        if not element:\n            not_found_keys.add(key_value)\n            continue\n\n        elem_fn        = get_family_name(element)\n        update_allowed = elem_fn in update_families if update_families else False\n        el_type        = doc.GetElement(element.GetTypeId())\n        conn_id_upper  = str(key_value).strip().upper()\n        moved_status   = move_action_lookup.get(conn_id_upper, \"Not Processed\")\n        old_loc, new_loc = move_loc_lookup.get(conn_id_upper, (\"\", \"\"))\n\n        inst_param_map = build_param_map(element)\n        type_param_map = build_param_map(el_type) if el_type else {}\n\n        element_was_updated = False\n        changed_excel_cols = []\n        values_row = [element.Id.ToString(), str(key_value), elem_fn, \"Unchanged\",\n                      moved_status, \"\", old_loc, new_loc]\n\n        for col in writable_cols:\n            col_lower = col.strip().lower()\n            new_val   = safe_get(data_row, col_lower)\n\n            # — Resolve Revit parameter name(s) and family applicability ──────\n            mapping_entry = um_revit_map.get(col_lower)\n\n            if mapping_entry:\n                revit_param_names   = mapping_entry[\"params\"]\n                applicable_families = mapping_entry[\"families\"]\n            else:\n                # No UM-Revit entry — try direct name match on the element\n                if col_lower in inst_param_map or col_lower in type_param_map:\n                    revit_param_names   = [col]\n                    applicable_families = []  # no restriction\n                else:\n                    values_row.extend([\"\", \"\"])\n                    continue  # Column not found anywhere — skip\n\n            # — Check family applicability ─────────────────────────────────────\n            if applicable_families and not family_is_applicable(elem_fn, applicable_families):\n                # Family not listed in UM-Revit Mapping (e.g. \"Process Data Connector\"\n                # mapped from TD- prefix in Script 1). Fall back: if the mapped\n                # parameter(s) physically exist on this element, allow the write.\n                # Parameter presence is the ground truth — family-specific params\n                # (e.g. Full Load Current on Electrical only) will simply not exist\n                # on unlisted families and will be skipped naturally.\n                param_exists_on_elem = any(\n                    inst_param_map.get(rpn.strip().lower()) is not None or\n                    type_param_map.get(rpn.strip().lower()) is not None\n                    for rpn in revit_param_names\n                )\n                if not param_exists_on_elem:\n                    values_row.extend([\"\", \"\"])\n                    continue  # Param does not exist on element — genuinely not applicable\n                # else: param exists — fall through and write it\n\n            # ─────────────────────────────────────────────────────────────────\n            # Per-column write logic:\n            #\n            #   Step 1 — Pre-read the BEFORE value for every mapped Revit param.\n            #            Done before any write so we always have the true pre-run state.\n            #\n            #   Step 2 — Short-circuit for empty Excel value or unselected family.\n            #            No write, before == after, cell stays white.\n            #\n            #   Step 3 — Write to ALL mapped params. For each one, record whether\n            #            it actually changed (compare_and_set_param is idempotent).\n            #            Track the first param that genuinely changed.\n            #\n            #   Step 4 — Choose display values for the report:\n            #            • If a param changed  → use THAT param's before/after.\n            #              This is critical for multi-param columns (e.g. Connection\n            #              Size → [Nominal Diameter, Connection Size]) where the\n            #              primary Double param may be unchanged while the secondary\n            #              String param was updated. Without this, the report would\n            #              show identical before/after even though Update Status=Updated.\n            #            • If nothing changed  → use primary param's current value\n            #              for both sides so the ExcelGen sees no diff → no highlight.\n            # ─────────────────────────────────────────────────────────────────\n\n            # Step 1 — pre-read before-values for all mapped params\n            param_records = []  # (rpn_lower, param_obj, tp_obj, before_display)\n            for rpn in revit_param_names:\n                rpn_lower = rpn.strip().lower()\n                p  = inst_param_map.get(rpn_lower)\n                tp = type_param_map.get(rpn_lower)\n                before = (get_param_display_value(p)  if p  is not None else\n                          get_param_display_value(tp) if tp is not None else \"\")\n                param_records.append((rpn_lower, p, tp, before))\n\n            # Default display source: first param that exists on this element\n            primary_before = param_records[0][3] if param_records else \"\"\n            any_updated    = False\n\n            # Step 2 — short-circuit: empty Excel value or family not selected\n            if new_val is None or str(new_val).strip() in (\"\", \"-\", \"None\", \"null\"):\n                values_row.extend([primary_before, primary_before])\n                params_skipped += 1\n                continue\n\n            if not update_allowed:\n                values_row.extend([primary_before, primary_before])\n                continue\n\n            # Step 3 — write to all mapped params, track the first actual change\n            first_changed_before = None\n            first_changed_param  = None\n\n            col_was_updated = False\n            for rpn_lower, param_to_set, tp_match, before_display in param_records:\n\n                if param_to_set is not None and not param_to_set.IsReadOnly:\n                    changed, _ = compare_and_set_param(param_to_set, new_val)\n                    if changed:\n                        if first_changed_before is None:\n                            first_changed_before = before_display\n                            first_changed_param  = rpn_lower\n                        any_updated    = True\n                        col_was_updated = True\n                        params_written += 1\n                    else:\n                        params_skipped += 1\n\n                elif tp_match is not None:\n                    # Type parameter — search family symbols for matching type\n                    if check_param_match(tp_match, new_val):\n                        params_skipped += 1\n                    else:\n                        family = el_type.Family\n                        for sym_id in family.GetFamilySymbolIds():\n                            sym    = doc.GetElement(sym_id)\n                            sym_pm = build_param_map(sym)\n                            sym_p  = sym_pm.get(rpn_lower)\n                            if sym_p and check_param_match(sym_p, new_val):\n                                if not sym.IsActive: sym.Activate()\n                                element.ChangeTypeId(sym_id)\n                                if first_changed_before is None:\n                                    first_changed_before = before_display\n                                    first_changed_param  = rpn_lower\n                                any_updated    = True\n                                col_was_updated = True\n                                el_type        = sym\n                                type_param_map = build_param_map(el_type)\n                                params_written += 1\n                                break\n\n            # Step 4 — choose display values for the report\n            if any_updated:\n                element_was_updated = True\n                doc.Regenerate()\n\n            current_type = doc.GetElement(element.GetTypeId())\n            current_inst_param_map = build_param_map(element)\n            current_type_param_map = build_param_map(current_type) if current_type else {}\n            current_display = get_representative_display(\n                revit_param_names,\n                current_inst_param_map,\n                current_type_param_map,\n                preferred_name=first_changed_param,\n            )\n\n            if first_changed_before is not None:\n                original_val_str = first_changed_before\n                final_val_str    = current_display\n            else:\n                original_val_str = primary_before\n                final_val_str    = current_display if str(current_display).strip() != \"\" else primary_before\n\n            if col_was_updated:\n                changed_excel_cols.append(col)\n\n            values_row.extend([original_val_str, final_val_str])\n\n        if element_was_updated:\n            values_row[3] = \"Updated\"\n        values_row[5] = \", \".join(changed_excel_cols)\n\n        processed_report.append(values_row)\n\n    TransactionManager.Instance.TransactionTaskDone()\n\n    not_found_report = [[\"Key Value\", \"Status\"]]\n    for key in sorted(not_found_keys):\n        not_found_report.append([key, \"Element Not Found in Revit\"])\n\n    if len(processed_report) <= 1:\n        processed_report = [[\"No matching elements were found to process.\"]]\n\n    return processed_report, not_found_report, params_written, params_skipped\n\n\nparam_results = write_parameters_to_revit(extractor_output, key_parameter, excel_file_path)\n\n\n# ═══════════════════════════════════════════════════════════════════════════════\n# SECTION 10 — OUTPUT ASSEMBLY\n#\n#   OUT[0] — Connector update report  → ExcelGen \"Connector Updates\" sheet\n#            List-of-lists. Header row, then one row per matched connector.\n#            Columns: Revit Element ID, Connection ID, Family, Update Status,\n#                     Moved, then Original/Updated pairs for each Excel column.\n#\n#   OUT[1] — Not-found report         → ExcelGen \"Metrics\" sheet\n#            List-of-lists. Connectors whose Connection ID had no Revit match.\n#\n#   OUT[2] — Move detail report       → Watch node / optional downstream use\n#            List of rows: [elem_id, conn_id, equip_id, action, old_loc, new_loc]\n#\n#   OUT[3] — Run metrics summary      → optional Watch node\n#            Key/value summary of counts for the run.\n# ═══════════════════════════════════════════════════════════════════════════════\n\nmoved_count  = sum(1 for r in move_report if r[3] == \"Moved\")\nno_chg_count = sum(1 for r in move_report if r[3] == \"No Change\")\nskip_fam     = sum(1 for r in move_report if r[3] == \"Skipped (Family Not Selected)\")\n\nmove_metrics = [\n    [\"Metric\",                                            \"Value\"],\n    [\"Total Connectors Scanned\",                          str(len(existing_connectors))],\n    [\"Families Selected for Move\",                        str(len(moveable_families))],\n    [\"Families Selected for Update\",                      str(len(update_families))],\n    [\"Connectors Moved\",                                  str(moved_count)],\n    [\"Connectors Already In Place\",                       str(no_chg_count)],\n    [\"Connectors Skipped (Family Not Selected for Move)\", str(skip_fam)],\n    [\"Parameters Written\",                                str(param_results[2]) if len(param_results) > 2 else \"N/A\"],\n    [\"Parameters Already Matched / Skipped\",              str(param_results[3]) if len(param_results) > 3 else \"N/A\"],\n]\n\nOUT = [param_results[0], param_results[1], move_report, move_metrics]\n",
+      "Engine": "CPython3",
+      "EngineName": "CPython3",
+      "VariableInputPorts": true,
+      "Id": "7ba91bbdb16a41adbfbb8c8469faad7d",
+      "Inputs": [
+        {
+          "Id": "2067a830209b46518ab2775e60a8b294",
+          "Name": "IN[0]",
+          "Description": "",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Id": "6ef9f05e6ce1471b916dfb4998fe727f",
+          "Name": "IN[1]",
+          "Description": "",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Id": "a00da4f5aaed4bd5827b8641065674b0",
+          "Name": "IN[2]",
+          "Description": "",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Id": "33e23112eef7463d8e7d454def912c04",
+          "Name": "IN[3]",
+          "Description": "",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Id": "0cdee0efda474b729b4e7b8705c5c54e",
+          "Name": "IN[4]",
+          "Description": "",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Outputs": [
+        {
+          "Id": "dbb4686a7c2446fc9db35184859fec2e",
+          "Name": "OUT",
+          "Description": "",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Disabled",
+      "Description": "Runs an embedded Python script."
+    },
+    {
+      "ConcreteType": "Dynamo.Graph.Nodes.CodeBlockNodeModel, DynamoCore",
+      "NodeType": "CodeBlockNode",
+      "Code": "// Graph 2 - Report Configuration\n\n[\"Connector Updates\",\"Metrics\"];\n // OUT[0] -> ExcelGen.IN[1];\n\n\"Update_Data_Report.xlsx\";\n // OUT[1] -> ExcelGen.IN[0];\n\n\"Blue\";\n // OUT[2] -> ExcelGen.IN[2];",
+      "Id": "14cc25fdc511440197c5e00fc7ddfcd0",
+      "Inputs": [],
+      "Outputs": [
+        {
+          "Id": "3f14ae721f7b4e30bf61c8ab0ce556b9",
+          "Name": "",
+          "Description": "Value of expression at line 3",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Id": "c1a4ec2f93524fc4a1ed0c7b79b102b0",
+          "Name": "",
+          "Description": "Value of expression at line 6",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Id": "9ec1c8c35c874c189b13aa4682bd1e7a",
+          "Name": "",
+          "Description": "Value of expression at line 9",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Disabled",
+      "Description": "Allows for DesignScript code to be authored directly"
+    },
+    {
+      "ConcreteType": "PythonNodeModels.PythonNode, PythonNodeModels",
+      "NodeType": "PythonScriptNode",
+      "Code": "# ExcelGen\n# Excel Report Generator\n# Revit 2023 / Dynamo 2.16 / CPython3\n# Developed By - Chris Staker\n# v1.9.3 - Fixed Moved cell false-positive highlight:\n#            Moved cell now only turns yellow when connector was actually Moved.\n#            Previously, Moved cell was yellow on ANY row change (param write or move).\n#          - Removed Moved from anchor col set; handled per-cell with row_was_moved check.\n#          - Connection ID + Original/Updated Equipment ID: yellow on any row change.\n#          - All other changed Original/Updated pairs: yellow via changed_cols.\n#          - Everything else: explicit white.\n\n# ═══════════════════════════════════════════════════════════════════════════════\n# SECTION 1 — CONFIGURATION CONSTANTS\n# ═══════════════════════════════════════════════════════════════════════════════\n\nDEPENDENCY_FOLDER_NAME = \"Python Support Pckg\"\nLOCAL_LIBRARY_PATH     = r\"C:\\Dynamo\\2.16\\Python Support Pckg\"\nNETWORK_LIBRARY_PATH   = r\"K:\\CAD\\_Revit2023\\Add_Ins\\Python Support Pckg\"\n\n# ═══════════════════════════════════════════════════════════════════════════════\n# SECTION 2 — STANDARD LIBRARY IMPORTS & LOGGER\n# ═══════════════════════════════════════════════════════════════════════════════\n\nimport sys\nimport os\nimport platform\nimport time\nfrom datetime import datetime\nfrom pathlib import Path\nimport re\nimport traceback\nimport colorsys\n\n\nclass Logger:\n    def __init__(self):\n        self.messages  = []\n        self.start_time = time.time()\n\n    def _record(self, message, level):\n        timestamp = datetime.now().strftime(\"%H:%M:%S\")\n        elapsed   = round(time.time() - self.start_time, 2)\n        try:\n            msg_str = str(message).encode('utf-8', 'replace').decode('utf-8')\n            self.messages.append(\"[{}][{}s][{}] {}\".format(timestamp, elapsed, level, msg_str))\n        except Exception:\n            self.messages.append(\"[{}][{}s][ERROR] Error formatting log message.\".format(timestamp, elapsed))\n\n    def log(self, message):     self._record(message, \"INFO\")\n    def error(self, message):   self._record(message, \"ERROR\")\n    def warning(self, message): self._record(message, \"WARN\")\n    def get_messages(self):     return self.messages\n\n# ═══════════════════════════════════════════════════════════════════════════════\n# SECTION 3 — DEPENDENCY PATH SETUP\n# ═══════════════════════════════════════════════════════════════════════════════\n\ndef setup_library_paths(logger):\n    logger.log(\"--- Running Dependency Check ---\")\n    for path, label in [(LOCAL_LIBRARY_PATH, \"Local C Drive\"), (NETWORK_LIBRARY_PATH, \"Network Drive\")]:\n        logger.log(\"Checking {} for libraries...\".format(label))\n        if os.path.isdir(path):\n            logger.log(\"Found library path on {}: {}\".format(label, path))\n            if path not in sys.path:\n                sys.path.insert(0, path)\n            return True, path, label\n    logger.error(\"FAILURE: Could not find the required library folder.\")\n    return False, None, None\n\n\nlogger   = Logger()\nlogger.log(\"ExcelGen v1.8.0 Started\")\npath_found, found_path, location_name = setup_library_paths(logger)\n\nif not path_found:\n    OUT = [\"FATAL ERROR: Could not find 'openpyxl' library.\", logger.get_messages(), \"0\"]\nelse:\n    try:\n        import openpyxl\n        from openpyxl.styles import PatternFill, Font, Alignment\n        from openpyxl.utils import get_column_letter\n        from openpyxl.worksheet.table import Table, TableStyleInfo\n        logger.log(\"Successfully imported 'openpyxl' from {}.\".format(location_name))\n    except ImportError as e:\n        OUT = [\"FATAL ERROR: Import failed from '{}'. Details: {}\".format(found_path, e),\n               logger.get_messages(), \"0\"]\n    else:\n\n# ═══════════════════════════════════════════════════════════════════════════════\n# SECTION 4 — CONSTANTS & THEME HELPERS\n# ═══════════════════════════════════════════════════════════════════════════════\n\n        MAX_SHEET_NAME_LENGTH = 31\n        MAX_COLUMN_WIDTH      = 120\n\n        # Highlighting colors\n        CHANGED_COLOR_A = \"FFFFFF99\"  # Soft yellow — changed rows (even)\n        CHANGED_COLOR_B = \"FFFFFFCC\"  # Lighter yellow — changed rows (odd)\n        BASE_TABLE_STYLE = \"TableStyleMedium2\"\n\n        def create_theme_shades(hex_color):\n            try:\n                hex_color = hex_color.lstrip('#')\n                r, g, b   = (int(hex_color[i:i+2], 16) / 255.0 for i in (0, 2, 4))\n                h, l, s   = colorsys.rgb_to_hls(r, g, b)\n                # Summary block: lighter shade of theme color\n                sum_l      = l + (1 - l) * 0.70\n                sr, sg, sb = [int(c * 255) for c in colorsys.hls_to_rgb(h, sum_l, s)]\n                # Stripe shade (used by Simple reports)\n                str_l      = l + (1 - l) * 0.90\n                str_s      = s * 0.5\n                xr, xg, xb = [int(c * 255) for c in colorsys.hls_to_rgb(h, str_l, str_s)]\n                return {\n                    \"summary\": \"FF{:02X}{:02X}{:02X}\".format(sr, sg, sb),\n                    \"stripe\":  \"FF{:02X}{:02X}{:02X}\".format(xr, xg, xb),\n                }\n            except Exception:\n                return {\"summary\": \"FFF0F0F0\", \"stripe\": \"FFF9F9F9\"}\n\n        def get_theme_config(theme_input, logger):\n            THEMES = {\n                \"blue\": \"4472C4\", \"green\": \"70AD47\", \"red\": \"C5504B\",\n                \"purple\": \"7030A0\", \"orange\": \"ED7D31\", \"teal\": \"264653\"\n            }\n            theme_str = str(theme_input).lower().strip() if theme_input else \"blue\"\n            hex_color = THEMES.get(theme_str)\n            if not hex_color:\n                hex_color = theme_str.lstrip('#')\n                if not (len(hex_color) == 6 and all(c in '0123456789abcdef' for c in hex_color)):\n                    logger.warning(\"Invalid theme '{}'. Using 'blue'.\".format(theme_str))\n                    hex_color = THEMES[\"blue\"]\n            shades = create_theme_shades(hex_color)\n            return {\n                \"header_color\":       \"FF\" + hex_color.upper(),\n                \"summary_background\": shades[\"summary\"],\n                \"stripe_background\":  shades[\"stripe\"],\n                \"log_header_color\":   \"FF\" + hex_color.upper(),\n            }\n\n# ═══════════════════════════════════════════════════════════════════════════════\n# SECTION 5 — HELPER FUNCTIONS\n# ═══════════════════════════════════════════════════════════════════════════════\n\n        def safe_cell_value(value):\n            if value is None: return \"\"\n            try:    str_value = str(value)\n            except: str_value = repr(value)\n            str_value = re.sub(r'[\\x00-\\x08\\x0B\\x0C\\x0E-\\x1F\\x7F]', '', str_value)\n            return str_value[:32767]\n\n        def create_safe_table_name(sheet_name):\n            safe_name = re.sub(r'[^\\w]', '', sheet_name)\n            if not safe_name or not safe_name[0].isalpha():\n                safe_name = \"Table\" + safe_name\n            return safe_name[:250] + \"Data\"\n\n        def should_center_align(value):\n            if value is None or value == \"\": return True\n            return len(str(value).strip()) <= 35\n\n        def validate_filepath(filepath, logger):\n            is_valid = False\n            if filepath and isinstance(filepath, str) and filepath.strip():\n                filepath = filepath.strip()\n                dir_name = os.path.dirname(filepath)\n                if dir_name and os.path.isdir(dir_name):\n                    is_valid = True\n                    logger.log(\"Using provided filepath: '{}'\".format(filepath))\n            if not is_valid:\n                logger.log(\"Creating default save path on Desktop...\")\n                try:\n                    home_dir     = os.path.expanduser(\"~\")\n                    desktop_path = os.path.join(home_dir, \"Desktop\")\n                    for item in os.listdir(home_dir):\n                        if \"onedrive\" in item.lower():\n                            od = os.path.join(home_dir, item, \"Desktop\")\n                            if os.path.isdir(od):\n                                desktop_path = od\n                                break\n                    base_name = (os.path.basename(filepath.strip())\n                                 if filepath and isinstance(filepath, str) and filepath.strip()\n                                 else \"\")\n                    if not base_name:\n                        base_name = \"Multi_Sheet_Report_{}.xlsx\".format(\n                            datetime.now().strftime('%Y%m%d_%H%M%S'))\n                    if not base_name.lower().endswith('.xlsx'):\n                        base_name = os.path.splitext(base_name)[0] + \".xlsx\"\n                    filepath = os.path.join(desktop_path, base_name)\n                    logger.log(\"Generated Desktop path: {}\".format(filepath))\n                except Exception as e:\n                    logger.error(\"Could not create default path: {}\".format(e))\n                    return False, None, True\n            if not filepath.lower().endswith('.xlsx'):\n                filepath += '.xlsx'\n            return True, filepath, not is_valid\n\n        def validate_sheet_name(sheet_name, logger):\n            if not sheet_name:\n                return \"Report Sheet\"\n            sheet_name = re.sub(r'[\\\\/?*\\[\\]:]', '_', str(sheet_name)).strip(\"'\\\"\")\n            if len(sheet_name) > MAX_SHEET_NAME_LENGTH:\n                sheet_name = sheet_name[:MAX_SHEET_NAME_LENGTH]\n                logger.warning(\"Sheet name truncated to {} chars.\".format(MAX_SHEET_NAME_LENGTH))\n            return sheet_name\n\n        def normalize_data_package(package, logger):\n            \"\"\"Converts any supported data shape to (headers_list, columns_list, error).\"\"\"\n            # List of lists (table format — primary format from parameter writer)\n            if (isinstance(package, list) and len(package) > 0 and\n                    all(isinstance(row, list) for row in package)):\n                logger.log(\"Detected list-of-lists (table) format.\")\n                headers    = package[0]\n                data_rows  = package[1:]\n                n_headers  = len(headers)\n                sanitized  = []\n                for i, row in enumerate(data_rows):\n                    n = len(row)\n                    if n < n_headers:\n                        sanitized.append(row + [''] * (n_headers - n))\n                    elif n > n_headers:\n                        sanitized.append(row[:n_headers])\n                    else:\n                        sanitized.append(row)\n                if not sanitized:\n                    return headers, [[] for _ in headers], None\n                data_columns = list(map(list, zip(*sanitized)))\n                return headers, data_columns, None\n\n            # Legacy [headers_list, data_dict]\n            if (isinstance(package, list) and len(package) == 2 and\n                    isinstance(package[0], list) and isinstance(package[1], dict)):\n                logger.log(\"Detected legacy [headers, dict] format.\")\n                headers      = package[0]\n                data_columns = [package[1].get(h, []) for h in headers]\n                return headers, data_columns, None\n\n            # Column-oriented dict\n            if isinstance(package, dict):\n                logger.log(\"Detected column-oriented dict format.\")\n                if not package: return [], [], None\n                headers      = list(package.keys())\n                data_columns = [v if isinstance(v, list) else [v] for v in package.values()]\n                return headers, data_columns, None\n\n            # Row-oriented list of dicts\n            if isinstance(package, list) and (not package or all(isinstance(i, dict) for i in package)):\n                logger.log(\"Detected row-oriented list-of-dicts format.\")\n                if not package: return [], [], None\n                ordered_headers = []\n                header_set      = set()\n                for row in package:\n                    for key in row.keys():\n                        if key not in header_set:\n                            header_set.add(key)\n                            ordered_headers.append(key)\n                data_columns = [[row.get(h) for row in package] for h in ordered_headers]\n                return ordered_headers, data_columns, None\n\n            # Simple list\n            if isinstance(package, list):\n                logger.log(\"Detected simple list format.\")\n                return [\"Value\"], [package], None\n\n            err = \"Data package has an unrecognized format or is null.\"\n            logger.error(err)\n            return None, None, err\n\n# ═══════════════════════════════════════════════════════════════════════════════\n# SECTION 6 — COMPARISON REPORT DATA PROCESSOR\n#\n#   Identifies \"Original:\" / \"Updated:\" column pairs, compares values row by row,\n#   and returns per-row change metadata alongside aggregate statistics.\n# ═══════════════════════════════════════════════════════════════════════════════\n\n        def process_comparison_data(data_columns, headers, logger):\n            \"\"\"\n            Processes the writer's report (list-of-columns) to identify which\n            Original/Updated cell pairs actually changed.\n\n            Returns:\n              report_data — list of {data, changed, changed_cols} per row\n                            data rows are NOT modified (no extra column appended)\n              stats       — {total, changed, no_change, errors}\n\n            has_changed is sourced from the writer's \"Update Status\" column\n            (\"Updated\" / \"Unchanged\") which is authoritative. changed_cols\n            tracks which 0-based column indices hold changed Original/Updated\n            values so ExcelGen can highlight exactly those cells.\n            \"\"\"\n            report_data = []\n            stats       = {\"total\": 0, \"changed\": 0, \"no_change\": 0, \"errors\": 0}\n            if not data_columns or not any(data_columns):\n                return report_data, stats\n\n            # Locate the writer's authoritative status columns\n            update_status_idx = next(\n                (i for i, h in enumerate(headers)\n                 if str(h).strip().lower() == 'update status'),\n                None\n            )\n            params_changed_idx = next(\n                (i for i, h in enumerate(headers)\n                 if str(h).strip().lower() == 'parameters changed'),\n                None\n            )\n\n            # Build Original/Updated column index pairs from header names\n            original_cols, updated_cols = {}, {}\n            for idx, header in enumerate(headers):\n                h_lower = str(header).lower()\n                for prefix in ('original:', 'original '):\n                    if h_lower.startswith(prefix):\n                        original_cols[h_lower[len(prefix):].strip()] = idx\n                for prefix in ('updated:', 'updated '):\n                    if h_lower.startswith(prefix):\n                        updated_cols[h_lower[len(prefix):].strip()] = idx\n\n            comparison_pairs = [\n                (original_cols[k], updated_cols[k])\n                for k in original_cols if k in updated_cols\n            ]\n\n            n_rows = len(data_columns[0]) if data_columns and data_columns[0] else 0\n            for i in range(n_rows):\n                stats[\"total\"] += 1\n                try:\n                    row_data = [(col[i] if i < len(col) else \"\") for col in data_columns]\n\n                    # Find changed Original/Updated pairs.\n                    # A pair is \"changed\" only when the values genuinely differ AND\n                    # it's not just two empty strings (non-applicable column for this family).\n                    changed_pair_indices = set()\n                    for orig_idx, upd_idx in comparison_pairs:\n                        orig_val = str(row_data[orig_idx]).strip()\n                        upd_val  = str(row_data[upd_idx]).strip()\n                        if orig_val == upd_val:\n                            continue  # identical — no change\n                        if orig_val == \"\" and upd_val == \"\":\n                            continue  # both empty — column not applicable to this family\n                        changed_pair_indices.add(orig_idx)\n                        changed_pair_indices.add(upd_idx)\n\n                    # Also trust the writer's authoritative \"Parameters Changed\"\n                    # list so the highlight remains correct even when the visible\n                    # before/after strings normalize to the same display text.\n                    if params_changed_idx is not None and params_changed_idx < len(row_data):\n                        changed_names = [\n                            name.strip().lower()\n                            for name in str(row_data[params_changed_idx]).split(',')\n                            if str(name).strip()\n                        ]\n                        for changed_name in changed_names:\n                            if changed_name in original_cols and changed_name in updated_cols:\n                                changed_pair_indices.add(original_cols[changed_name])\n                                changed_pair_indices.add(updated_cols[changed_name])\n\n                    # has_changed drives anchor highlighting and the stats counter.\n                    # Use the writer's authoritative columns: Update Status and Moved.\n                    was_updated = (update_status_idx is not None and\n                                   str(row_data[update_status_idx]).strip() == \"Updated\")\n                    moved_idx_  = next(\n                        (i for i, h in enumerate(headers) if str(h).strip().lower() == 'moved'),\n                        None\n                    )\n                    was_moved   = (moved_idx_ is not None and\n                                   str(row_data[moved_idx_]).strip() == \"Moved\")\n                    has_changed = was_updated or was_moved\n\n                    stats[\"changed\" if has_changed else \"no_change\"] += 1\n                    # Do NOT append any extra column — row_data stays exactly as received\n                    report_data.append({\n                        'data':         row_data,\n                        'changed':      has_changed,\n                        'changed_cols': changed_pair_indices,\n                    })\n                except Exception as e:\n                    stats[\"errors\"] += 1\n                    logger.error(\"Error processing row {}: {}\".format(i, e))\n                    report_data.append({'data': [], 'changed': False, 'changed_cols': set()})\n\n            logger.log(\"Comparison processing done: {}\".format(stats))\n            return report_data, stats\n\n# ═══════════════════════════════════════════════════════════════════════════════\n# SECTION 7 — SHEET CREATOR\n#\n#   Creates and formats a single worksheet. Handles three report types:\n#\n#   Comparison  — Connector Updates style.\n#                 • Summary block (rows 1-6) with run stats.\n#                 • Data table starting at row 8.\n#                 • Pin columns (ID, Connection ID, Family, Status, Moved):\n#                   always light theme tint.\n#                 • Changed Original/Updated pairs: soft yellow.\n#                 • All other data cells: explicit white.\n#\n#   Simple      — Key/value or plain table. Optional summary header block.\n#                 Alternating row striping.\n#\n#   Error       — Placeholder sheet written when data is null/invalid.\n# ═══════════════════════════════════════════════════════════════════════════════\n\n        def process_and_create_sheet(wb, sheet_config, logger, used_table_names,\n                                     theme_config, total_changed_counter):\n            validated_name = \"\"\n            try:\n                config_name  = sheet_config.get('name', 'Report Sheet')\n                report_type  = sheet_config.get('type')\n                validated_name = validate_sheet_name(config_name, logger)\n                logger.log(\"--- Processing Sheet: '{}' (Type: {}) ---\".format(\n                    validated_name, report_type or 'Unknown'))\n                ws = wb.create_sheet(title=validated_name)\n\n                # ── Error placeholder ─────────────────────────────────────────\n                if report_type == 'Error':\n                    ws['A1'] = \"Data Error\"\n                    ws['A1'].font = Font(bold=True, size=16, color=\"C00000\")\n                    ws['A2'] = sheet_config.get('error_message', 'Unspecified error.')\n                    ws.column_dimensions['A'].width = 100\n                    ws['A2'].alignment = Alignment(wrap_text=True, vertical='top')\n                    return True\n\n                data_headers = sheet_config.get('headers', [])\n                data_columns = sheet_config.get('columns', [])\n\n                # Build fill/font palettes\n                fills = {\n                    \"header\":  PatternFill(start_color=theme_config['header_color'],      fill_type='solid'),\n                    \"summary\": PatternFill(start_color=theme_config['summary_background'], fill_type='solid'),\n                    \"stripe\":  PatternFill(start_color=theme_config['stripe_background'],  fill_type='solid'),\n                    \"white\":   PatternFill(start_color=\"FFFFFFFF\",                        fill_type='solid'),\n                }\n                fonts = {\n                    \"header\": Font(bold=True, color=\"FFFFFF\"),\n                    \"bold\":   Font(bold=True),\n                    \"italic\": Font(italic=True),\n                }\n                center_align = Alignment(horizontal='center', vertical='center')\n                right_align  = Alignment(horizontal='right',  vertical='center')\n\n                # ── Simple report ─────────────────────────────────────────────\n                if report_type == 'Simple':\n                    summary_header_data = sheet_config.get('summary_header')\n                    start_col   = 2 if summary_header_data else 1\n                    data_start  = 8 if summary_header_data else 1\n\n                    if summary_header_data:\n                        title_cell = ws.cell(row=1, column=1, value=\"Execution Summary\")\n                        title_cell.font      = fonts['bold']\n                        title_cell.alignment = center_align\n                        ws.merge_cells(start_row=1, start_column=1, end_row=1, end_column=2)\n                        for r_idx, (key, value) in enumerate(summary_header_data.items(), 2):\n                            ws.cell(row=r_idx, column=1, value=key).font = fonts['bold']\n                            ws.cell(row=r_idx, column=2, value=safe_cell_value(value))\n                        for row in ws.iter_rows(min_row=1,\n                                                max_row=len(summary_header_data) + 1,\n                                                min_col=1, max_col=2):\n                            for cell in row: cell.fill = fills['summary']\n\n                    if data_headers:\n                        for i, value in enumerate(data_headers, start_col):\n                            c           = ws.cell(row=data_start, column=i, value=value)\n                            c.font      = fonts['header']\n                            c.fill      = fills['header']\n                            c.alignment = center_align\n\n                        n_rows = len(data_columns[0]) if data_columns and data_columns[0] else 0\n                        for i in range(n_rows):\n                            for j, col in enumerate(data_columns, start_col):\n                                cell_value  = safe_cell_value(col[i] if i < len(col) else \"\")\n                                cell        = ws.cell(row=data_start + 1 + i, column=j, value=cell_value)\n                                if should_center_align(cell_value):\n                                    cell.alignment = center_align\n\n                        end_col = start_col + len(data_headers) - 1\n                        if n_rows > 0:\n                            for i, row_obj in enumerate(ws.iter_rows(\n                                    min_row=data_start + 1, max_row=data_start + n_rows,\n                                    min_col=start_col, max_col=end_col)):\n                                if (i + 1) % 2 == 0:\n                                    for cell in row_obj: cell.fill = fills['stripe']\n\n                        range_str      = \"{}{}:{}{}\".format(\n                            get_column_letter(start_col), data_start,\n                            get_column_letter(end_col), data_start + n_rows)\n                        safe_tbl_name  = create_safe_table_name(validated_name)\n                        tbl            = Table(displayName=safe_tbl_name, ref=range_str)\n                        tbl.tableStyleInfo = TableStyleInfo(\n                            name=BASE_TABLE_STYLE,\n                            showFirstColumn=False, showLastColumn=False,\n                            showRowStripes=False,  showColumnStripes=False)\n                        ws.add_table(tbl)\n\n                # ── Comparison report ─────────────────────────────────────────\n                elif report_type == 'Comparison':\n                    report_data, stats = process_comparison_data(data_columns, data_headers, logger)\n                    # report_headers = data_headers exactly — writer already includes\n                    # \"Update Status\" at position 3. Do NOT append a duplicate column.\n                    report_headers = data_headers\n                    total_changed_counter[0] += stats['changed']\n\n                    # Summary block (rows 1-6)\n                    ws['A1'] = \"Report Summary\"\n                    ws['A1'].font      = fonts['bold']\n                    ws['A1'].alignment = center_align\n                    ws.merge_cells('A1:B1')\n                    for cell in ws['A1:A1'][0]: cell.fill = fills['summary']\n                    for cell in ws['B1:B1'][0]: cell.fill = fills['summary']\n\n                    summary_rows = {\n                        \"Total Rows:\":  stats['total'],\n                        \"Changed:\":     stats['changed'],\n                        \"No Change:\":   stats['no_change'],\n                        \"Errors:\":      stats['errors'],\n                    }\n                    for i, (key, value) in enumerate(summary_rows.items(), 2):\n                        ws.cell(row=i, column=1, value=key).font = fonts['bold']\n                        ws.cell(row=i, column=2, value=value).alignment = right_align\n                    timestamp_str = datetime.now().strftime(\"%Y-%m-%d %H:%M:%S\")\n                    ws.merge_cells('A6:B6')\n                    ws['A6'].value     = \"Generated: {}\".format(timestamp_str)\n                    ws['A6'].font      = fonts['italic']\n                    ws['A6'].alignment = center_align\n                    for row in ws['A1:B6']:\n                        for cell in row: cell.fill = fills['summary']\n\n                    data_start = 8\n\n                    # Header row\n                    for i, value in enumerate(report_headers, 1):\n                        cell           = ws.cell(row=data_start, column=i, value=value)\n                        cell.font      = fonts['header']\n                        cell.fill      = fills['header']\n                        cell.alignment = center_align\n\n                    # Data rows — write values\n                    for i, row_info in enumerate(report_data):\n                        for j, value in enumerate(row_info['data'], 1):\n                            ws.cell(row=data_start + 1 + i, column=j,\n                                    value=safe_cell_value(value)).alignment = center_align\n\n                    # ── Highlighting rules (v1.9.2) ───────────────────────────\n                    # A row is only highlighted if something actually changed.\n                    # \"Changed\" = Update Status == \"Updated\" OR Moved == \"Moved\".\n                    # When a row HAS changes:\n                    #   - Connection ID column                    → yellow\n                    #   - Update Status column                    → yellow when == \"Updated\"\n                    #   - Moved column                            → yellow\n                    #   - Original/Updated Equipment ID           → yellow\n                    #   - Original/Updated Location (if moved)    → yellow via changed_cols\n                    #   - All other changed Original/Updated pairs → yellow via changed_cols\n                    # When a row has NO changes → everything white, no exceptions.\n                    CHANGED_FILL = PatternFill(start_color=\"FFFF00\", fill_type='solid')\n\n                    # ID anchor columns that get highlighted whenever the row has changes\n                    # Anchor col indices: Connection ID + Equip ID pair\n                    # (highlighted yellow whenever the row has ANY change)\n                    # 'Moved' is handled per-cell below (only yellow if == 'Moved')\n                    id_anchor_col_indices = {\n                        idx + 1\n                        for idx, h in enumerate(report_headers)\n                        if str(h).strip().lower() in (\n                            'connection id',\n                            'original: equipment id', 'updated: equipment id'\n                        )\n                    }\n\n                    # Find the 1-based column index for 'Update Status' / 'Moved'\n                    update_status_col_1based = next(\n                        (idx + 1 for idx, h in enumerate(report_headers)\n                         if str(h).strip().lower() == 'update status'),\n                        None\n                    )\n                    moved_col_1based = next(\n                        (idx + 1 for idx, h in enumerate(report_headers)\n                         if str(h).strip().lower() == 'moved'),\n                        None\n                    )\n\n                    if report_data:\n                        for i, row_obj in enumerate(ws.iter_rows(\n                                min_row=data_start + 1, max_row=ws.max_row,\n                                min_col=1, max_col=len(report_headers))):\n                            if i >= len(report_data): break\n                            row_info     = report_data[i]\n                            changed_cols = row_info.get('changed_cols', set())\n                            row_changed  = row_info.get('changed', False)\n                            row_data_vals = row_info.get('data', [])\n\n                            # Pre-compute: did this row actually update / move?\n                            update_status_col_0 = (\n                                update_status_col_1based - 1\n                                if update_status_col_1based else None\n                            )\n                            row_was_updated = (\n                                update_status_col_0 is not None and\n                                update_status_col_0 < len(row_data_vals) and\n                                str(row_data_vals[update_status_col_0]).strip() == 'Updated'\n                            )\n                            moved_col_0 = (moved_col_1based - 1) if moved_col_1based else None\n                            row_was_moved = (\n                                moved_col_0 is not None and\n                                moved_col_0 < len(row_data_vals) and\n                                str(row_data_vals[moved_col_0]).strip() == 'Moved'\n                            )\n\n                            for cell in row_obj:\n                                col_0 = cell.column - 1  # 0-based\n\n                                if row_changed and cell.column in id_anchor_col_indices:\n                                    # Connection ID + Equipment ID pair: yellow on any change\n                                    cell.fill = CHANGED_FILL\n                                elif update_status_col_1based and cell.column == update_status_col_1based:\n                                    # Update Status cell: yellow ONLY if this connector was actually updated\n                                    cell.fill = CHANGED_FILL if row_was_updated else fills['white']\n                                elif moved_col_1based and cell.column == moved_col_1based:\n                                    # Moved cell: yellow ONLY if this connector was actually moved\n                                    cell.fill = CHANGED_FILL if row_was_moved else fills['white']\n                                elif col_0 in changed_cols:\n                                    # This specific Original/Updated pair changed\n                                    cell.fill = CHANGED_FILL\n                                else:\n                                    # No change here — white\n                                    cell.fill = fills['white']\n\n                        # Freeze panes below summary + header\n                        ws.freeze_panes = ws.cell(row=data_start + 1, column=1)\n\n                        # Excel table\n                        range_str     = \"A{}:{}{}\".format(\n                            data_start,\n                            get_column_letter(len(report_headers)),\n                            data_start + len(report_data))\n                        safe_tbl_name = create_safe_table_name(validated_name)\n                        ctr = 1\n                        while safe_tbl_name in used_table_names:\n                            safe_tbl_name = \"{}{}\".format(\n                                create_safe_table_name(validated_name), ctr)\n                            ctr += 1\n                        used_table_names.add(safe_tbl_name)\n                        tbl = Table(displayName=safe_tbl_name, ref=range_str)\n                        tbl.tableStyleInfo = TableStyleInfo(\n                            name=BASE_TABLE_STYLE,\n                            showFirstColumn=False, showLastColumn=False,\n                            showRowStripes=False,  showColumnStripes=False)\n                        ws.add_table(tbl)\n\n                # ── Column auto-sizing ────────────────────────────────────────\n                col_widths = {}\n                for row in ws.rows:\n                    for cell in row:\n                        if cell.value:\n                            adjusted = (len(str(cell.value)) * 1.15) + 1\n                            col_widths[cell.column] = max(col_widths.get(cell.column, 0), adjusted)\n                for col_idx, max_len in col_widths.items():\n                    ws.column_dimensions[get_column_letter(col_idx)].width = min(max_len, MAX_COLUMN_WIDTH)\n\n                logger.log(\"Sheet '{}' created successfully.\".format(validated_name))\n                return True\n\n            except Exception as e:\n                logger.error(\"Failed to process sheet '{}': {}\\n{}\".format(\n                    validated_name or 'Unknown', e, traceback.format_exc()))\n                return False\n\n# ═══════════════════════════════════════════════════════════════════════════════\n# SECTION 8 — WORKBOOK ORCHESTRATOR\n# ═══════════════════════════════════════════════════════════════════════════════\n\n        def create_multi_sheet_excel_report(filepath, sheet_configs, logger,\n                                            theme_config, total_changed_counter):\n            is_path_valid, validated_filepath, is_default_path = validate_filepath(filepath, logger)\n            if not is_path_valid:\n                return False, \"Filepath validation failed.\"\n            try:\n                wb = openpyxl.Workbook()\n                wb.remove(wb.active)\n                used_sheet_names = set()\n                used_table_names = set()\n                sheet_count      = 0\n\n                for config in sheet_configs:\n                    orig_name  = config.get('name', 'Report Sheet')\n                    valid_name = validate_sheet_name(orig_name, logger)\n                    final_name = valid_name\n                    ctr        = 1\n                    while final_name in used_sheet_names:\n                        suffix     = \"_{}\".format(ctr)\n                        final_name = valid_name[:MAX_SHEET_NAME_LENGTH - len(suffix)] + suffix\n                        ctr       += 1\n                    if final_name != orig_name:\n                        logger.warning(\"Sheet '{}' renamed to '{}'.\".format(orig_name, final_name))\n                    config['name'] = final_name\n                    used_sheet_names.add(final_name)\n\n                    if process_and_create_sheet(wb, config, logger, used_table_names,\n                                               theme_config, total_changed_counter):\n                        sheet_count += 1\n\n                if sheet_count == 0:\n                    logger.warning(\"No data sheets were created.\")\n\n                # ── Script Log sheet ──────────────────────────────────────────\n                log_ws = wb.create_sheet(title=\"Script Log\")\n                log_ws.append([\"Timestamp\", \"Elapsed (s)\", \"Level\", \"Message\"])\n                pattern   = re.compile(r\"\\[(.*?)\\]\\[(.*?)s\\]\\[(.*?)\\] (.*)\", re.DOTALL)\n                hdr_fill  = PatternFill(start_color=theme_config['log_header_color'], fill_type='solid')\n                stripe_f  = PatternFill(start_color='FFEAEAEA', fill_type='solid')\n                error_f   = PatternFill(start_color='FFFFC7CE', fill_type='solid')\n                warn_f    = PatternFill(start_color='FFFFEB9C', fill_type='solid')\n                hdr_font  = Font(bold=True, color=\"FFFFFF\")\n                center_a  = Alignment(horizontal='center', vertical='center')\n                wrap_a    = Alignment(horizontal='left', vertical='top', indent=1, wrap_text=True)\n\n                for msg in logger.get_messages():\n                    m = pattern.match(msg)\n                    if m: log_ws.append([m.group(1), float(m.group(2)), m.group(3), m.group(4)])\n                    else:  log_ws.append([\"\", \"\", \"\", msg])\n\n                for cell in log_ws[\"1:1\"]:\n                    cell.font, cell.fill, cell.alignment = hdr_font, hdr_fill, center_a\n                for row_num in range(2, log_ws.max_row + 1):\n                    fill = stripe_f if row_num % 2 == 0 else None\n                    level = log_ws.cell(row=row_num, column=3).value\n                    if level == \"ERROR\": fill = error_f\n                    elif level == \"WARN\": fill = warn_f\n                    for col_num in range(1, 5):\n                        c = log_ws.cell(row=row_num, column=col_num)\n                        c.alignment = wrap_a if col_num == 4 else center_a\n                        if fill: c.fill = fill\n\n                for col, width in [('A', 12), ('B', 12), ('C', 10), ('D', 100)]:\n                    log_ws.column_dimensions[col].width = width\n                log_ws.freeze_panes = 'A2'\n\n                # ── Save ──────────────────────────────────────────────────────\n                final_fp = validated_filepath\n                logger.log(\"Saving workbook to: {}\".format(final_fp))\n                try:\n                    wb.save(filename=final_fp)\n                except PermissionError:\n                    logger.warning(\"Save failed — file is open. Saving with timestamp suffix.\")\n                    p        = Path(validated_filepath)\n                    final_fp = p.with_name(\"{}_{}{}\".format(\n                        p.stem, datetime.now().strftime('%Y%m%d_%H%M%S'), p.suffix))\n                    wb.save(filename=final_fp)\n\n                if platform.system() == \"Windows\":\n                    os.startfile(final_fp)\n\n                return True, \"Excel report with {} sheet(s) created: {}\".format(\n                    sheet_count, os.path.basename(final_fp))\n\n            except Exception as e:\n                msg = \"Unexpected error: {}\\n{}\".format(e, traceback.format_exc())\n                logger.error(msg)\n                return False, msg\n\n# ═══════════════════════════════════════════════════════════════════════════════\n# SECTION 9 — MAIN ENTRY POINT\n#\n#   Parses inputs, classifies each data package (Simple vs Comparison),\n#   auto-generates an \"All Updates Only\" companion sheet for any Comparison\n#   sheet (filtering to rows where Update Status = \"Updated\"), then\n#   calls the workbook orchestrator.\n# ═══════════════════════════════════════════════════════════════════════════════\n\n        def main():\n            try:\n                if len(IN) < 3:\n                    raise ValueError(\"Insufficient inputs. Expected filepath, sheet_names, theme.\")\n\n                filepath, sheet_names, theme_input = IN[0], IN[1], IN[2]\n                data_packages = IN[3:]\n                theme_config  = get_theme_config(theme_input, logger)\n                sheet_names   = [sheet_names] if isinstance(sheet_names, str) else sheet_names\n\n                if not isinstance(sheet_names, list):\n                    raise TypeError(\"Sheet names (IN[1]) must be a list.\")\n\n                n_names    = len(sheet_names)\n                n_packages = len(data_packages)\n                n_process  = min(n_names, n_packages)\n                if n_names != n_packages:\n                    logger.warning(\"Name/package count mismatch ({} vs {}). \"\n                                   \"Processing {}.\".format(n_names, n_packages, n_process))\n\n                total_changed_counter = [0]\n                sheet_configs         = []\n\n                # ── Build sheet configs ───────────────────────────────────────\n                for i in range(n_process):\n                    sheet_name = sheet_names[i]\n                    package    = data_packages[i]\n                    headers, data_columns, error = normalize_data_package(package, logger)\n\n                    if error:\n                        logger.error(\"Invalid data for sheet '{}': {}\".format(sheet_name, error))\n                        sheet_configs.append({\n                            'name': sheet_name,\n                            'type': 'Error',\n                            'error_message': (\"The data package for this sheet was null or \"\n                                              \"in an unrecognized format. See Script Log.\")\n                        })\n                        continue\n\n                    config       = {'name': sheet_name, 'headers': headers, 'columns': data_columns}\n                    header_str   = ' '.join(str(h) for h in headers).lower()\n                    is_sow_log   = isinstance(package, dict) and 'debug_log' in package\n\n                    if is_sow_log:\n                        config['type']           = 'Simple'\n                        summary_data             = {k: (v[0] if isinstance(v, list) and len(v) == 1 else v)\n                                                    for k, v in package.items() if k != 'debug_log'}\n                        config['summary_header'] = summary_data\n                        config['headers']        = ['Log Messages']\n                        config['columns']        = [package.get('debug_log', [])]\n                    elif 'original' in header_str and 'updated' in header_str:\n                        logger.log(\"Classifying '{}' as Comparison report.\".format(sheet_name))\n                        config['type']           = 'Comparison'\n                        config['summary_header'] = None\n                    else:\n                        logger.log(\"Classifying '{}' as Simple report.\".format(sheet_name))\n                        config['type']           = 'Simple'\n                        config['summary_header'] = None\n\n                    sheet_configs.append(config)\n\n                # ── Auto-add \"All Updates Only\" for Comparison sheets ─────────\n                # Includes rows where Update Status == \"Updated\" (param changes)\n                # OR Moved == \"Moved\" (position changed), so nothing is missed.\n                auto_sheets = []\n                for i in range(n_process):\n                    cfg = sheet_configs[i] if i < len(sheet_configs) else None\n                    if not cfg or cfg.get('type') != 'Comparison':\n                        continue\n                    raw_pkg = data_packages[i]\n                    if not (isinstance(raw_pkg, list) and len(raw_pkg) > 1 and\n                            isinstance(raw_pkg[0], list)):\n                        continue\n\n                    hdr        = raw_pkg[0]\n                    status_idx = next(\n                        (j for j, h in enumerate(hdr) if str(h).strip().lower() == 'update status'),\n                        None\n                    )\n                    moved_idx  = next(\n                        (j for j, h in enumerate(hdr) if str(h).strip().lower() == 'moved'),\n                        None\n                    )\n                    if status_idx is None and moved_idx is None:\n                        continue\n\n                    def row_has_any_change(r):\n                        was_updated = (status_idx is not None and\n                                       len(r) > status_idx and\n                                       str(r[status_idx]).strip() == 'Updated')\n                        was_moved   = (moved_idx is not None and\n                                       len(r) > moved_idx and\n                                       str(r[moved_idx]).strip() == 'Moved')\n                        return was_updated or was_moved\n\n                    filtered = [hdr] + [r for r in raw_pkg[1:] if row_has_any_change(r)]\n                    if len(filtered) <= 1:\n                        logger.log(\"No updated rows found for 'All Updates Only' sheet.\")\n                        continue\n\n                    fh, fc, ferr = normalize_data_package(filtered, logger)\n                    if ferr:\n                        continue\n\n                    auto_sheets.append({\n                        'name':           'All Updates Only',\n                        'type':           'Comparison',\n                        'headers':        fh,\n                        'columns':        fc,\n                        'summary_header': None,\n                    })\n                    logger.log(\"Auto-added 'All Updates Only' with {} updated row(s).\".format(\n                        len(filtered) - 1))\n\n                sheet_configs.extend(auto_sheets)\n\n                if not sheet_configs:\n                    logger.warning(\"No sheet configurations assembled.\")\n\n                success, message = create_multi_sheet_excel_report(\n                    filepath, sheet_configs, logger, theme_config, total_changed_counter)\n\n                logger.log(\"Script {}.\".format(\"completed successfully\" if success else \"completed with errors\"))\n                return [message, logger.get_messages(), str(total_changed_counter[0])]\n\n            except Exception as e:\n                err = \"Fatal error in main(): {}\\n{}\".format(e, traceback.format_exc())\n                logger.error(err)\n                return [err, logger.get_messages(), \"0\"]\n\n        OUT = main()\n",
+      "Engine": "CPython3",
+      "EngineName": "CPython3",
+      "VariableInputPorts": true,
+      "Id": "5aac8cc4394f44a2bbcd8f45c39c998c",
+      "Inputs": [
+        {
+          "Id": "e919cd16d0ac4eeda53709416367debf",
+          "Name": "IN[0]",
+          "Description": "",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Id": "fb3ca4f2bfa942489dee642369c0cb59",
+          "Name": "IN[1]",
+          "Description": "",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Id": "23521f44002c4c34bf07ad0613218b03",
+          "Name": "IN[2]",
+          "Description": "",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Id": "2c661f08499c44c39475e54a7273cc1c",
+          "Name": "IN[3]",
+          "Description": "",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Id": "e1af072ddcc94b798b3fbf9346ffa884",
+          "Name": "IN[4]",
+          "Description": "",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Outputs": [
+        {
+          "Id": "f4f98e02cc58433ab34777f1bb50066a",
+          "Name": "OUT",
+          "Description": "",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Disabled",
+      "Description": "Runs an embedded Python script."
+    },
+    {
+      "ConcreteType": "Dynamo.Graph.Nodes.CodeBlockNodeModel, DynamoCore",
+      "NodeType": "CodeBlockNode",
+      "Code": "x[0];",
+      "Id": "8a7193a89e52439eb56e0d0ae9bda0c1",
+      "Inputs": [
+        {
+          "Id": "abab1574bbd448a4b3ec885c32df80cf",
+          "Name": "x",
+          "Description": "x",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Outputs": [
+        {
+          "Id": "dd5dfeac862242a992d38907dc62a7dd",
+          "Name": "",
+          "Description": "Value of expression at line 1",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Disabled",
+      "Description": "Allows for DesignScript code to be authored directly"
+    },
+    {
+      "ConcreteType": "Dynamo.Graph.Nodes.CodeBlockNodeModel, DynamoCore",
+      "NodeType": "CodeBlockNode",
+      "Code": "x[1];",
+      "Id": "86fcf23e202047ccb6fe553085a90c87",
+      "Inputs": [
+        {
+          "Id": "6c21b928712c44d8a3b6cb7954e0f1c1",
+          "Name": "x",
+          "Description": "x",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Outputs": [
+        {
+          "Id": "0db7d2fcca5441c991b2480e185a3416",
+          "Name": "",
+          "Description": "Value of expression at line 1",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Disabled",
+      "Description": "Allows for DesignScript code to be authored directly"
+    },
+    {
+      "ConcreteType": "CoreNodeModels.Watch, CoreNodeModels",
+      "NodeType": "ExtensionNode",
+      "Id": "7d0885bea9434743bce438d60f15c12d",
+      "Inputs": [
+        {
+          "Id": "dcdc7a2961ec4cd1a17594c266a8c88a",
+          "Name": "",
+          "Description": "Node to show output from",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Outputs": [
+        {
+          "Id": "860a03c702c748ac9f7f46a3cabd1517",
+          "Name": "",
+          "Description": "Node output",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Disabled",
+      "Description": "Visualize the node's output"
+    },
+    {
+      "ConcreteType": "CoreNodeModels.Watch, CoreNodeModels",
+      "NodeType": "ExtensionNode",
+      "Id": "1a68a57e13464a9c9c2050bf57b32269",
+      "Inputs": [
+        {
+          "Id": "633c37f0367445b1be8a4794f110bb82",
+          "Name": "",
+          "Description": "Node to show output from",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Outputs": [
+        {
+          "Id": "ace96a83fad54f0fb294edb080c559e9",
+          "Name": "",
+          "Description": "Node output",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Disabled",
+      "Description": "Visualize the node's output"
+    },
+    {
+      "ConcreteType": "CoreNodeModels.Input.StringInput, CoreNodeModels",
+      "NodeType": "StringInputNode",
+      "InputValue": "Select/Browse Matrix Excel File",
+      "Id": "841599b738f743b8b51724d4b6528115",
+      "Inputs": [],
+      "Outputs": [
+        {
+          "Id": "e4dc9694753f448aa92720966e0aee7a",
+          "Name": "",
+          "Description": "String",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Disabled",
+      "Description": "Creates a string."
+    },
+    {
+      "ConcreteType": "CoreNodeModels.Input.StringInput, CoreNodeModels",
+      "NodeType": "StringInputNode",
+      "InputValue": "Select/Browse Matrix Excel File",
+      "Id": "49639b91e4bb4664ab9f3a2f31154fbf",
+      "Inputs": [],
+      "Outputs": [
+        {
+          "Id": "50a99a98d2dc43b9bfff7356f9742722",
+          "Name": "",
+          "Description": "String",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Disabled",
+      "Description": "Creates a string."
+    },
+    {
+      "ConcreteType": "CoreNodeModels.Input.BoolSelector, CoreNodeModels",
+      "NodeType": "BooleanInputNode",
+      "InputValue": true,
+      "Id": "da5f7a9b0dda4a94810e4f092fdea61c",
+      "Inputs": [],
+      "Outputs": [
+        {
+          "Id": "968b898a66e44cdc936f0e0c2b4996a3",
+          "Name": "",
+          "Description": "Boolean",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Disabled",
+      "Description": "Selection between a true and false."
+    },
+    {
+      "ConcreteType": "Dynamo.Graph.Nodes.CustomNodes.Function, DynamoCore",
+      "FunctionSignature": "219697d9-d6eb-4f4a-97d6-1fc8acac27a7",
+      "FunctionType": "Graph",
+      "NodeType": "FunctionNode",
+      "Id": "bc70624bb7ef42b997b94b50a1bb5a49",
+      "Inputs": [
+        {
+          "Id": "98164a1a08fb48b289d472328dce7e26",
+          "Name": "InputName",
+          "Description": "string\nDefault value : \"\"",
+          "UsingDefaultValue": true,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Id": "888b426c476449abbd40fd6fcb6290ad",
+          "Name": "DefaulPath",
+          "Description": "string\nDefault value : \"FilePath\"",
+          "UsingDefaultValue": true,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Id": "ab345df7441e4b548c251a373ebf5f54",
+          "Name": "ButtonText",
+          "Description": "Is ignored if a default path is given\n\nstring\nDefault value : \"FilePath\"",
+          "UsingDefaultValue": true,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Outputs": [
+        {
+          "Id": "71f5b15f358a4611ad0c6b4aa987f754",
+          "Name": "FilePath input",
+          "Description": "return value",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Auto",
+      "Description": "Create filepath input for UI.MultipleInputForm ++ . Check out www.data-shapes.net for more infos !"
+    },
+    {
+      "ConcreteType": "Dynamo.Graph.Nodes.CustomNodes.Function, DynamoCore",
+      "FunctionSignature": "9fbd05c0-ec1f-4bd3-bf37-969a1552eab8",
+      "FunctionType": "Graph",
+      "NodeType": "FunctionNode",
+      "Id": "5b0d950a63ed4df3bd3f6923620d3713",
+      "Inputs": [
+        {
+          "Id": "dedb6e1208154ebeba3fe158e766b448",
+          "Name": "Description_optional_",
+          "Description": "string\nDefault value : \"\"",
+          "UsingDefaultValue": true,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Id": "4916ef3a977c4cef8677dedb3af963b3",
+          "Name": "Logo_optional_",
+          "Description": "var\nDefault value : \"\"",
+          "UsingDefaultValue": true,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Id": "23ad43cf9c6a4fa99de918f437025a9c",
+          "Name": "ButtonText_optional_",
+          "Description": "string\nDefault value : \"Set Values\"",
+          "UsingDefaultValue": true,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Id": "86c9685088bc4caea8f3c64ef3a971cc",
+          "Name": "Inputs_",
+          "Description": "var[]",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Id": "a150145a653a44dc8d73665afd90a5c4",
+          "Name": "Toggle_",
+          "Description": "bool\nDefault value : false",
+          "UsingDefaultValue": true,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Id": "50440b604b4b40019875529d43de897d",
+          "Name": "LinkToHelp_optional_",
+          "Description": "string\nDefault value : null",
+          "UsingDefaultValue": true,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Id": "c43170a5366f43988390ac28af6d54d6",
+          "Name": "CancelButtonText_optional_",
+          "Description": " Cancel button will only be displayed if a label text is entered here\n\nstring\nDefault value : null",
+          "UsingDefaultValue": true,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Id": "a56f14b35751498a9b1d785884a5fbd6",
+          "Name": "MaxHeight_optional_",
+          "Description": "int\nDefault value : 0",
+          "UsingDefaultValue": true,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Id": "3af1fb18d6e047829aaeca5c5facb874",
+          "Name": "Width_optional_",
+          "Description": "int\nDefault value : 400",
+          "UsingDefaultValue": true,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Id": "2d3f4c36a81f4f88a4f00953014360fd",
+          "Name": "LabelWidth_optional_",
+          "Description": "int\nDefault value : 140",
+          "UsingDefaultValue": true,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Outputs": [
+        {
+          "Id": "02e7a2e71ae147b0bbb538fc2b7c2243",
+          "Name": "User Inputs",
+          "Description": "return value",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Id": "107ca7d77e8b47febafac0268192f260",
+          "Name": "Was Run ",
+          "Description": "return value",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Id": "31c04678930d4bc288bc52cdf1dbf971",
+          "Name": "Was Cancelled",
+          "Description": "return value",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Auto",
+      "Description": "Create a form with multiple inputs. \r\nsee www.data-shapes.net for tutorials and infos!"
+    },
+    {
+      "ConcreteType": "Dynamo.Graph.Nodes.ZeroTouch.DSFunction, DynamoCore",
+      "NodeType": "FunctionNode",
+      "FunctionSignature": "DSCore.List.FirstItem@var[]..[]",
+      "Id": "f286486a2bf441ba8cf812283de52534",
+      "Inputs": [
+        {
+          "Id": "34ed41a8b99c4cf690e07dcd13e58d82",
+          "Name": "list",
+          "Description": "List to get the first item from.\n\nvar[]..[]",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Outputs": [
+        {
+          "Id": "c9c5f9c85edd4b9cacb1580299762b71",
+          "Name": "item",
+          "Description": "First item in the list.",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Auto",
+      "Description": "Returns the first item in a list.\n\nList.FirstItem (list: var[]..[]): var[]..[]"
+    }
+  ],
+  "Connectors": [
+    {
+      "Start": "1c724aadab844a7cbbd1ecf7b8d03c6f",
+      "End": "999dc88325f54f3bb32c2445d1bb54fd",
+      "Id": "4bfab4e74e944db58cbd6bcc5d03dd43",
+      "IsHidden": "False"
+    },
+    {
+      "Start": "67598ab79d4b48efbc39bf26887ec7ba",
+      "End": "05a5fb0a246b448e963dffc2e657bd63",
+      "Id": "92d85e114cc3425e9d1d15d9f53853be",
+      "IsHidden": "False"
+    },
+    {
+      "Start": "5d42c00e975c4e07a957af292bf2833b",
+      "End": "2acb6025317d4b528ada58348a69265c",
+      "Id": "51b9214a5dbb4f20bd4cb06b16a22bff",
+      "IsHidden": "False"
+    },
+    {
+      "Start": "e9453459cc4d4f4489312a50f61931d8",
+      "End": "8571418bd7044a39830269ccff734376",
+      "Id": "a1d27a8f183c4391b1c12a50b121ccdd",
+      "IsHidden": "False"
+    },
+    {
+      "Start": "52dbab4e7fd84e9091c58fc113b16b15",
+      "End": "c1a06c691e624b67a56e5c026b2e646d",
+      "Id": "4fbc467791814b4a8fa2279a99c3ba2c",
+      "IsHidden": "False"
+    },
+    {
+      "Start": "d3a7c07c165d4e7da1feef3306608c81",
+      "End": "2067a830209b46518ab2775e60a8b294",
+      "Id": "774363691a88452189b8e143f7d5277b",
+      "IsHidden": "False"
+    },
+    {
+      "Start": "7e9b266cb6d8437da162ed69620624ec",
+      "End": "a00da4f5aaed4bd5827b8641065674b0",
+      "Id": "260e11b783a34211b067c0e1934780c7",
+      "IsHidden": "False"
+    },
+    {
+      "Start": "03912d77039b4a499a07dfe96de593c7",
+      "End": "33e23112eef7463d8e7d454def912c04",
+      "Id": "dc737b097b3a4746b65f9ca46cf36dca",
+      "IsHidden": "False"
+    },
+    {
+      "Start": "90608d2a5cb94e38af5abdfe593ce1f7",
+      "End": "6ef9f05e6ce1471b916dfb4998fe727f",
+      "Id": "29feacc5f0ad48728f83a80a857a6050",
+      "IsHidden": "False"
+    },
+    {
+      "Start": "dbb4686a7c2446fc9db35184859fec2e",
+      "End": "dcdc7a2961ec4cd1a17594c266a8c88a",
+      "Id": "826c839351d847afa45af9818f993745",
+      "IsHidden": "False"
+    },
+    {
+      "Start": "dbb4686a7c2446fc9db35184859fec2e",
+      "End": "6c21b928712c44d8a3b6cb7954e0f1c1",
+      "Id": "4fb8a5ac13b74454b7a5f2bfde57024f",
+      "IsHidden": "False"
+    },
+    {
+      "Start": "dbb4686a7c2446fc9db35184859fec2e",
+      "End": "abab1574bbd448a4b3ec885c32df80cf",
+      "Id": "fa51188d454a4bedbef4be49694830c4",
+      "IsHidden": "False"
+    },
+    {
+      "Start": "3f14ae721f7b4e30bf61c8ab0ce556b9",
+      "End": "fb3ca4f2bfa942489dee642369c0cb59",
+      "Id": "05954b8a3c5546ae9adf0a4bed546c0d",
+      "IsHidden": "False"
+    },
+    {
+      "Start": "c1a4ec2f93524fc4a1ed0c7b79b102b0",
+      "End": "e919cd16d0ac4eeda53709416367debf",
+      "Id": "1730788d476f41908a4569def22aa7e4",
+      "IsHidden": "False"
+    },
+    {
+      "Start": "9ec1c8c35c874c189b13aa4682bd1e7a",
+      "End": "23521f44002c4c34bf07ad0613218b03",
+      "Id": "ab13348fde84421aa194a853feb1ac09",
+      "IsHidden": "False"
+    },
+    {
+      "Start": "f4f98e02cc58433ab34777f1bb50066a",
+      "End": "633c37f0367445b1be8a4794f110bb82",
+      "Id": "155e962efd334084bf3325a7c01db708",
+      "IsHidden": "False"
+    },
+    {
+      "Start": "dd5dfeac862242a992d38907dc62a7dd",
+      "End": "2c661f08499c44c39475e54a7273cc1c",
+      "Id": "b6ee5815eaf0479f9df2a09b14d3d637",
+      "IsHidden": "False"
+    },
+    {
+      "Start": "0db7d2fcca5441c991b2480e185a3416",
+      "End": "e1af072ddcc94b798b3fbf9346ffa884",
+      "Id": "3970803b7ae14f2da7b9463dfce01f2d",
+      "IsHidden": "False"
+    },
+    {
+      "Start": "e4dc9694753f448aa92720966e0aee7a",
+      "End": "98164a1a08fb48b289d472328dce7e26",
+      "Id": "535f8ca5e3d746979f570fa2bb16e8fb",
+      "IsHidden": "False"
+    },
+    {
+      "Start": "50a99a98d2dc43b9bfff7356f9742722",
+      "End": "ab345df7441e4b548c251a373ebf5f54",
+      "Id": "71198d6d9fc2426bbae6387486bf691d",
+      "IsHidden": "False"
+    },
+    {
+      "Start": "968b898a66e44cdc936f0e0c2b4996a3",
+      "End": "a150145a653a44dc8d73665afd90a5c4",
+      "Id": "b99b4dd81ccf4045bb964cf6b9bc658e",
+      "IsHidden": "False"
+    },
+    {
+      "Start": "71f5b15f358a4611ad0c6b4aa987f754",
+      "End": "86c9685088bc4caea8f3c64ef3a971cc",
+      "Id": "f000975ffb5447aebe125a6f4a93be23",
+      "IsHidden": "False"
+    },
+    {
+      "Start": "02e7a2e71ae147b0bbb538fc2b7c2243",
+      "End": "34ed41a8b99c4cf690e07dcd13e58d82",
+      "Id": "8368225bc7154c798a00d3d926f0908d",
+      "IsHidden": "False"
+    },
+    {
+      "Start": "c9c5f9c85edd4b9cacb1580299762b71",
+      "End": "fc6ab025d002421d92d705b9ecd8cfb4",
+      "Id": "7b4a2f40f6e24830b11ef91d7c4408b8",
+      "IsHidden": "False"
+    },
+    {
+      "Start": "c9c5f9c85edd4b9cacb1580299762b71",
+      "End": "0cdee0efda474b729b4e7b8705c5c54e",
+      "Id": "8ae8ba6518104c23a8923dddf8cc1fa6",
+      "IsHidden": "False"
+    }
+  ],
+  "Dependencies": [
+    "219697d9-d6eb-4f4a-97d6-1fc8acac27a7",
+    "9fbd05c0-ec1f-4bd3-bf37-969a1552eab8"
+  ],
+  "NodeLibraryDependencies": [
+    {
+      "Name": "Data-Shapes",
+      "Version": "2026.4.2",
+      "ReferenceType": "Package",
+      "Nodes": [
+        "bc70624bb7ef42b997b94b50a1bb5a49",
+        "5b0d950a63ed4df3bd3f6923620d3713"
+      ]
+    },
+    {
+      "Name": "07645 Process Utility Matrix.xlsx",
+      "ReferenceType": "External",
+      "Nodes": [
+        "f286486a2bf441ba8cf812283de52534"
+      ]
+    }
+  ],
+  "Thumbnail": "",
+  "GraphDocumentationURL": null,
+  "ExtensionWorkspaceData": [
+    {
+      "ExtensionGuid": "28992e1d-abb9-417f-8b1b-05e053bee670",
+      "Name": "Properties",
+      "Version": "2.16",
+      "Data": {}
+    },
+    {
+      "ExtensionGuid": "DFBD9CC0-DB40-457A-939E-8C8555555A9D",
+      "Name": "Generative Design",
+      "Version": "3.0",
+      "Data": {}
+    }
+  ],
+  "Author": "None provided",
+  "Linting": {
+    "activeLinter": "None",
+    "activeLinterId": "7b75fb44-43fd-4631-a878-29f4d5d8399a",
+    "warningCount": 0,
+    "errorCount": 0
+  },
+  "Bindings": [],
+  "View": {
+    "Dynamo": {
+      "ScaleFactor": 1.0,
+      "HasRunWithoutCrash": true,
+      "IsVisibleInDynamoLibrary": true,
+      "Version": "2.16.4.10216",
+      "RunType": "Manual",
+      "RunPeriod": "1000"
+    },
+    "Camera": {
+      "Name": "Background Preview",
+      "EyeX": -17.0,
+      "EyeY": 24.0,
+      "EyeZ": 50.0,
+      "LookX": 12.0,
+      "LookY": -13.0,
+      "LookZ": -58.0,
+      "UpX": 0.0,
+      "UpY": 1.0,
+      "UpZ": 0.0
+    },
+    "ConnectorPins": [],
+    "NodeViews": [
+      {
+        "Name": "Extractor Config",
+        "ShowGeometry": true,
+        "Id": "e94bc789325d4274bff4224c29ea9288",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "X": -479.32241922785624,
+        "Y": 148.90407346341135
+      },
+      {
+        "Name": "Excel Data Extractor",
+        "ShowGeometry": true,
+        "Id": "5023219ce9b64671a82ba45213f05620",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "X": 769.52787843198757,
+        "Y": 345.28810497145639
+      },
+      {
+        "Name": "PW Config",
+        "ShowGeometry": true,
+        "Id": "9cb1b91b506640ac9345b41b25ecf4a6",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "X": 624.70820643103934,
+        "Y": -925.56370320723977
+      },
+      {
+        "Name": "Parameter Writer",
+        "ShowGeometry": true,
+        "Id": "7ba91bbdb16a41adbfbb8c8469faad7d",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "X": 1369.4971228001432,
+        "Y": -709.9573331319458
+      },
+      {
+        "Name": "Report Config",
+        "ShowGeometry": true,
+        "Id": "14cc25fdc511440197c5e00fc7ddfcd0",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "X": 2518.9863973689294,
+        "Y": -277.73874398846613
+      },
+      {
+        "Name": "ExcelGen",
+        "ShowGeometry": true,
+        "Id": "5aac8cc4394f44a2bbcd8f45c39c998c",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "X": 2980.2177137220751,
+        "Y": -154.80239438584579
+      },
+      {
+        "Name": "Index x[0]",
+        "ShowGeometry": true,
+        "Id": "8a7193a89e52439eb56e0d0ae9bda0c1",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "X": 2535.9427762773621,
+        "Y": -9.0707703428262221
+      },
+      {
+        "Name": "Index x[1]",
+        "ShowGeometry": true,
+        "Id": "86fcf23e202047ccb6fe553085a90c87",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "X": 2537.7297059384118,
+        "Y": 110.55142541932753
+      },
+      {
+        "Name": "Watch - PW Output",
+        "ShowGeometry": true,
+        "Id": "7d0885bea9434743bce438d60f15c12d",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "X": 1642.4055952031526,
+        "Y": -997.22861183266093
+      },
+      {
+        "Name": "Watch - ExcelGen",
+        "ShowGeometry": true,
+        "Id": "1a68a57e13464a9c9c2050bf57b32269",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "X": 3191.2111280732843,
+        "Y": -156.41700650142673
+      },
+      {
+        "Name": "String",
+        "ShowGeometry": true,
+        "Id": "841599b738f743b8b51724d4b6528115",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "X": -1387.7282805937564,
+        "Y": -717.93204194720613
+      },
+      {
+        "Name": "String",
+        "ShowGeometry": true,
+        "Id": "49639b91e4bb4664ab9f3a2f31154fbf",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "X": -1387.6097509019621,
+        "Y": -577.72390398825007
+      },
+      {
+        "Name": "Relocate Connectors",
+        "ShowGeometry": true,
+        "Id": "da5f7a9b0dda4a94810e4f092fdea61c",
+        "IsSetAsInput": true,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "X": -1017.0316487756991,
+        "Y": -474.54215969472671
+      },
+      {
+        "Name": "FilePath Data",
+        "ShowGeometry": true,
+        "Id": "bc70624bb7ef42b997b94b50a1bb5a49",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "X": -1066.8046836581857,
+        "Y": -693.17193536665911
+      },
+      {
+        "Name": "MultipleInputForm ++",
+        "ShowGeometry": true,
+        "Id": "5b0d950a63ed4df3bd3f6923620d3713",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "X": -651.30665157172416,
+        "Y": -691.24297300090268
+      },
+      {
+        "Name": "List.FirstItem",
+        "ShowGeometry": true,
+        "Id": "f286486a2bf441ba8cf812283de52534",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "X": -248.36218576677766,
+        "Y": -791.249944245183
+      }
+    ],
+    "Annotations": [
+      {
+        "Id": "b5d7152d9f5a49df8112db06eda582e4",
+        "Title": "File Selection",
+        "DescriptionText": "<Double click here to edit group description>",
+        "IsExpanded": true,
+        "WidthAdjustment": 0.0,
+        "HeightAdjustment": 0.0,
+        "Nodes": [
+          "841599b738f743b8b51724d4b6528115",
+          "49639b91e4bb4664ab9f3a2f31154fbf",
+          "da5f7a9b0dda4a94810e4f092fdea61c",
+          "bc70624bb7ef42b997b94b50a1bb5a49",
+          "5b0d950a63ed4df3bd3f6923620d3713",
+          "f286486a2bf441ba8cf812283de52534"
+        ],
+        "HasNestedGroups": false,
+        "Left": -1397.7282805937564,
+        "Top": -863.649944245183,
+        "Width": 1335.3660948269787,
+        "Height": 616.20697124428034,
+        "FontSize": 36.0,
+        "InitialTop": -791.249944245183,
+        "InitialHeight": 461.70778455045627,
+        "TextblockHeight": 62.4,
+        "Background": "#FFC1D676"
+      },
+      {
+        "Id": "e709f0cd153a43f2a76f4b77c738daae",
+        "Title": "Info Extractor Configure",
+        "DescriptionText": "Explanation:\nTells the graph which Excel sheet to read, which columns to grab, and which rows to ignore. Only pulls rows with a recognized Connection ID and skips anything marked Obsolete.",
+        "IsExpanded": true,
+        "WidthAdjustment": 0.0,
+        "HeightAdjustment": 0.0,
+        "Nodes": [
+          "e94bc789325d4274bff4224c29ea9288",
+          "5023219ce9b64671a82ba45213f05620"
+        ],
+        "HasNestedGroups": false,
+        "Left": -489.32241922785624,
+        "Top": 66.904073463411351,
+        "Width": 1492.0502976598439,
+        "Height": 1596.2,
+        "FontSize": 36.0,
+        "InitialTop": 148.90407346341135,
+        "InitialHeight": 341.38403150804504,
+        "TextblockHeight": 72.0,
+        "Background": "#FF48B9FF"
+      },
+      {
+        "Id": "400a98eedd0f41cebc7f52744be8e90b",
+        "Title": "Revit Parameter Writer",
+        "DescriptionText": "Param Writer + Config\nOpens a dialog on run where you select which connector families to move and which to update — independently. For selected Move families, repositions each connector onto its parent Data Cube, evenly spaced along the cube's longest axis. For selected Update families, reads the UM-Revit Mapping sheet directly from the Utility Matrix Excel file to determine which parameters apply to which family, then writes values from the Excel data to matched Revit elements keyed by Connection ID. If a parameter is read-only (type parameter), it finds and swaps to the matching family type instead of writing directly. Config supplies the Revit categories to collect from and the key parameter (Connection ID).",
+        "IsExpanded": true,
+        "WidthAdjustment": 0.0,
+        "HeightAdjustment": 0.0,
+        "Nodes": [
+          "9cb1b91b506640ac9345b41b25ecf4a6",
+          "7ba91bbdb16a41adbfbb8c8469faad7d",
+          "7d0885bea9434743bce438d60f15c12d"
+        ],
+        "HasNestedGroups": false,
+        "Left": 614.70820643103934,
+        "Top": -1108.028611832661,
+        "Width": 1316.0973887721134,
+        "Height": 715.86490862542121,
+        "FontSize": 36.0,
+        "InitialTop": -997.22861183266093,
+        "InitialHeight": 432.27127870071524,
+        "TextblockHeight": 100.8,
+        "Background": "#FFFFAA45"
+      },
+      {
+        "Id": "f7f4c42aa9a24d48b9ad7a8b7b7800b2",
+        "Title": "Excel Report generator",
+        "DescriptionText": "ExcelGen + Config\nTakes the Param Writer's output and generates a formatted multi-sheet Excel report. Automatically adds a second \"All Updates Only\" sheet filtering to only rows where something actually changed — either a parameter was written or the connector was moved. Cells highlight yellow on a per-column basis: only the specific Original/Updated pairs that actually changed turn yellow, not the whole row. The Moved and Update Status columns highlight independently. Falls back to Desktop if the save path is invalid, saves a timestamped copy if the file is locked. Config supplies the save path (Update_Data_Report.xlsx), sheet names (Connector Updates, Metrics), and color theme (Blue).",
+        "IsExpanded": true,
+        "WidthAdjustment": 0.0,
+        "HeightAdjustment": 0.0,
+        "Nodes": [
+          "14cc25fdc511440197c5e00fc7ddfcd0",
+          "5aac8cc4394f44a2bbcd8f45c39c998c",
+          "8a7193a89e52439eb56e0d0ae9bda0c1",
+          "86fcf23e202047ccb6fe553085a90c87",
+          "1a68a57e13464a9c9c2050bf57b32269"
+        ],
+        "HasNestedGroups": false,
+        "Left": 2508.9863973689294,
+        "Top": -402.93874398846611,
+        "Width": 970.624730704355,
+        "Height": 645.29016940779366,
+        "FontSize": 36.0,
+        "InitialTop": -277.73874398846613,
+        "InitialHeight": 533.29016940779366,
+        "TextblockHeight": 115.19999999999999,
+        "Background": "#FFC1D676"
+      }
+    ],
+    "X": 349.32921064694403,
+    "Y": 345.77316568164,
+    "Zoom": 0.13561525339929509
+  }
+}

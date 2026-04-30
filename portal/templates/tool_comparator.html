@@ -1,0 +1,120 @@
+{% extends 'base.html' %}
+{% set page_feedback_source = 'comparator' %}
+
+{% block title %}P&ID Comparison Checker - Stellar Engineering{% endblock %}
+
+{% block content %}
+<div class="grid gap-5 lg:grid-cols-[1fr_360px]">
+  <section class="space-y-5">
+    <div class="ui-panel rounded-lg p-4 sm:p-5">
+      <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+        <div>
+          <p class="text-xs font-bold uppercase tracking-wide ui-muted">P&amp;ID Comparison Checker</p>
+          <h1 class="mt-1 font-display text-2xl font-semibold">Compare PDF to Excel tag list</h1>
+          <p class="mt-1 text-sm ui-muted">Upload one P&amp;ID PDF and one `.xlsx` file. The existing comparison route returns a ZIP package.</p>
+        </div>
+        <button type="button" data-feedback-open data-feedback-source="comparator" class="ui-button ui-button-secondary">Feedback</button>
+      </div>
+    </div>
+
+    <div class="ui-panel overflow-hidden rounded-lg">
+      <div class="flex">
+        <div class="w-1 shrink-0 bg-amber-400"></div>
+        <div class="p-4">
+          <p class="text-xs font-bold uppercase tracking-wide text-amber-600 dark:text-amber-400">Important Notice</p>
+          <p class="mt-2 text-sm leading-6">This tool is built to <strong>assist and accelerate</strong> review workflows — it does not replace human verification. Automated outputs are subject to errors, missed items, and edge cases. Always apply professional judgment to every result and report issues through the Feedback button.</p>
+          <label class="mt-4 flex cursor-pointer items-center gap-3">
+            <input type="checkbox" id="disclaimerCheck" class="h-4 w-4 rounded accent-[var(--action)]">
+            <span class="text-sm font-semibold">I understand — this tool assists but does not replace my professional judgment</span>
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <form action="{{ url_for('compare') }}" method="post" enctype="multipart/form-data" class="ui-panel rounded-lg" data-upload-form>
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <div class="border-b border-[var(--line)] px-4 py-3">
+        <h2 class="font-display text-lg font-semibold">Upload files</h2>
+      </div>
+      <div class="space-y-4 p-4">
+        <div data-dropzone data-empty-name="No PDF selected" data-empty-size="PDF only" class="cursor-pointer rounded-md border border-dashed border-[var(--line)] bg-slate-50 p-4 dark:bg-slate-900">
+          <input type="file" name="pdf" accept="application/pdf" required class="sr-only">
+          <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <div class="font-semibold text-red-600 dark:text-red-400">This is a demo of Awesome Tools hosted on public hardware-due to Data and IP restrictions tools are unavailable untill official launch</div>
+              <div class="mt-1 text-sm ui-muted italic">Required input: `.pdf`</div>
+            </div>
+            <button type="button" data-browse-file class="ui-button ui-button-secondary">Browse PDF</button>
+          </div>
+          <div class="mt-3 grid gap-3 sm:grid-cols-2">
+            <div class="rounded-md border border-[var(--line)] bg-[var(--surface)] px-3 py-2">
+              <div class="text-xs font-bold uppercase tracking-wide ui-muted">File</div>
+              <div data-file-name class="mt-1 truncate font-mono text-sm">No PDF selected</div>
+            </div>
+            <div class="rounded-md border border-[var(--line)] bg-[var(--surface)] px-3 py-2">
+              <div class="text-xs font-bold uppercase tracking-wide ui-muted">Size</div>
+              <div data-file-size class="mt-1 text-sm ui-muted">PDF only</div>
+            </div>
+          </div>
+        </div>
+
+        <div data-dropzone data-empty-name="No Excel file selected" data-empty-size="XLSX only" class="cursor-pointer rounded-md border border-dashed border-[var(--line)] bg-slate-50 p-4 dark:bg-slate-900">
+          <input type="file" name="xlsx" accept=".xlsx" required class="sr-only">
+          <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <div class="font-semibold text-red-600 dark:text-red-400">This is a demo of Awesome Tools hosted on public hardware-due to Data and IP restrictions tools are unavailable untill official launch</div>
+              <div class="mt-1 text-sm ui-muted italic">Required input: `.xlsx`</div>
+            </div>
+            <button type="button" data-browse-file class="ui-button ui-button-secondary">Browse Excel</button>
+          </div>
+          <div class="mt-3 grid gap-3 sm:grid-cols-2">
+            <div class="rounded-md border border-[var(--line)] bg-[var(--surface)] px-3 py-2">
+              <div class="text-xs font-bold uppercase tracking-wide ui-muted">File</div>
+              <div data-file-name class="mt-1 truncate font-mono text-sm">No Excel file selected</div>
+            </div>
+            <div class="rounded-md border border-[var(--line)] bg-[var(--surface)] px-3 py-2">
+              <div class="text-xs font-bold uppercase tracking-wide ui-muted">Size</div>
+              <div data-file-size class="mt-1 text-sm ui-muted">XLSX only</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+          <div class="flex flex-wrap gap-2">
+            <button type="submit" data-submit-button class="ui-button ui-button-primary" disabled>
+              <span data-submit-label>This is a demo of Awesome Tools hosted on public hardware-due to Data and IP restrictions tools are unavailable untill official launch</span>
+              <span data-submit-loading class="hidden items-center gap-2"><span class="spinner"></span>Processing</span>
+            </button>
+            <a href="{{ url_for('index') }}" class="ui-button ui-button-secondary" aria-label="Home page">Home</a>
+          </div>
+          <span class="text-sm ui-muted">Output: ZIP with annotated files</span>
+        </div>
+      </div>
+    </form>
+  </section>
+
+  <aside class="space-y-5">
+    <div class="ui-panel rounded-lg p-4">
+      <h2 class="font-display text-lg font-semibold">Checklist</h2>
+      <ul class="mt-3 space-y-2 text-sm ui-muted">
+        <li>Upload the matching project PDF and tag workbook.</li>
+        <li>Use `.xlsx`, not `.xls` or `.csv`.</li>
+        <li>Download the ZIP from the results page.</li>
+      </ul>
+    </div>
+  </aside>
+</div>
+<script>
+  (function () {
+    const check = document.getElementById('disclaimerCheck');
+    const section = document.querySelector('form[data-upload-form]');
+    if (!check || !section) return;
+    function sync() {
+      section.style.opacity = check.checked ? '1' : '0.35';
+      section.style.pointerEvents = check.checked ? '' : 'none';
+    }
+    check.addEventListener('change', sync);
+    sync();
+  }());
+</script>
+{% endblock %}

@@ -1,0 +1,222 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 383 192" fill="none" role="img" aria-labelledby="pid-title pid-desc">
+  <title id="pid-title">P&amp;ID Scanner — PDF to Excel Tag Report</title>
+  <desc id="pid-desc">A P&amp;ID PDF is scanned and exported as a structured Excel tag report.</desc>
+  <defs>
+    <linearGradient id="s-bg" x1="0" x2="383" y1="0" y2="192" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#07101d"/>
+      <stop offset="1" stop-color="#0b1423"/>
+    </linearGradient>
+    <linearGradient id="s-paper" x1="78" x2="86" y1="10" y2="182" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#eef3fb"/>
+      <stop offset=".7" stop-color="#d4dded"/>
+      <stop offset="1" stop-color="#bdc8db"/>
+    </linearGradient>
+    <linearGradient id="s-fold" x1="138" x2="163" y1="10" y2="35" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#e4edfb"/>
+      <stop offset="1" stop-color="#aab6cc"/>
+    </linearGradient>
+    <filter id="s-shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="6" stdDeviation="7" flood-color="#000810" flood-opacity=".5"/>
+    </filter>
+    <filter id="s-glow" x="-140%" y="-140%" width="380%" height="380%">
+      <feGaussianBlur stdDeviation="3.5" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="383" height="192" fill="url(#s-bg)"/>
+
+  <!-- PDF sheet -->
+  <g filter="url(#s-shadow)">
+    <path d="M4 10h134l24 24v148H4V10Z" fill="url(#s-paper)"/>
+    <path d="M138 10v24h24L138 10Z" fill="url(#s-fold)"/>
+    <path d="M138 10v24h24" stroke="#8fa3bc" stroke-width=".8"/>
+  </g>
+
+  <!-- PDF label badge -->
+  <g transform="translate(10 14)">
+    <rect width="52" height="16" rx="2.5" fill="#cc1e1e"/>
+    <text x="8" y="11" fill="#fff" font-family="Arial,sans-serif" font-size="7" font-weight="800">P&amp;ID PDF</text>
+  </g>
+
+  <!-- P&ID drawing content -->
+  <!-- Main pipe horizontal -->
+  <path d="M18 105h120" stroke="#2a3f5e" stroke-width="2.2" stroke-linecap="round"/>
+  <!-- Branch pipe vertical -->
+  <path d="M55 105V78" stroke="#2a3f5e" stroke-width="2.2" stroke-linecap="round"/>
+  <path d="M100 105V82" stroke="#2a3f5e" stroke-width="2.2" stroke-linecap="round"/>
+
+  <!-- Pump (circle) -->
+  <circle cx="29" cy="105" r="10" fill="#dce7f5" stroke="#2a3f5e" stroke-width="1.6"/>
+  <path d="M24 105l5-5 5 5-5 5z" fill="#2a3f5e"/>
+
+  <!-- Vessel (rectangle) -->
+  <rect x="46" y="60" width="18" height="28" rx="2" fill="#dce7f5" stroke="#2a3f5e" stroke-width="1.4"/>
+  <path d="M52 64h6M52 68h6M52 72h6" stroke="#2a3f5e" stroke-width=".8" stroke-linecap="round"/>
+
+  <!-- Control valve (diamond) -->
+  <path d="M93 93l7-7 7 7-7 7z" fill="#dce7f5" stroke="#2a3f5e" stroke-width="1.4"/>
+
+  <!-- Signal lines (dashed) -->
+  <path d="M55 60v-12h20" stroke="#3d5a8a" stroke-width=".9" stroke-dasharray="2.5 2" stroke-linecap="round"/>
+  <path d="M100 82v-12h16" stroke="#3d5a8a" stroke-width=".9" stroke-dasharray="2.5 2" stroke-linecap="round"/>
+  <path d="M29 95v-30h24" stroke="#3d5a8a" stroke-width=".9" stroke-dasharray="2.5 2" stroke-linecap="round"/>
+
+  <!-- Instrument bubbles -->
+  <!-- FT-101 -->
+  <circle cx="75" cy="48" r="9" fill="#fef3c7" stroke="#2a3f5e" stroke-width="1.2"/>
+  <text x="75" y="46.5" text-anchor="middle" fill="#1a2535" font-family="Arial,sans-serif" font-size="4.2" font-weight="800">FT</text>
+  <text x="75" y="52" text-anchor="middle" fill="#1a2535" font-family="Arial,sans-serif" font-size="3.8">101</text>
+
+  <!-- LT-202 -->
+  <circle cx="116" cy="70" r="9" fill="#fef3c7" stroke="#2a3f5e" stroke-width="1.2"/>
+  <text x="116" y="68.5" text-anchor="middle" fill="#1a2535" font-family="Arial,sans-serif" font-size="4.2" font-weight="800">LT</text>
+  <text x="116" y="74" text-anchor="middle" fill="#1a2535" font-family="Arial,sans-serif" font-size="3.8">202</text>
+
+  <!-- FIC-301 -->
+  <circle cx="53" cy="35" r="9" fill="#fef3c7" stroke="#2a3f5e" stroke-width="1.2"/>
+  <text x="53" y="33.5" text-anchor="middle" fill="#1a2535" font-family="Arial,sans-serif" font-size="4.2" font-weight="800">FIC</text>
+  <text x="53" y="39" text-anchor="middle" fill="#1a2535" font-family="Arial,sans-serif" font-size="3.8">301</text>
+
+  <!-- PIT-401 -->
+  <circle cx="29" cy="65" r="9" fill="#fef3c7" stroke="#2a3f5e" stroke-width="1.2"/>
+  <text x="29" y="63.5" text-anchor="middle" fill="#1a2535" font-family="Arial,sans-serif" font-size="4.2" font-weight="800">PIT</text>
+  <text x="29" y="69" text-anchor="middle" fill="#1a2535" font-family="Arial,sans-serif" font-size="3.8">401</text>
+
+  <!-- TT-501 -->
+  <circle cx="113" cy="118" r="9" fill="#fef3c7" stroke="#2a3f5e" stroke-width="1.2"/>
+  <text x="113" y="116.5" text-anchor="middle" fill="#1a2535" font-family="Arial,sans-serif" font-size="4.2" font-weight="800">TT</text>
+  <text x="113" y="122" text-anchor="middle" fill="#1a2535" font-family="Arial,sans-serif" font-size="3.8">501</text>
+
+  <!-- Title block -->
+  <rect x="8" y="150" width="154" height="26" rx="1.5" fill="none" stroke="#8fa3bc" stroke-width=".8"/>
+  <path d="M8 159h154" stroke="#8fa3bc" stroke-width=".6"/>
+  <path d="M85 150v26" stroke="#8fa3bc" stroke-width=".6"/>
+  <text x="14" y="156.5" fill="#5a6e88" font-family="Arial,sans-serif" font-size="3.8" font-weight="700">DRAWING</text>
+  <text x="14" y="168" fill="#253045" font-family="Arial,sans-serif" font-size="4.5" font-weight="800">PID-001</text>
+  <text x="91" y="156.5" fill="#5a6e88" font-family="Arial,sans-serif" font-size="3.8" font-weight="700">REV</text>
+  <text x="91" y="168" fill="#253045" font-family="Arial,sans-serif" font-size="4.5" font-weight="800">C</text>
+
+  <!-- SCAN arrow -->
+  <g filter="url(#s-glow)">
+    <path d="M172 91h22" stroke="#16e5d6" stroke-width="2.5" stroke-linecap="round"/>
+    <path d="m186 82 10 9-10 9" stroke="#16e5d6" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+    <text x="180" y="112" text-anchor="middle" fill="#16e5d6" font-family="Arial,sans-serif" font-size="6.5" font-weight="800" letter-spacing="1">SCAN</text>
+  </g>
+
+  <!-- Excel output panel -->
+  <g transform="translate(207 10)" filter="url(#s-shadow)">
+    <rect width="170" height="172" rx="5" fill="#071a10" stroke="#16a34a" stroke-width="1.2"/>
+
+    <!-- Header -->
+    <rect width="170" height="22" rx="5" fill="#14532d"/>
+    <rect y="16" width="170" height="6" fill="#14532d"/>
+    <rect x="8" y="4" width="13" height="13" rx="2" fill="#16a34a"/>
+    <path d="M12 7h5M12 10h5M12 13h5" stroke="#bbf7d0" stroke-width=".8" stroke-linecap="round"/>
+    <text x="28" y="15" fill="#dcfce7" font-family="Arial,sans-serif" font-size="7" font-weight="800">P&amp;ID TAG REPORT (Excel)</text>
+
+    <!-- Column headers -->
+    <rect y="22" x="0" width="170" height="14" fill="#052e16"/>
+    <g font-family="Arial,sans-serif" font-size="4.8" font-weight="800" fill="#4ade80">
+      <text x="5" y="31.5">TAG</text>
+      <text x="38" y="31.5">TYPE</text>
+      <text x="72" y="31.5">DESCRIPTION</text>
+      <text x="130" y="31.5">PG</text>
+      <text x="148" y="31.5">CONF</text>
+    </g>
+
+    <!-- Divider lines -->
+    <g stroke="#0d3320" stroke-width=".7">
+      <path d="M0 36h170M0 48h170M0 60h170M0 72h170M0 84h170M0 96h170M0 108h170M0 120h170"/>
+      <path d="M34 22v110M67 22v110M126 22v110M144 22v110"/>
+    </g>
+
+    <!-- Rows: 7 normal + 1 amber low-confidence -->
+    <g font-family="Arial,sans-serif" font-size="4.8">
+      <!-- Row 1 -->
+      <text x="5" y="45" fill="#f0fdf4" font-weight="700">FT-101</text>
+      <text x="38" y="45" fill="#a7c4b5">Flow Trans.</text>
+      <text x="72" y="45" fill="#a7c4b5">Flow Transmitter</text>
+      <text x="130" y="45" fill="#a7c4b5">1</text>
+      <rect x="144" y="37" width="20" height="9" rx="4" fill="#14532d"/>
+      <text x="154" y="43.5" text-anchor="middle" fill="#4ade80" font-weight="800">98%</text>
+
+      <!-- Row 2 -->
+      <text x="5" y="57" fill="#f0fdf4" font-weight="700">LT-202</text>
+      <text x="38" y="57" fill="#a7c4b5">Level Trans.</text>
+      <text x="72" y="57" fill="#a7c4b5">Level Transmitter</text>
+      <text x="130" y="57" fill="#a7c4b5">1</text>
+      <rect x="144" y="49" width="20" height="9" rx="4" fill="#14532d"/>
+      <text x="154" y="55.5" text-anchor="middle" fill="#4ade80" font-weight="800">96%</text>
+
+      <!-- Row 3 -->
+      <text x="5" y="69" fill="#f0fdf4" font-weight="700">FIC-301</text>
+      <text x="38" y="69" fill="#a7c4b5">Flow Ctrl.</text>
+      <text x="72" y="69" fill="#a7c4b5">Flow Controller</text>
+      <text x="130" y="69" fill="#a7c4b5">1</text>
+      <rect x="144" y="61" width="20" height="9" rx="4" fill="#14532d"/>
+      <text x="154" y="67.5" text-anchor="middle" fill="#4ade80" font-weight="800">99%</text>
+
+      <!-- Row 4 -->
+      <text x="5" y="81" fill="#f0fdf4" font-weight="700">PIT-401</text>
+      <text x="38" y="81" fill="#a7c4b5">Press. Trans.</text>
+      <text x="72" y="81" fill="#a7c4b5">Pressure Transmitter</text>
+      <text x="130" y="81" fill="#a7c4b5">2</text>
+      <rect x="144" y="73" width="20" height="9" rx="4" fill="#14532d"/>
+      <text x="154" y="79.5" text-anchor="middle" fill="#4ade80" font-weight="800">97%</text>
+
+      <!-- Row 5 -->
+      <text x="5" y="93" fill="#f0fdf4" font-weight="700">TT-501</text>
+      <text x="38" y="93" fill="#a7c4b5">Temp. Trans.</text>
+      <text x="72" y="93" fill="#a7c4b5">Temperature Trans.</text>
+      <text x="130" y="93" fill="#a7c4b5">2</text>
+      <rect x="144" y="85" width="20" height="9" rx="4" fill="#14532d"/>
+      <text x="154" y="91.5" text-anchor="middle" fill="#4ade80" font-weight="800">95%</text>
+
+      <!-- Row 6 -->
+      <text x="5" y="105" fill="#f0fdf4" font-weight="700">PSV-601</text>
+      <text x="38" y="105" fill="#a7c4b5">Safety Valve</text>
+      <text x="72" y="105" fill="#a7c4b5">Pressure Safety Valve</text>
+      <text x="130" y="105" fill="#a7c4b5">3</text>
+      <rect x="144" y="97" width="20" height="9" rx="4" fill="#14532d"/>
+      <text x="154" y="103.5" text-anchor="middle" fill="#4ade80" font-weight="800">94%</text>
+
+      <!-- Row 7 -->
+      <text x="5" y="117" fill="#f0fdf4" font-weight="700">HV-701</text>
+      <text x="38" y="117" fill="#a7c4b5">Hand Valve</text>
+      <text x="72" y="117" fill="#a7c4b5">Manual Hand Valve</text>
+      <text x="130" y="117" fill="#a7c4b5">3</text>
+      <rect x="144" y="109" width="20" height="9" rx="4" fill="#14532d"/>
+      <text x="154" y="115.5" text-anchor="middle" fill="#4ade80" font-weight="800">93%</text>
+
+      <!-- Row 8 — amber low-confidence -->
+      <rect x="0" y="120" width="170" height="12" fill="#3d2300"/>
+      <text x="5" y="129" fill="#fcd34d" font-weight="800">XV-801</text>
+      <text x="38" y="129" fill="#d4b57a">Shutoff Valve</text>
+      <text x="72" y="129" fill="#d4b57a">Automated Shutoff</text>
+      <text x="130" y="129" fill="#d4b57a">4</text>
+      <rect x="144" y="121" width="20" height="9" rx="4" fill="#7c2d12"/>
+      <text x="154" y="127.5" text-anchor="middle" fill="#fcd34d" font-weight="800">61%</text>
+    </g>
+
+    <!-- Legend -->
+    <rect y="132" width="170" height="12" fill="#061210"/>
+    <rect x="5" y="135" width="7" height="6" rx="3" fill="#14532d"/>
+    <text x="15" y="140.5" fill="#4ade80" font-family="Arial,sans-serif" font-size="4.2" font-weight="700">High conf.</text>
+    <rect x="65" y="135" width="7" height="6" rx="3" fill="#7c2d12"/>
+    <text x="75" y="140.5" fill="#fcd34d" font-family="Arial,sans-serif" font-size="4.2" font-weight="700">Low conf. — review</text>
+
+    <!-- Summary footer -->
+    <rect y="144" width="170" height="28" rx="0" fill="#041a0e"/>
+    <rect y="144" width="170" height="1" fill="#16a34a" opacity=".4"/>
+    <g font-family="Arial,sans-serif">
+      <text x="8" y="155" fill="#a7c4b5" font-size="4.5" font-weight="700">TAGS FOUND</text>
+      <text x="8" y="166" fill="#4ade80" font-size="9" font-weight="900">8</text>
+      <text x="58" y="155" fill="#a7c4b5" font-size="4.5" font-weight="700">LOW CONF.</text>
+      <text x="58" y="166" fill="#fcd34d" font-size="9" font-weight="900">1</text>
+      <text x="105" y="155" fill="#a7c4b5" font-size="4.5" font-weight="700">PAGES READ</text>
+      <text x="105" y="166" fill="#86efac" font-size="9" font-weight="900">4</text>
+    </g>
+  </g>
+</svg>
